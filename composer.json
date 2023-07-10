@@ -32,7 +32,7 @@
         "phpmailer/phpmailer": "~6.1",
         "phpoffice/phpspreadsheet": "^1.13",
         "nelexa/zip": "^3.3",
-        "iexbase/tron-api": "dev-master",
+        "iexbase/tron-api": "^4.0.1",
         "furqansiddiqui/ethereum-rpc": "dev-master",
         "web3p/ethereum-tx": "dev-master",
         "web3p/ethereum-wallet": "dev-master",
