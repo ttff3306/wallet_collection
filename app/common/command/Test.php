@@ -45,14 +45,6 @@ class Test extends Command
 
     protected function configure()
     {
-        dd(Account::listProfitConfig());
-        dd(123);
-//        publisher('registerTeam', ['register_uid' => 11]);
-//        "public_key" => "0x043f99018d9a1ea959668332e37e958a8aa02e796639feb17ac5bed34807c38d2fa87434f670ba80edde82b3985095ac2f2ac26629eb5b1673b5409d6b0205d887"
-//  "address" => "0xb0d579b447efe2ee886e2e95218231ea1d263455"
-//  "private_key" => "805925bca6b87ca3062642815df007c422d7cd78fd3d5a8dbc6545c80e90a436"
-//  "mnemonic" => "photo hood march envelope soap spin live margin police ensure december game"
-
         $this
             ->setName('test')
             ->setDescription('test');
