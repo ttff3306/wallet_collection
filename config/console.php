@@ -11,5 +11,7 @@ return [
         'app\admin\command\Min',
         'app\admin\command\Addon',
         'app\admin\command\Api',
+        'app\common\command\Test',
+        'app\common\command\RabbitmqConsumer',
     ],
 ];

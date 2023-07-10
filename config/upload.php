@@ -23,7 +23,7 @@ return [
     /**
      * CDN地址
      */
-    'cdnurl'    => '',
+    'cdnurl'    => env('system_config.upload_cdn'),
     /**
      * 文件保存格式
      */

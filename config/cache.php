@@ -27,5 +27,21 @@ return [
             'serialize'  => [],
         ],
         // 更多的缓存连接
+        'redis'   =>  [
+            // 驱动方式
+            'type'       => 'redis',
+            // 服务器地址
+            'host'       => env('redis.host', '127.0.0.1'),
+            //前缀
+            'prefix'     => env('redis.prefix', 'app_'),
+            //密码
+            'password'   => env('redis.password', ''),
+            //有效时长
+            'expire'     => env('redis.expire', 3600),
+            //端口
+            'port'       => env('redis.port', 6379),
+            //redis库
+            'select'     => env('redis.select', 0),
+        ],
     ],
 ];

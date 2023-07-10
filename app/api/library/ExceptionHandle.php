@@ -2,11 +2,15 @@
 
 namespace app\api\library;
 
+use app\api\exception\ApiException;
+use app\api\exception\TokenIsInvalidException;
+use app\api\model\ApiLogModel;
+use app\common\model\AppLogModel;
+use think\exception\RouteNotFoundException;
+use think\facade\Log;
 use Throwable;
 use think\Response;
-use think\facade\Env;
 use think\exception\Handle;
-use think\exception\HttpException;
 use think\exception\ValidateException;
 use think\exception\HttpResponseException;
 use think\db\exception\DataNotFoundException;
@@ -42,49 +46,85 @@ class ExceptionHandle extends Handle
     }
 
     /**
-     * Render an exception into an HTTP response.
-     *
-     * @param  \think\Request  $request
-     * @param  Throwable  $e
-     *
+     * 错误处理
+     * @param $request
+     * @param Throwable $e
      * @return Response
+     * @author Bin
+     * @time 2023/7/2
      */
     public function render($request, Throwable $e): Response
     {
-        // 在生产环境下返回code信息
-        if (! Env::get('app_debug')) {
-            if ($e instanceof HttpResponseException) {
-                return $e->getResponse();
-            }
-            $statuscode = $code = 500;
-            $msg = 'An error occurred';
-            // 验证异常
-            if ($e instanceof ValidateException) {
-                $code = 0;
-                $statuscode = 200;
-                $msg = $e->getError();
-            }
-            // Http异常
-            if ($e instanceof HttpException) {
-                $statuscode = $code = $e->getStatusCode();
-            }
+        //处理token验证异常
+        if ($e instanceof TokenIsInvalidException) {
+            return json([
+                "code" => 101,
+                "msg" => $e->getMessage(),
+                "data" => null
+            ]);
+        }
+        // 参数验证错误
+        if ($e instanceof ValidateException) {
+            return json([
+                "code" => 100,
+                "msg" => $e->getMessage(),
+                "data" => null
+            ]);
+        }
 
-            return json(['code' => $code, 'msg' => $msg, 'time' => time(), 'data' => null], $statuscode);
+        // 路由方法错误
+        if ($e instanceof RouteNotFoundException) {
+            return json([
+                "code" => $e->getStatusCode(),
+                "msg" => $e->getMessage(),
+                "data" => null
+            ], $e->getStatusCode());
         }
-        //其它此交由系统处理
-        if (request()->isJson()) {
-            if ($e instanceof HttpResponseException || $e instanceof HttpException) {
-                return parent::render($request, $e);
-            } else {
-                $response = parent::render($request, $e);
-                $data = $response->getData();
-                if (isset($data['tables']['Environment Variables'])) {
-                    unset($data['tables']['Environment Variables']);
-                    $response->data($data);
-                }
-                return $response;
-            }
+
+        //记录错误信息
+        $this->errLog($request, $e);
+
+        //处理逻辑业务错误异常
+        if ($e instanceof ApiException) {
+            return json([
+                "code" => 100,
+                "msg" => $e->getMessage(),
+                "data" => null
+            ]);
         }
+
+        //关闭调试模式，屏蔽错误信息
+        if(!env('APP_DEBUG',false)){
+            Log::write("服务内部错误:" . $e->getMessage());
+            //当关闭DEBUG模式，错误返回改为json返回
+            return json([
+                "code" => 500,
+                "msg" => $e->getMessage(),
+                "data" => null
+            ]);
+        }
+
+        // 其他错误交给系统处理
         return parent::render($request, $e);
+    }
+
+    /**
+     * 记录错误日志
+     * @param $request
+     * @param Throwable $e
+     */
+    private function errLog($request, Throwable $e)
+    {
+        $save = [
+            'api_path'=> $request->baseUrl(),
+            'args'=> json_encode(request()->param()),
+            'result'=> 'line : ' . $e->getLine() . ' msg : ' . $e->getMessage(),
+            'code'=> $e->getCode(),
+            'date_day'=> date('Ymd'),
+            'create_time'=> time(),
+            'token' => $request->header("token"),
+            'ip' => $request->ip(),
+        ];
+        AppLogModel::create($save);
     }
 }

@@ -11,10 +11,13 @@
  */
 
 // 公共助手函数
+use app\common\facade\Rabbitmq;
+use fast\Random;
 use think\Model;
 use think\facade\Lang;
 use think\facade\Event;
 use think\facade\Config;
+use \app\common\facade\Redis;
 
 if (! function_exists('tp5ControllerToTp6Controller')) {
     /**
@@ -1138,5 +1141,103 @@ if (! function_exists('varexport')) {
         } else {
             echo $export;
         }
+    }
+}
+
+/**
+ * 获取用户分享码
+ * @param int $length
+ * @return string
+ */
+function createShareCode(int $length = 8)
+{
+    do{
+        $code = Random::alnum($length);
+        if (Redis::addSet('share:code:list', $code, 0)) break;
+    }while(true);
+    return $code;
+}
+
+/**
+ * 添加队列
+ * @param string $action
+ * @param array $params
+ * @param int $delayTime
+ * @return void
+ * @author Bin
+ * @time 2023/7/3
+ */
+function publisher(string $action, array $params, int $delayTime = 0) {
+    Rabbitmq::publisher(['action' => $action, 'params' => $params], $delayTime);
+}
+
+/**
+ * 获取用户全局uuid
+ * @return false|int
+ * @author Bin
+ * @time 2023/7/3
+ */
+function getUserUuid()
+{
+    //缓存key
+    $key = 'user:uuid';
+    //检测缓存是否存在
+    if (!Redis::has($key)) {
+        //获取最大用户id
+        $max_user_id = \app\common\model\UserModel::new()->max('id');
+        $max_user_id += 151300;
+        Redis::setString($key, $max_user_id);
+    }
+    return Redis::incString($key, mt_rand(10, 100));
+}
+
+if(!function_exists('getDateDay')){
+    /**
+     * 获取当前日期
+     * @param int $offset_minute 偏移分钟数
+     * @param int $offset_hours 偏移小时数
+     */
+    function getDateDay(int $offset_hours = 0, int $offset_minute = 0)
+    {
+        //获取当前时间
+        $time = time();
+        //获取偏移后时间戳(小时)
+        if(!empty($offset_hours)) $time = $time - ($offset_hours * 3600);
+        //获取偏移后时间戳(分钟)
+        if(!empty($offset_minute)) $time = $time - ($offset_minute * 60);
+        //返回数据
+        return date('Ymd' ,$time);
+    }
+}
+
+/**
+ * 是否英文
+ * @return bool
+ * @author Bin
+ * @time 2023/7/6
+ */
+function isEnglish()
+{
+    return Lang::getLangSet() != 'zh-cn';
+}
+
+if (! function_exists('createOrderNo')) {
+    /**
+     * 生成唯一订单号
+     *
+     * @param string $prefix  订单前缀
+     *
+     * @return string
+     */
+    function createOrderNo(string $prefix = ''): string
+    {
+        $minute_time = date('YmdHi');
+        //生成key
+        $key = $prefix . 'create:order:no:time:' . $minute_time;
+
+        //判断缓存是否存在
+        if (!Redis::exists($key)) Redis::setex($key, 120, 1000000);
+
+        return $prefix . $minute_time . Redis::incr($key);
     }
 }

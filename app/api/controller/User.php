@@ -2,11 +2,7 @@
 
 namespace app\api\controller;
 
-use fast\Random;
-use think\facade\Validate;
-use think\facade\Config;
-use app\common\library\Ems;
-use app\common\library\Sms;
+use app\api\logic\UserLogic;
 use app\common\controller\Api;
 
 /**
@@ -14,317 +10,217 @@ use app\common\controller\Api;
  */
 class User extends Api
 {
-    protected $noNeedLogin = ['login', 'mobilelogin', 'register', 'resetpwd', 'changeemail', 'changemobile', 'third'];
-    protected $noNeedRight = '*';
-
-    public function _initialize()
+    /**
+     * 登录
+     * @param UserLogic $logic
+     * @return void
+     * @throws \app\api\exception\ApiException
+     * @author Bin
+     * @time 2023/7/2
+     */
+    public function login(UserLogic $logic)
     {
-        parent::_initialize();
-        if (!Config::get('fastadmin.usercenter')) {
-            $this->error(__('User center already closed'));
-        }
+        $result = $logic->userLogin();
+        $this->success($result);
     }
 
     /**
-     * 会员中心.
+     * 注册
+     * @param UserLogic $logic
+     * @return void
+     * @throws \app\api\exception\ApiException
+     * @author Bin
+     * @time 2023/7/2
      */
-    public function index()
+    public function register(UserLogic $logic)
     {
-        $this->success('', ['welcome' => $this->auth->nickname]);
+        $result = $logic->register();
+        $this->success($result);
     }
 
     /**
-     * 会员登录.
-     *
-     * @param string $account  账号
-     * @param string $password 密码
+     * 获取用户信息
+     * @param UserLogic $logic
+     * @return void
+     * @author Bin
+     * @time 2023/7/3
      */
-    public function login()
+    public function getUserInfo(UserLogic $logic)
     {
-        $account = $this->request->request('account');
-        $password = $this->request->request('password');
-        if (! $account || ! $password) {
-            $this->error(__('Invalid parameters'));
-        }
-        $ret = $this->auth->login($account, $password);
-        if ($ret) {
-            $data = ['userinfo' => $this->auth->getUserinfo()];
-            $this->success(__('Logged in successful'), $data);
-        } else {
-            $this->error($this->auth->getError());
-        }
+        $result = $logic->getUserInfo();
+        $this->success($result);
     }
 
     /**
-     * 手机验证码登录.
-     *
-     * @param string $mobile  手机号
-     * @param string $captcha 验证码
+     * 上传头像
+     * @param UserLogic $logic
+     * @return void
+     * @author Bin
+     * @time 2023/7/4
      */
-    public function mobilelogin()
+    public function uploadAvatar(UserLogic $logic)
     {
-        $mobile = $this->request->request('mobile');
-        $captcha = $this->request->request('captcha');
-        if (! $mobile || ! $captcha) {
-            $this->error(__('Invalid parameters'));
-        }
-        if (! Validate::regex($mobile, "^1\d{10}$")) {
-            $this->error(__('Mobile is incorrect'));
-        }
-        if (! Sms::check($mobile, $captcha, 'mobilelogin')) {
-            $this->error(__('Captcha is incorrect'));
-        }
-        $user = \app\common\model\User::where('mobile',$mobile)->find();
-        if ($user) {
-            if ($user->status != 'normal') {
-                $this->error(__('Account is locked'));
-            }
-            //如果已经有账号则直接登录
-            $ret = $this->auth->direct($user->id);
-        } else {
-            $ret = $this->auth->register($mobile, Random::alnum(), '', $mobile, []);
-        }
-        if ($ret) {
-            Sms::flush($mobile, 'mobilelogin');
-            $data = ['userinfo' => $this->auth->getUserinfo()];
-            $this->success(__('Logged in successful'), $data);
-        } else {
-            $this->error($this->auth->getError());
-        }
+        $result = $logic->uploadAvatar();
+        $this->success($result);
     }
 
     /**
-     * 注册会员.
-     *
-     * @param string $username 用户名
-     * @param string $password 密码
-     * @param string $email    邮箱
-     * @param string $mobile   手机号
-     * @param string $code   验证码
+     * 修改用户昵称
+     * @param UserLogic $logic
+     * @return void
+     * @throws \app\api\exception\ApiException
+     * @author Bin
+     * @time 2023/7/4
      */
-    public function register()
+    public function updateNickname(UserLogic $logic)
     {
-        $username = $this->request->request('username');
-        $password = $this->request->request('password');
-        $email = $this->request->request('email');
-        $mobile = $this->request->request('mobile');
-        $code = $this->request->request('code');
-        if (! $username || ! $password) {
-            $this->error(__('Invalid parameters'));
-        }
-        if ($email && ! Validate::is($email, 'email')) {
-            $this->error(__('Email is incorrect'));
-        }
-        if ($mobile && ! Validate::regex($mobile, "^1\d{10}$")) {
-            $this->error(__('Mobile is incorrect'));
-        }
-        $ret = Sms::check($mobile, $code, 'register');
-        if (!$ret) {
-            $this->error(__('Captcha is incorrect'));
-        }
-        if (empty($email)) {
-            $email = $username;
-        }
-        if (empty($mobile)) {
-            $mobile = $username;
-        }
-        $ret = $this->auth->register($username, $password, $email, $mobile, []);
-        if ($ret) {
-            $data = ['userinfo' => $this->auth->getUserinfo()];
-            $this->success(__('Sign up successful'), $data);
-        } else {
-            $this->error($this->auth->getError());
-        }
+        $result = $logic->updateNickname();
+        $this->success($result);
     }
 
     /**
-     * 注销登录.
+     * 修改登录密码
+     * @param UserLogic $logic
+     * @return void
+     * @author Bin
+     * @time 2023/7/4
      */
-    public function logout()
+    public function updateLoginPassword(UserLogic $logic)
     {
-        $this->auth->logout();
-        $this->success(__('Logout successful'));
+        $result = $logic->updateLoginPassword();
+        $this->success($result);
     }
 
     /**
-     * 修改会员个人信息.
-     *
-     * @param string $avatar   头像地址
-     * @param string $username 用户名
-     * @param string $nickname 昵称
-     * @param string $bio      个人简介
+     * 修改二级密码
+     * @param UserLogic $logic
+     * @return void
+     * @author Bin
+     * @time 2023/7/4
      */
-    public function profile()
+    public function updatePayPassword(UserLogic $logic)
     {
-        $user = $this->auth->getUser();
-        $username = $this->request->request('username');
-        $nickname = $this->request->request('nickname');
-        $bio = $this->request->request('bio');
-        $avatar = $this->request->request('avatar', '', 'trim,strip_tags,htmlspecialchars');
-        if ($username) {
-            $exists = \app\common\model\User::where('username', $username)->where('id', '<>', $this->auth->id)->find();
-            if ($exists) {
-                $this->error(__('Username already exists'));
-            }
-            $user->username = $username;
-        }
-        $user->nickname = $nickname;
-        $user->bio = $bio;
-        $user->avatar = $avatar;
-        $user->save();
-        $this->success();
+        $result = $logic->updatePayPassword();
+        $this->success($result);
     }
 
     /**
-     * 修改邮箱.
-     *
-     * @param string $email   邮箱
-     * @param string $captcha 验证码
+     * 获取关联账户列表
+     * @param UserLogic $logic
+     * @return void
+     * @author Bin
+     * @time 2023/7/5
      */
-    public function changeemail()
+    public function relationList(UserLogic $logic)
     {
-        $user = $this->auth->getUser();
-        $email = $this->request->post('email');
-        $captcha = $this->request->request('captcha');
-        if (! $email || ! $captcha) {
-            $this->error(__('Invalid parameters'));
-        }
-        if (! Validate::is($email, 'email')) {
-            $this->error(__('Email is incorrect'));
-        }
-        if (\app\common\model\User::where('email', $email)->where('id', '<>', $user->id)->find()) {
-            $this->error(__('Email already exists'));
-        }
-        $result = Ems::check($email, $captcha, 'changeemail');
-        if (! $result) {
-            $this->error(__('Captcha is incorrect'));
-        }
-        $verification = $user->verification;
-        $verification->email = 1;
-        $user->verification = $verification;
-        $user->email = $email;
-        $user->save();
-
-        Ems::flush($email, 'changeemail');
-        $this->success();
+        $result = $logic->getRelationUserList();
+        $this->success($result);
     }
 
     /**
-     * 修改手机号.
-     *
-     * @param string $mobile   手机号
-     * @param string $captcha 验证码
+     * 添加关联账户
+     * @param UserLogic $logic
+     * @return void
+     * @throws \app\api\exception\ApiException
+     * @author Bin
+     * @time 2023/7/5
      */
-    public function changemobile()
+    public function addRelationUser(UserLogic $logic)
     {
-        $user = $this->auth->getUser();
-        $mobile = $this->request->request('mobile');
-        $captcha = $this->request->request('captcha');
-        if (! $mobile || ! $captcha) {
-            $this->error(__('Invalid parameters'));
-        }
-        if (! Validate::regex($mobile, "^1\d{10}$")) {
-            $this->error(__('Mobile is incorrect'));
-        }
-        if (\app\common\model\User::where('mobile', $mobile)->where('id', '<>', $user->id)->find()) {
-            $this->error(__('Mobile already exists'));
-        }
-        $result = Sms::check($mobile, $captcha, 'changemobile');
-        if (! $result) {
-            $this->error(__('Captcha is incorrect'));
-        }
-        $verification = $user->verification;
-        $verification->mobile = 1;
-        $user->verification = $verification;
-        $user->mobile = $mobile;
-        $user->save();
-
-        Sms::flush($mobile, 'changemobile');
-        $this->success();
+        $result = $logic->addRelationUser();
+        $this->success($result);
     }
 
     /**
-     * 第三方登录.
-     *
-     * @param string $platform 平台名称
-     * @param string $code     Code码
+     * 解除关联账号
+     * @param UserLogic $logic
+     * @return void
+     * @throws \app\api\exception\ApiException
+     * @author Bin
+     * @time 2023/7/5
      */
-    public function third()
+    public function delRelationUser(UserLogic $logic)
     {
-        $url = url('user/index');
-        $platform = $this->request->request('platform');
-        $code = $this->request->request('code');
-        $config = get_addon_config('third');
-        if (! $config || ! isset($config[$platform])) {
-            $this->error(__('Invalid parameters'));
-        }
-        $app = new \addons\third\library\Application($config);
-        //通过code换access_token和绑定会员
-        $result = $app->{$platform}->getUserInfo(['code' => $code]);
-        if ($result) {
-            $loginret = \addons\third\library\Service::connect($platform, $result);
-            if ($loginret) {
-                $data = [
-                    'userinfo'  => $this->auth->getUserinfo(),
-                    'thirdinfo' => $result,
-                ];
-                $this->success(__('Logged in successful'), $data);
-            }
-        }
-        $this->error(__('Operation failed'), $url);
+        $result = $logic->delRelationUser();
+        $this->success($result);
     }
 
     /**
-     * 重置密码
-     *
-     * @param string $mobile      手机号
-     * @param string $newpassword 新密码
-     * @param string $captcha     验证码
+     * 退出登陆
+     * @param UserLogic $logic
+     * @return void
+     * @throws \app\api\exception\ApiException
+     * @author Bin
+     * @time 2023/7/5
      */
-    public function resetpwd()
+    public function logout(UserLogic $logic)
     {
-        $type = $this->request->request('type');
-        $mobile = $this->request->request('mobile');
-        $email = $this->request->request('email');
-        $newpassword = $this->request->request('newpassword');
-        $captcha = $this->request->request('captcha');
-        if (! $newpassword || ! $captcha) {
-            $this->error(__('Invalid parameters'));
-        }
-        if ($type == 'mobile') {
-            if (! Validate::regex($mobile, "^1\d{10}$")) {
-                $this->error(__('Mobile is incorrect'));
-            }
-            $user = \app\common\model\User::where('mobile',$mobile)->find();
-            if (! $user) {
-                $this->error(__('User not found'));
-            }
-            $ret = Sms::check($mobile, $captcha, 'resetpwd');
-            if (! $ret) {
-                $this->error(__('Captcha is incorrect'));
-            }
-            Sms::flush($mobile, 'resetpwd');
-        } else {
-            if (! Validate::is($email, 'email')) {
-                $this->error(__('Email is incorrect'));
-            }
-            $user = \app\common\model\User::where('email',$email)->find();
-            if (! $user) {
-                $this->error(__('User not found'));
-            }
-            $ret = Ems::check($email, $captcha, 'resetpwd');
-            if (! $ret) {
-                $this->error(__('Captcha is incorrect'));
-            }
-            Ems::flush($email, 'resetpwd');
-        }
-        //模拟一次登录
-        $this->auth->direct($user->id);
-        $ret = $this->auth->changepwd($newpassword, '', true);
-        if ($ret) {
-            $this->success(__('Reset password successful'));
-        } else {
-            $this->error($this->auth->getError());
-        }
+        $result = $logic->logout();
+        $this->success($result);
+    }
+
+    /**
+     * 获取团队数据
+     * @param UserLogic $logic
+     * @return void
+     * @author Bin
+     * @time 2023/7/6
+     */
+    public function getTeamData(UserLogic $logic)
+    {
+        $result = $logic->getTeamData();
+        $this->success($result);
+    }
+
+    /**
+     * 获取收益明细
+     * @param UserLogic $logic
+     * @return void
+     * @author Bin
+     * @time 2023/7/6
+     */
+    public function getProfitList(UserLogic $logic)
+    {
+        $result = $logic->getProfitList();
+        $this->success($result);
+    }
+
+    /**
+     * 意见反馈
+     * @param UserLogic $logic
+     * @return void
+     * @author Bin
+     * @time 2023/7/6
+     */
+    public function feedback(UserLogic $logic)
+    {
+        $result = $logic->feedback();
+        $this->success($result);
+    }
+
+    /**
+     * 邀请好友
+     * @param UserLogic $logic
+     * @return void
+     * @author Bin
+     * @time 2023/7/8
+     */
+    public function inviteFriends(UserLogic $logic)
+    {
+        $result = $logic->inviteFriends();
+        $this->success($result);
+    }
+
+    /**
+     * 签到
+     * @param UserLogic $logic
+     * @return void
+     * @author Bin
+     * @time 2023/7/9
+     */
+    public function sign(UserLogic $logic)
+    {
+        $result = $logic->sign();
+        $this->success($result);
     }
 }

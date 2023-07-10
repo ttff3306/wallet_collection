@@ -12,7 +12,7 @@
 
 return [
     //是否开启前台会员中心
-    'usercenter' => true,
+    'usercenter' => false,
     //会员注册验证码类型email/mobile/wechat/text/false
     'user_register_captcha' => 'text',
     //登录验证码
@@ -34,7 +34,7 @@ return [
     //自动检测更新
     'checkupdate' => false,
     //API是否允许跨域
-    'api_cross' => false,
+    'api_cross' => true,
     //版本号
     'version' => '3.0.4',
     //API接口地址
