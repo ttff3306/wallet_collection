@@ -4,7 +4,6 @@ namespace app\api\library;
 
 use app\api\exception\ApiException;
 use app\api\exception\TokenIsInvalidException;
-use app\api\model\ApiLogModel;
 use app\common\model\AppLogModel;
 use think\exception\RouteNotFoundException;
 use think\facade\Log;
@@ -58,27 +57,27 @@ class ExceptionHandle extends Handle
         //处理token验证异常
         if ($e instanceof TokenIsInvalidException) {
             return json([
-                "code" => 101,
+                "code" => 401,
                 "msg" => $e->getMessage(),
                 "data" => null
-            ]);
+            ], 401);
         }
         // 参数验证错误
         if ($e instanceof ValidateException) {
             return json([
-                "code" => 100,
+                "code" => 400,
                 "msg" => $e->getMessage(),
                 "data" => null
-            ]);
+            ], 400);
         }
 
         // 路由方法错误
         if ($e instanceof RouteNotFoundException) {
             return json([
-                "code" => $e->getStatusCode(),
+                "code" => 403,
                 "msg" => $e->getMessage(),
                 "data" => null
-            ], $e->getStatusCode());
+            ], 403);
         }
 
         //记录错误信息
@@ -101,7 +100,7 @@ class ExceptionHandle extends Handle
                 "code" => 500,
                 "msg" => $e->getMessage(),
                 "data" => null
-            ]);
+            ], 500);
         }
 
         // 其他错误交给系统处理
