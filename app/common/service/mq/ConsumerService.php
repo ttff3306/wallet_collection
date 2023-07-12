@@ -37,15 +37,38 @@ class ConsumerService
     }
 
     /**
-     * 异步上报质押订单
+     * 异步上报团队业绩
      * @param $data
      * @return void
      * @author Bin
-     * @time 2023/7/10
+     * @time 2023/7/11
      */
-    public function asyncReportUserReleaseOrder($data)
+    public function asyncReportUserPerformanceByTeam($data)
     {
-        if (empty($data['user_id']) || empty($data['amount'])) return;
-        ReportData::reportUserReleaseOrder($data['user_id']);
+        ReportData::reportUserPerformanceByTeam($data['user_id'], $data['order_no'], $data['performance'], $data['type']);
+    }
+
+    /**
+     * 异步上报有效用户
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/7/11
+     */
+    public function asyncReportUserEffectiveMember($data)
+    {
+        ReportData::reportUserEffectiveMember($data['user_id']);
+    }
+
+    /**
+     * 异步检测团队等级
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/7/11
+     */
+    public function asyncCheckTeamUserLevel($data)
+    {
+        ReportData::checkTeamUserLevel($data['user_id']);
     }
 }

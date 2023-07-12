@@ -222,6 +222,8 @@ class AccountService
                 );
             }
         }
+        //清除用户缓存
+        User::delUserCache($user_id);
         //返回结果
         return $result;
     }
@@ -264,6 +266,8 @@ class AccountService
                 ]
             );
         }
+        //清除用户缓存
+        User::delUserCache($user_id);
         //返回结果
         return $result;
     }

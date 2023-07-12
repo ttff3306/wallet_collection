@@ -219,17 +219,17 @@ class RabbitmqService
     /**
      * 生产者
      * @param array  $messages 消息
-     * @param int  $delayTime 延时时间(秒)
+     * @param int  $delay_time 延时时间(秒)
      * @return void
      * @author  
      * @time 2022年5月14日
      */
-    public function publisher (array $messages, $delayTime = null )
+    public function publisher (array $messages, $delay_time = null )
     {
         //将$messages转化为json
         $messages = json_encode($messages ,true);
         //判断是及时消息还是延时消息
-        empty( $delayTime ) ? $this->publishMessage( $messages ) : $this->delayMessage( $messages, $delayTime * 1000 );
+        empty( $delay_time ) ? $this->publishMessage( $messages ) : $this->delayMessage( $messages, $delay_time * 1000 );
     }
 
 

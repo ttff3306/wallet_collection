@@ -23,7 +23,7 @@ class LevelConfigService
         {
             //删除缓存
             Redis::del($key);
-            $list = LevelConfigModel::new()->column('*', 'id');
+            $list = LevelConfigModel::new()->order('sort', 'desc')->column('*', 'id');
             //写入缓存
             Redis::setString($key, $list);
         }

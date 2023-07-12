@@ -124,6 +124,20 @@ class UserService
     }
 
     /**
+     * 删除用户缓存
+     * @param int $user_id
+     * @return void
+     * @author Bin
+     * @time 2023/7/11
+     */
+    public function delUserCache(int $user_id)
+    {
+        //缓存key
+        $key = 'user:info:' . $user_id;
+        Redis::del($key);
+    }
+
+    /**
      * 设置用户登陆信息
      * @param int $user_id
      * @param int $login_time
@@ -234,6 +248,20 @@ class UserService
             Redis::setString($key, $row, 24 * 3600);
         }
         return $row ?? Redis::getString($key);
+    }
+
+    /**
+     * 删除用户缓存
+     * @param int $user_id
+     * @return void
+     * @author Bin
+     * @time 2023/7/11
+     */
+    public function delUserCommonInfoCache(int $user_id)
+    {
+        //缓存key
+        $key = 'user:common:info:' . $user_id;
+        Redis::del($key);
     }
 
     /**
@@ -414,6 +442,8 @@ class UserService
     public function updateUserCommon(int $user_id, array $update_data = array(), array $inc_data = array())
     {
         $result = UserCommonModel::new()->updateRow(['uid' => $user_id], $update_data, $inc_data);
+        //清除缓存
+        if ($result) $this->delUserCommonInfoCache($user_id);
         //返回结果
         return $result;
     }
@@ -430,6 +460,8 @@ class UserService
     public function updateUser(int $user_id, array $update_data = array(), array $inc_data = array())
     {
         $result = UserModel::new()->updateRow(['id' => $user_id], $update_data, $inc_data);
+        //清除用户缓存
+        if ($result) $this->delUserCache($user_id);
         //返回结果
         return $result;
     }

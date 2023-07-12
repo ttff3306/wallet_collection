@@ -138,8 +138,6 @@ class UserOrderService
             Db::rollback();
             return false;
         }
-        //异步上报
-        publisher('asyncReportUserReleaseOrder', ['user_id' => $user_id, 'amount' => $amount]);
         //全网累计投入
         $this->setTotalOrderPerformance($amount);
         //设置进行中的订单数量
@@ -148,6 +146,10 @@ class UserOrderService
         User::getUser($user_id, true);
         //刷新公共用户缓存
         User::getUserCommonInfo($user_id, true);
+        //异步上报团队业绩
+        publisher('asyncReportUserPerformanceByTeam', ['user_id' => $user_id, 'order_no' => $data['order_no'], 'performance' => $amount, 'type' => 1]);
+        //异步检测有效人数
+        if ($amount >= (int)config('site.effective_amount', 100)) publisher('asyncReportUserEffectiveMember', ['user_id' => $user_id]);
         //返回结果
         return true;
     }
