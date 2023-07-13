@@ -1,25 +1,14 @@
 <?php
-// +----------------------------------------------------------------------
-// | ThinkPHP [ WE CAN DO IT JUST THINK ]
-// +----------------------------------------------------------------------
-// | Copyright (c) 2006~2021 http://thinkphp.cn All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
-// +----------------------------------------------------------------------
-// | Author: liu21st <liu21st@gmail.com>
-// +----------------------------------------------------------------------
-declare (strict_types = 1);
+
 
 namespace app\api\middleware;
 
-use Closure;
+
 use think\Config;
 use think\Request;
 use think\Response;
+use Closure;
 
-/**
- * 跨域请求支持
- */
 class AllowCrossDomain
 {
     protected $cookieDomain;
@@ -28,7 +17,7 @@ class AllowCrossDomain
         'Access-Control-Allow-Credentials' => 'true',
         'Access-Control-Max-Age'           => 1800,
         'Access-Control-Allow-Methods'     => 'GET, POST, PATCH, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers'     => 'Authorization, Content-Type, If-Match, If-Modified-Since, If-None-Match, If-Unmodified-Since, X-CSRF-TOKEN, X-Requested-With, token',
+        'Access-Control-Allow-Headers'     => 'Authorization, Content-Type, If-Match, If-Modified-Since, If-None-Match, If-Unmodified-Since, X-CSRF-TOKEN, X-Requested-With, TOKEN, SIGN, TIME, HTTP_ACCEPT_LANGUAGE',
     ];
 
     public function __construct(Config $config)
@@ -57,6 +46,7 @@ class AllowCrossDomain
                 $header['Access-Control-Allow-Origin'] = '*';
             }
         }
+
         return $next($request)->header($header);
     }
 }
