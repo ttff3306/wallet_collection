@@ -22,6 +22,8 @@ class MarketLogic extends BaseLogic
         //个人累计投入
         $user_common = User::getUserCommonInfo($this->user['id']);
         $result['total_user_performance'] = $user_common['total_user_performance'];
+        //累计收益
+        $result['total_user_profit'] = $user_common['total_user_usdk_profit'];
         //进行中的订单
         $result['order_num'] = UserOrder::getReleaseOrderIngNum($this->user['id']);
         //最小投入
