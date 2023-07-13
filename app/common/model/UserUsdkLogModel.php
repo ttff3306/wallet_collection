@@ -20,6 +20,7 @@ class UserUsdkLogModel extends  BaseModel
      */
     public function getTitleAttr($value, $data)
     {
+        if (!isset($data['type'])) return '';
         return $this->getTitle($data['type']);
     }
 
@@ -55,6 +56,7 @@ class UserUsdkLogModel extends  BaseModel
             7 => __('签到'),
             8 => __('投入'),
             9 => __('解压'),
+            10 => __('云服务器收益'),
         ];
         return $list[$type] ?? $list[1];
     }

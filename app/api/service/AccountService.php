@@ -11,6 +11,8 @@ use app\common\model\UserModel;
 use app\common\model\UserUsdkLogModel;
 use app\common\model\UserUsdtLogModel;
 use app\common\model\WalletModel;
+use think\Exception;
+use think\facade\Db;
 
 /**
  * 用户账户服务
@@ -30,17 +32,17 @@ class AccountService
      * @author Bin
      * @time 2023/7/6
      */
-    public function listUsdkLog(int $user_id, int $type = 0, int $page = 1, int $limit = 10, string $field = '*', string $order = 'id desc')
+    public function listUsdkLog(int $user_id, int $type = 0, int $page = 1, int $limit = 10, string $field = '*', string $order = 'id desc', int $order_id = null)
     {
         //获取查询
         $filter = ['user_id' => $user_id];
         if (!empty($type)) $filter['type'] = $type;
-        $data = UserUsdkLogModel::new()->where($filter)->field($field)->order($order)->paginate(['list_rows' => $limit, 'page' => $page])->toArray();
-        $result['total_count'] = $data['total'];
-        $result['total_page'] = $data['last_page'];
-        $result['list'] = $data['data'];
+        if (!is_null($order_id)) $filter['order_id'] = $order_id;
+        $data = UserUsdkLogModel::new()->where($filter)->field($field)->order($order)
+            ->paginate(['list_rows' => $limit, 'page' => $page])
+            ->toArray();
         //返回数据
-        return $result;
+        return $data;
     }
 
     /**
@@ -59,12 +61,11 @@ class AccountService
         //获取查询
         $filter = ['user_id' => $user_id];
         if (!empty($type)) $filter['type'] = $type;
-        $data = UserUsdtLogModel::new()->where($filter)->field($field)->order($order)->paginate(['list_rows' => $limit, 'page' => $page])->toArray();
-        $result['total_count'] = $data['total'];
-        $result['total_page'] = $data['last_page'];
-        $result['list'] = $data['data'];
+        $data = UserUsdtLogModel::new()->where($filter)->field($field)
+            ->order($order)->paginate(['list_rows' => $limit, 'page' => $page])
+            ->toArray();
         //返回数据
-        return $result;
+        return $data;
     }
 
     /**
@@ -319,5 +320,43 @@ class AccountService
         }
         //返回结果
         return $list ?? Redis::getString($key);
+    }
+
+    /**
+     * 兑换
+     * @param int $user_id
+     * @param int $amount
+     * @param int $type
+     * @return bool|string
+     * @author Bin
+     * @time 2023/7/12
+     */
+    public function exchange(int $user_id, int $amount, int $type)
+    {
+        Db::starttrans();
+        try {
+            //1.扣除余额
+            if ($type == 1) {
+                //扣除usdt
+                $result = $this->changeUsdt($user_id, $amount * -1, 4, '闪兑');
+                //增加usdk
+                $add_result = $this->changeUsdk($user_id, $amount, 2, '闪兑');
+            }else{
+                //扣除usdk
+                $result = $this->changeUsdk($user_id, $amount * -1, 2, '闪兑');
+                //增加usdt
+                $add_result = $this->changeUsdt($user_id, $amount, 4, '闪兑');
+            }
+            //扣除余额是否成功
+            if (!$result) throw new Exception('余额不足');
+            //2.增加对应余额
+            if (!$add_result) throw new Exception('入账失败');
+            Db::commit();
+        }catch (\Exception $e){
+            Db::rollback();
+            return $e->getMessage();
+        }
+        //返回结果
+        return true;
     }
 }

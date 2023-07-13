@@ -142,10 +142,6 @@ class UserOrderService
         $this->setTotalOrderPerformance($amount);
         //设置进行中的订单数量
         $this->setReleaseOrderIngNum($user_id);
-        //刷新用户缓存
-        User::getUser($user_id, true);
-        //刷新公共用户缓存
-        User::getUserCommonInfo($user_id, true);
         //异步上报团队业绩
         publisher('asyncReportUserPerformanceByTeam', ['user_id' => $user_id, 'order_no' => $data['order_no'], 'performance' => $amount, 'type' => 1]);
         //异步检测有效人数
@@ -154,4 +150,58 @@ class UserOrderService
         return true;
     }
 
+    /**
+     * 获取订单详情
+     * @param int $order_id
+     * @param int $user_id
+     * @return \app\common\model\BaseModel|array|mixed|\think\Model|null
+     * @author Bin
+     * @time 2023/7/12
+     */
+    public function getOrder(int $order_id, int $user_id = 0, string $field = '*')
+    {
+        $condition = ['id' => $order_id];
+        if (!empty($user_id)) $condition['uid'] = $user_id;
+        //获取订单
+        return ReleaseOrderModel::new()->getRow($condition, $field);
+    }
+
+    /**
+     * 解压订单
+     * @param int $user_id
+     * @param int $order_id
+     * @param float $amount
+     * @param string $order_no
+     * @return bool|string
+     * @author Bin
+     * @time 2023/7/12
+     */
+    public function closeOrder(int $user_id, int $order_id, float $amount, string $order_no)
+    {
+        Db::starttrans();
+        try {
+            //1.关闭订单
+            $result = ReleaseOrderModel::new()->updateRow(['id' => $order_id, 'status' => 1], ['status' => 0, 'close_time' => time()]);
+            if (!$result) throw new Exception('订单更新失败');
+            //2.退回余额
+            $result = Account::changeUsdk($user_id, $amount, 9, '解压退回本金');
+            if (!$result) throw new Exception('本金退回失败');
+            //扣除用户累计投入
+            User::updateUserCommon($user_id, [], ['total_user_performance' => $amount * -1]);
+            Db::commit();
+        }catch (\Exception $e){
+            Db::rollback();
+            return $e->getMessage();
+        }
+        //全网累计投入
+        $this->getTotalOrderPerformance(true);
+        //设置进行中的订单数量
+        $this->getReleaseOrderIngNum($user_id, true);
+        //异步上报扣除团队业绩
+        publisher('asyncReportUserPerformanceByTeam', ['user_id' => $user_id, 'order_no' => $order_no, 'performance' => $amount, 'type' => 2]);
+        //异步检测有效人数
+        if ($amount >= (int)config('site.effective_amount', 100)) publisher('asyncReportUserEffectiveMember', ['user_id' => $user_id]);
+        //返回结果
+        return true;
+    }
 }

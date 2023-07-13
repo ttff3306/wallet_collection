@@ -36,9 +36,7 @@ class AccountLogic extends BaseLogic
         $type = $types[$type];
         $result = Account::listUsdkLog($this->user['id'], $type, $page, $limit, 'id,type,money,create_time');
         //累计收益
-        $result['usdk'] = Account::getUserUsdkTotalProfit($this->user['id'], $type);
-        //返回结果
-        return $result;
+        return array_merge(['usdk' => Account::getUserUsdkTotalProfit($this->user['id'], $type)], $result);
     }
 
     /**
@@ -52,10 +50,8 @@ class AccountLogic extends BaseLogic
         $page = $this->input['page'] ?? 1;
         $limit = $this->input['limit'] ?? 10;
         $result = Account::listUsdtLog($this->user['id'], 0, $page, $limit, 'id,type,money,create_time');
-        //余额
-        $result['usdt'] = $this->user['usdt'];
         //返回结果
-        return $result;
+        return array_merge(['usdt' => $this->user['usdt']], $result);
     }
 
     /**

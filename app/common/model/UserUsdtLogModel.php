@@ -20,6 +20,7 @@ class UserUsdtLogModel extends  BaseModel
      */
     public function getTitleAttr($value, $data)
     {
+        if (!isset($data['type'])) return '';
         return $this->getTitle($data['type']);
     }
 

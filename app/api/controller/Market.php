@@ -42,4 +42,46 @@ class Market extends Api
     {
         $this->success($logic->release());
     }
+
+    /**
+     * 订单详情
+     * @param MarketLogic $logic
+     * @return void
+     * @throws \app\api\exception\ApiException
+     * @author Bin
+     * @time 2023/7/12
+     */
+    public function getOrderDetail(MarketLogic $logic)
+    {
+        $this->success($logic->getOrderDetail());
+    }
+
+    /**
+     * 解除订单
+     * @param MarketLogic $logic
+     * @return void
+     * @author Bin
+     * @time 2023/7/12
+     */
+    public function closeOrder(MarketLogic $logic)
+    {
+        $this->success($logic->closeOrder());
+    }
+
+    /**
+     * 获取闪兑数据
+     * @param MarketLogic $logic
+     * @return void
+     * @author Bin
+     * @time 2023/7/12
+     */
+    public function getExchangeIndex(MarketLogic $logic)
+    {
+        $this->success($logic->getExchangeIndex());
+    }
+
+    public function exchange(MarketLogic $logic)
+    {
+        $this->success($logic->exchange());
+    }
 }

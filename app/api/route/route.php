@@ -73,8 +73,12 @@ Route::group(function (){
 
     Route::group('market', function (){
         Route::any('$', 'api/market/index')->name('市场数据');
-        Route::any('list/order', 'api/market/listOrder')->name('市场数据');
-        Route::any('release', 'api/market/release')->validate(ReleaseValidate::class)->middleware(IsBackUpMnemonicMiddleware::class)->name('投入');
+        Route::get('list/order$', 'api/market/listOrder')->name('质押订单列表');
+        Route::get('order$', 'api/market/getOrderDetail')->name('订单详情');
+        Route::post('release$', 'api/market/release')->validate(ReleaseValidate::class)->middleware(IsBackUpMnemonicMiddleware::class)->name('投入');
+        Route::post('close/order$', 'api/market/closeOrder')->middleware(CheckPayPwdMiddleware::class)->name('解压订单');
+        Route::get('exchange$', 'api/market/getExchangeIndex')->name('获取闪兑数据');
+        Route::post('exchange$', 'api/market/exchange')->middleware(CheckPayPwdMiddleware::class)->name('闪兑提交');
     });
 
 })->middleware(AuthMiddleware::class)->middleware(DelAppLockMiddleware::class);
