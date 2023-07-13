@@ -12,6 +12,7 @@ use app\common\model\Attachment;
 use fast\Random;
 use think\facade\Config;
 use think\facade\Event;
+use think\facade\Lang;
 
 class UserLogic extends BaseLogic
 {

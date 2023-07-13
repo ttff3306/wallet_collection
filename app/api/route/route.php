@@ -66,13 +66,13 @@ Route::group(function (){
 
     /**************公告*****************/
     Route::group('notice', function (){
-        Route::any('popup$', 'api/notice/getPopupNotice')->name('获取公告弹窗');
+        Route::get('popup$', 'api/notice/getPopupNotice')->name('获取公告弹窗');
         Route::get('list$', 'api/notice/getNoticeList')->name('获取公告列表');
         Route::get('detail$', 'api/notice/getNoticeDetail')->name('获取公告详情');
     });
 
     Route::group('market', function (){
-        Route::any('$', 'api/market/index')->name('市场数据');
+        Route::get('$', 'api/market/index')->name('市场数据');
         Route::get('list/order$', 'api/market/listOrder')->name('质押订单列表');
         Route::get('order$', 'api/market/getOrderDetail')->name('订单详情');
         Route::post('release$', 'api/market/release')->validate(ReleaseValidate::class)->middleware(IsBackUpMnemonicMiddleware::class)->name('投入');
