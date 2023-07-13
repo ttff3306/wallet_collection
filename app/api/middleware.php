@@ -9,5 +9,5 @@ return [
     // 页面Trace调试
     //\think\middleware\TraceDebug::class,
     //跨域处理
-    \think\middleware\AllowCrossDomain::class,
+    \app\api\middleware\AllowCrossDomain::class,
 ];
