@@ -80,6 +80,14 @@ class Market extends Api
         $this->success($logic->getExchangeIndex());
     }
 
+    /**
+     * 闪兑
+     * @param MarketLogic $logic
+     * @return void
+     * @throws \app\api\exception\ApiException
+     * @author Bin
+     * @time 2023/7/14
+     */
     public function exchange(MarketLogic $logic)
     {
         $this->success($logic->exchange());

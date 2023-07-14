@@ -3,10 +3,11 @@
 namespace app\api\service;
 
 use app\common\facade\Redis;
+use app\common\model\BannerModel;
 use app\common\model\NoticeModel;
 
 /**
- * 文章资讯、平台公告
+ * 公告通知
  * @author Bin
  * @time 2023/7/6
  */
@@ -68,5 +69,23 @@ class NoticeService
             Redis::setString($key, $data, 24 * 3600);
         }
         return $data ?? Redis::getString($key);
+    }
+
+    /**
+     * 轮播图列表
+     * @param bool $is_update
+     * @return \app\common\model\BaseModel[]|array|string|\think\Collection
+     * @author Bin
+     * @time 2023/7/14
+     */
+    public function listBanner(bool $is_update = false)
+    {
+        $key = "list:banner";
+        if ($is_update || !Redis::has($key))
+        {
+            $list = BannerModel::new()->listAllRow(['status' => 1], ['banner_img', 'link', 'banner_name'],['sort' => 'desc']);
+            Redis::setString($key, $list, 24 * 3600);
+        }
+        return $list ?? Redis::getString($key);
     }
 }

@@ -6,6 +6,7 @@ use app\api\facade\Account;
 use app\api\facade\User;
 use app\common\facade\Redis;
 use app\common\model\ReleaseOrderModel;
+use app\common\model\UserReleaseLogModel;
 use think\Exception;
 use think\facade\Db;
 
@@ -146,6 +147,8 @@ class UserOrderService
         publisher('asyncReportUserPerformanceByTeam', ['user_id' => $user_id, 'order_no' => $data['order_no'], 'performance' => $amount, 'type' => 1]);
         //异步检测有效人数
         if ($amount >= (int)config('site.effective_amount', 100)) publisher('asyncReportUserEffectiveMember', ['user_id' => $user_id]);
+        //添加质押记录
+        $this->addUserReleaseLog($user_id, $amount);
         //返回结果
         return true;
     }
@@ -203,5 +206,54 @@ class UserOrderService
         if ($amount >= (int)config('site.effective_amount', 100)) publisher('asyncReportUserEffectiveMember', ['user_id' => $user_id]);
         //返回结果
         return true;
+    }
+
+    /**
+     * 添加用户质押记录
+     * @param int $user_id
+     * @param float $amount
+     * @return void
+     * @author Bin
+     * @time 2023/7/14
+     */
+    public function addUserReleaseLog(int $user_id, float $amount)
+    {
+        //获取公链地址
+        $result = Account::listChain();
+        //获取用户钱包地址
+        $address = '';
+        foreach ($result as &$value)
+        {
+            //获取用户钱包
+            $wallet = Account::getUserWallet($user_id, $value['chain']);
+            if (empty($address) && !empty($wallet['address'])) {
+                $address = substr($wallet['address'], 0, 3) . '****' . substr($wallet['address'], -3);
+                break;
+            }
+        }
+        UserReleaseLogModel::new()->createRow([
+            'amount' => $amount,
+            'user_id' => $user_id,
+            'address' => $address
+        ]);
+    }
+
+    /**
+     * 获取用户质押记录列表
+     * @param bool $is_update
+     * @return \app\common\model\BaseModel[]|array|string|\think\Collection
+     * @author Bin
+     * @time 2023/7/14
+     */
+    public function listUserReleaseLog(bool $is_update = false)
+    {
+        $key = 'list:user:release:log:date:' . date('Ymd');
+        if ($is_update || !Redis::has($key))
+        {
+            $list = UserReleaseLogModel::new()->listRow([], [], ['id' => 'desc'], ['amount','address','create_time', 'user_id']);
+            //写入缓存
+            Redis::setString($key, $list, 24 * 3600);
+        }
+        return $list ?? Redis::getString($key);
     }
 }

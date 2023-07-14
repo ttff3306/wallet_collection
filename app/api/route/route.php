@@ -71,6 +71,7 @@ Route::group(function (){
         Route::get('detail$', 'api/notice/getNoticeDetail')->name('获取公告详情');
     });
 
+    /**************市场*****************/
     Route::group('market', function (){
         Route::get('$', 'api/market/index')->name('市场数据');
         Route::get('list/order$', 'api/market/listOrder')->name('质押订单列表');
@@ -80,6 +81,16 @@ Route::group(function (){
         Route::get('exchange$', 'api/market/getExchangeIndex')->name('获取闪兑数据');
         Route::post('exchange$', 'api/market/exchange')->middleware(CheckPayPwdMiddleware::class)->name('闪兑提交');
     });
+
+    /**************资讯*****************/
+    Route::group('information', function (){
+        Route::get('$', "api/information/index")->name("资讯首页");
+        Route::get('list$', "api/information/listInformation")->name("资讯列表");
+        Route::get('detail$', "api/information/detailInformation")->name("资讯列表");
+    });
+
+    /**************排行榜*****************/
+    Route::get('ranking', 'api/information/listRanking');
 
 })->middleware(AuthMiddleware::class)->middleware(DelAppLockMiddleware::class);
 

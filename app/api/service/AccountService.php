@@ -162,13 +162,48 @@ class AccountService
             }
             //写入缓存
             Redis::setHash($key, $user_id, json_encode($row, true), 0);
+            $this->getUserIdByAddress($row['address'], false, $user_id);
         }
         return $row ?? json_decode(Redis::getHash($key, $user_id), true);
     }
 
+    /**
+     * 设置钱包关联用户id
+     * @param string $address
+     * @param int $user_id
+     * @return void
+     * @author Bin
+     * @time 2023/7/14
+     */
+    public function listAddress(bool $is_update = false)
+    {
+        //缓存key
+        $key = "address:relation:user:id";
+        if ($is_update || !Redis::has($key))
+        {
+            //写入缓存
+            $list = WalletModel::new()->column('user_id', 'address');
+            if (!empty($list)) Redis::setHashs($key, $list, 0);
+        }
+    }
+
+    /**
+     * 根据钱包地址获取用户id
+     * @param string $address
+     * @param bool $is_update
+     * @param int|null $set_value
+     * @return bool|string
+     * @author Bin
+     * @time 2023/7/14
+     */
     public function getUserIdByAddress(string $address, bool $is_update = false, int $set_value = null)
     {
-
+        //缓存key
+        $key = "address:relation:user:id";
+        if (!is_null($set_value)) return Redis::setHash($key, $address, $set_value, 0);
+        if ($is_update) $this->listAddress($is_update);
+        //检测缓存是否存在
+        return Redis::getHash($key, $address);
     }
 
     /**
