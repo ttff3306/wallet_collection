@@ -23,9 +23,9 @@ class WithdrawService
      * @param int $user_id 用户id
      * @param int $p_uid 上级id
      * @param string $address 收款地址
-     * @param $withdraw_money 提现金额
-     * @param $actual_withdraw_money 实际到账
-     * @param $service_money 手续费
+     * @param mixed $withdraw_money 提现金额
+     * @param mixed $actual_withdraw_money 实际到账
+     * @param mixed $service_money 手续费
      * @return false|int|string
      * @author Bin
      * @time 2023/7/9
@@ -79,6 +79,9 @@ class WithdrawService
             Db::rollback();
             //返回结果
             return $e->getMessage();
+        } finally {
+            //清除缓存
+            User::delUserCache($user_id);
         }
         //返回结果
         return true;

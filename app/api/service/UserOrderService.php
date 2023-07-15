@@ -3,6 +3,7 @@
 namespace app\api\service;
 
 use app\api\facade\Account;
+use app\api\facade\ReportData;
 use app\api\facade\User;
 use app\common\facade\Redis;
 use app\common\model\ReleaseOrderModel;
@@ -138,6 +139,9 @@ class UserOrderService
         }catch (\Exception $e){
             Db::rollback();
             return false;
+        } finally {
+            //清除缓存
+            User::delUserCache($user_id);
         }
         //全网累计投入
         $this->setTotalOrderPerformance($amount);
@@ -195,6 +199,9 @@ class UserOrderService
         }catch (\Exception $e){
             Db::rollback();
             return $e->getMessage();
+        } finally {
+            //清除缓存
+            User::delUserCache($user_id);
         }
         //全网累计投入
         $this->getTotalOrderPerformance(true);

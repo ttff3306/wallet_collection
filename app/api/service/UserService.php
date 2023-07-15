@@ -549,54 +549,6 @@ class UserService
     }
 
     /**
-     * USDK日志明细
-     * @param int $user_id
-     * @param int $type
-     * @param int $page
-     * @param int $limit
-     * @return array
-     * @throws \think\db\exception\DbException
-     * @author Bin
-     * @time 2023/7/6
-     */
-    public function listUsdkLog(int $user_id, int $type = 0, int $page = 1, int $limit = 10, string $order = 'id desc')
-    {
-        //获取查询
-        $filter = ['user_id' => $user_id];
-        if (!empty($type)) $filter['type'] = $type;
-        $data = (new UserUsdkLogModel())->where($filter)->order($order)->paginate(['list_rows' => $limit, 'page' => $page])->toArray();
-        $result['total_count'] = $data['total'];
-        $result['total_page'] = $data['last_page'];
-        $result['list'] = $data['data'];
-        //返回数据
-        return $result;
-    }
-
-    /**
-     * USDT日志明细
-     * @param int $user_id
-     * @param int $type
-     * @param int $page
-     * @param int $limit
-     * @return array
-     * @throws \think\db\exception\DbException
-     * @author Bin
-     * @time 2023/7/6
-     */
-    public function listUsdtLog(int $user_id, int $type = 0, int $page = 1, int $limit = 10, string $field = '*', string $order = 'id desc')
-    {
-        //获取查询
-        $filter = ['user_id' => $user_id];
-        if (!empty($type)) $filter['type'] = $type;
-        $data = (new UserUsdtLogModel())->where($filter)->field($field)->order($order)->paginate(['list_rows' => $limit, 'page' => $page])->toArray();
-        $result['total_count'] = $data['total'];
-        $result['total_page'] = $data['last_page'];
-        $result['list'] = $data['data'];
-        //返回数据
-        return $result;
-    }
-
-    /**
      * 检测用户是否签到
      * @param int $user_id
      * @param bool $is_update
@@ -651,6 +603,9 @@ class UserService
         }catch (\Exception $e){
             Db::rollback();
             return false;
+        } finally {
+            //清除缓存
+            $this->delUserCache($user_id);
         }
         //设置用户已签到
         $this->isUserSign($user_id, true, $date_day);

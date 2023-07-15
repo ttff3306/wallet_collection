@@ -2,15 +2,20 @@
 
 namespace app\api\service;
 
+use app\api\facade\ReportData;
 use app\api\facade\User;
+use app\api\facade\UserOrder;
 use app\common\facade\Redis;
 use app\common\facade\Wallet;
 use app\common\model\ChainModel;
 use app\common\model\ProfitConfigModel;
+use app\common\model\ReleaseOrderModel;
 use app\common\model\UserModel;
+use app\common\model\UserProfitRankingModel;
 use app\common\model\UserUsdkLogModel;
 use app\common\model\UserUsdtLogModel;
 use app\common\model\WalletModel;
+use think\db\exception\DbException;
 use think\Exception;
 use think\facade\Db;
 
@@ -27,8 +32,11 @@ class AccountService
      * @param int $type
      * @param int $page
      * @param int $limit
+     * @param string $field
+     * @param string $order
+     * @param int|null $order_id
      * @return array
-     * @throws \think\db\exception\DbException
+     * @throws DbException
      * @author Bin
      * @time 2023/7/6
      */
@@ -51,8 +59,10 @@ class AccountService
      * @param int $type
      * @param int $page
      * @param int $limit
+     * @param string $field
+     * @param string $order
      * @return array
-     * @throws \think\db\exception\DbException
+     * @throws DbException
      * @author Bin
      * @time 2023/7/6
      */
@@ -71,13 +81,13 @@ class AccountService
     /**
      * 获取USDK累计收益
      * @param int $user_id
-     * @param int $type
+     * @param int|array $type
      * @param bool $is_update
      * @return float
      * @author Bin
      * @time 2023/7/6
      */
-    public function getUserUsdkTotalProfit(int $user_id, int $type, bool $is_update = false): float
+    public function getUserUsdkTotalProfit(int $user_id, $type, bool $is_update = false): float
     {
         return UserUsdkLogModel::new()->where(['user_id' => $user_id, 'type' => $type])->sum('money');
     }
@@ -168,9 +178,8 @@ class AccountService
     }
 
     /**
-     * 设置钱包关联用户id
-     * @param string $address
-     * @param int $user_id
+     * 获取钱包列表
+     * @param bool $is_update
      * @return void
      * @author Bin
      * @time 2023/7/14
@@ -222,7 +231,7 @@ class AccountService
         if ($amount < 0) $where[] = ['usdt', '>=', abs($amount)];
         //1:平台福利 2:充值 3:提现 4:闪兑 5:手续费
         //更新数据
-        $result = (new UserModel())->updateRow($where, [], ['usdt' => $amount]);
+        $result = (new UserModel())->updateRow($where, ['updatetime' => time()], ['usdt' => $amount]);
         //获取用户
         $user = User::getUser($user_id);
         //记录日志
@@ -258,8 +267,6 @@ class AccountService
                 );
             }
         }
-        //清除用户缓存
-        User::delUserCache($user_id);
         //返回结果
         return $result;
     }
@@ -274,16 +281,15 @@ class AccountService
      * @author Bin
      * @time 2023/7/8
      */
-    public function changeUsdk(int $user_id, $amount, int $type, string $memo)
+    public function changeUsdk(int $user_id, $amount, int $type, string $memo, int $order_id = 0)
     {
         //获取玩家数据
         $user = User::getUser($user_id);
 
         $where = [ ['id', '=', $user_id] ];
         if ($amount < 0) $where[] = ['usdk', '>=', abs($amount)];
-        //1:福利 2:闪兑 3:直推收益 4:间推收益  5:推广奖励 6:团队收益 7:签到 8:投入
         //更新数据
-        $result = (new UserModel())->updateRow($where, [], ['usdk' => $amount]);
+        $result = (new UserModel())->updateRow($where, ['updatetime' => time()], ['usdk' => $amount]);
 
         //记录日志
         if ($result)
@@ -299,11 +305,10 @@ class AccountService
                     'create_time' => time(),
                     'type' => $type,
                     'date_day' => date('Ymd'),
+                    'order_id' => $order_id
                 ]
             );
         }
-        //清除用户缓存
-        User::delUserCache($user_id);
         //返回结果
         return $result;
     }
@@ -390,8 +395,122 @@ class AccountService
         }catch (\Exception $e){
             Db::rollback();
             return $e->getMessage();
+        } finally {
+            //清除缓存
+            User::delUserCache($user_id);
         }
         //返回结果
+        return true;
+    }
+
+    /**
+     * 质押订单收益释放
+     * @param string $order_id
+     * @return void
+     * @author Bin
+     * @time 2023/7/14
+     */
+    public function orderRevenueReleaseProfit(string $order_id)
+    {
+        //缓存key
+        if (!Redis::getLock("order:revenue:release:order:" . $order_id, 20)) return;
+        //初始化本次总收益
+        $total_profit = 0;
+        Db::starttrans();
+        try {
+            //获取订单
+            $order = UserOrder::getOrder($order_id);
+            //判断订单状态以及时间周期
+            if (empty($order) || $order['status'] != 1 || time() < $order['next_release_time']) throw new Exception('订单无效或者订单时间未达标');
+            //计算收益 本金*收益率
+            $profit = sprintf('%.2f', $order['amount'] * $order['profit_rate'] / 100);
+            //修改钱包
+            $result = $this->changeUsdk($order['uid'], $profit, 10, "[$order_id]订单收益释放", $order_id);
+            if (empty($result)) throw new Exception('余额更新失败');
+            //更新订单数据
+            $update_data = ['next_release_time' => $order['next_release_time'] + 24 * 3600, 'input_day_num' => $order['input_day_num'] + 1];
+            //自增数据
+            $inc_data = ['input_day_num' => 1];
+            if ($profit > 0) $inc_data['reward_amount'] = $profit;
+            $total_profit += $profit;
+            //获取额外收益配置
+            $extra_profit_config = config('site.extra_profit_config');
+            //计算是否有额外收益
+            if ($extra_profit_config['profit'] > 0 && ($order['extra_day_num'] + 1) == $extra_profit_config['day_num'])
+            {
+                //清除天数
+                $update_data['extra_day_num'] = 0;
+                //计算额外收益 本金 * 收益率
+                $extra_profit = sprintf('%.2f',$order['amount'] * $extra_profit_config['profit'] / 100);
+                //修改钱包
+                $result = $this->changeUsdk($order['uid'], $profit, 11, "[$order_id]激励收益", $order_id);
+                if (empty($result)) throw new Exception('订单额外收益余额更新失败1');
+                //更新额外收益
+                if ($extra_profit > 0) $inc_data['extra_reward_amount'] = $extra_profit;
+                $total_profit += $extra_profit;
+            } else {
+                //累计额外收益天数
+                $update_data['extra_day_num'] = $order['extra_day_num'] + 1;
+            }
+            //更新订单
+            ReleaseOrderModel::new()->updateRow(['id' => $order_id], $update_data, $inc_data);
+            //上报用户累计收益
+            if ($total_profit > 0) User::updateUserCommon($order['uid'], [], ['total_user_usdk_profit' => $total_profit]);
+            Db::commit();
+        }catch (\Exception $e){
+            Db::rollback();
+            //记录错误日志
+            ReportData::recordErrorLog('orderRevenueRelease', "[$order_id]" . $e->getMessage());
+            return;
+        } finally {
+            //删除相关缓存
+            if (isset($order['uid'])) {
+                User::delUserCache($order['uid']);
+                User::delUserCommonInfoCache($order['uid']);
+            }
+        }
+        //释放锁
+        Redis::delLock("order:revenue:release:order:" . $order_id);
+        if ($total_profit > 0) {
+            //团队奖励上报
+            publisher('asyncTeamReward', ['user_id' => $order['uid'], 'order_id' => $order['id'], 'reward_amount' => $profit ?? 0, 'extra_reward_amount' => $extra_profit ?? 0]);
+            //收益排行榜上报
+            ReportData::reportProfitRanking($order['uid'], $total_profit);
+        }
+    }
+
+    /**
+     * 检测用户收益排行榜是否存在
+     * @param int $user_id
+     * @param int $type
+     * @param string $date_node
+     * @return bool
+     * @author Bin
+     * @time 2023/7/15
+     */
+    public function hasUserProfitRanking(int $user_id, int $type, string $date_node = '')
+    {
+        //获取时间节点
+        if (empty($date_node)) $date_node = $type == 1 ? date('Y_W') : date('Y_m');
+        //缓存key
+        $key = 'user:profit:ranking:' . $type . ':date:node:' . $date_node;
+        if (!Redis::hasSetMember($key, $user_id))
+        {
+            $result = UserProfitRankingModel::new()->getCount(['date_node' => $date_node, 'type' => $type, 'uid' => $user_id]);
+            if (empty($result))
+            {
+                //创建数据
+                try {
+                    UserProfitRankingModel::new()->createRow([
+                        'uid' => $user_id,
+                        'type' => $type,
+                        'date_node' => $date_node,
+                    ]);
+                }catch (\Exception $e){}
+            }
+            //写入缓存
+            Redis::addSet($key, $user_id, 24 * 3600);
+        }
         return true;
     }
 }

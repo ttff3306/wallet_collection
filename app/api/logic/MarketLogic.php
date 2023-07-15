@@ -127,7 +127,7 @@ class MarketLogic extends BaseLogic
         $order = UserOrder::getOrder($order_id, $this->user['id'], 'id,order_no,amount,reward_amount,status,next_release_time,input_day_num');
         if (empty($order)) $this->error('订单不存在');
         //获取订单记录
-        $result = Account::listUsdkLog($this->user['id'], 10, $page, $limit, 'id,type,money,create_time', 'id desc', $order_id);
+        $result = Account::listUsdkLog($this->user['id'], 10, $page, $limit, 'id,type,money,title,create_time', 'id desc', $order_id);
         //返回结果
         return array_merge(['order' => $order], $result);
     }
@@ -153,7 +153,7 @@ class MarketLogic extends BaseLogic
             //获取最低兑换配置
             $min_exchange_limit = config('site.min_exchange_usdk', 10);
             //获取日志
-            $result = Account::listUsdkLog($this->user['id'], 2, $page, $limit, 'id,type,money,create_time');
+            $result = Account::listUsdkLog($this->user['id'], 2, $page, $limit, 'id,type,money,title,create_time');
         }
         //返回结果
         return array_merge(['min_exchange_limit' => $min_exchange_limit, 'balance' => ($type == 1 ? $this->user['usdt'] : $this->user['usdk'])], $result);

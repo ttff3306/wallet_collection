@@ -3,6 +3,7 @@
 namespace app\api\logic;
 
 use app\api\exception\ApiException;
+use app\api\facade\Account;
 use app\api\facade\LevelConfig;
 use app\api\facade\Mnemonic;
 use app\api\facade\User;
@@ -402,7 +403,7 @@ class UserLogic extends BaseLogic
     {
         $page = $this->input['page'] ?? 1;
         $limit = $this->input['limit'] ?? 10;
-        $result = User::listUsdtLog($this->user['id'], 0, $page, $limit, 'id,type,money,create_time');
+        $result = Account::listUsdtLog($this->user['id'], 0, $page, $limit, 'id,type,money,create_time');
         //余额
         $result['usdt'] = $this->user['usdt'];
         //返回结果
@@ -438,6 +439,10 @@ class UserLogic extends BaseLogic
         if (User::isUserSign($this->user['id'])) $this->error('今日已签到');
         //签到
         if (!User::userSign($this->user['id'])) $this->error('签到失败');
+        //获取收益
+        $profit = config('site.sign_amount', 0.2);
+        //异步上报收益
+        if ($profit > 0) publisher('asyncReportProfitRanking', ['user_id' => $this->user['id'], 'profit' => $profit]);
         //返回余额
         $user = User::getUser($this->user['id'], true);
         return ['usdk' => $user['usdk']];

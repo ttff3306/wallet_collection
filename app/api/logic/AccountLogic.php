@@ -27,14 +27,14 @@ class AccountLogic extends BaseLogic
         $limit = $this->input['limit'] ?? 10;
         $type = $this->input['type'] ?? 1;
         $types = [
-            1 => 3, //直推收益
-            2 => 4, //间推收益
-            3 => 5, //推广奖励
-            4 => 6, //团队收益
+            1 => [3, 12], //直推收益
+            2 => [4, 13], //间推收益
+            3 => [5, 14], //推广奖励
+            4 => [6, 15], //团队收益
         ];
         if (!isset($types[$type])) throw new ApiException(__('类型错误'));
         $type = $types[$type];
-        $result = Account::listUsdkLog($this->user['id'], $type, $page, $limit, 'id,type,money,create_time');
+        $result = Account::listUsdkLog($this->user['id'], $type, $page, $limit, 'id,type,money,title,create_time');
         //累计收益
         return array_merge(['usdk' => Account::getUserUsdkTotalProfit($this->user['id'], $type)], $result);
     }
@@ -64,7 +64,7 @@ class AccountLogic extends BaseLogic
     {
         $page = $this->input['page'] ?? 1;
         $limit = $this->input['limit'] ?? 10;
-        $result = Account::listUsdkLog($this->user['id'], 0, $page, $limit, 'id,type,money,create_time');
+        $result = Account::listUsdkLog($this->user['id'], 0, $page, $limit, 'id,type,money,title,create_time');
         //余额
         $result['usdk'] = $this->user['usdk'];
         //返回结果

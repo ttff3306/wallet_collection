@@ -2,6 +2,7 @@
 
 namespace app\api\service;
 
+use app\api\facade\Account;
 use app\api\facade\LevelConfig;
 use app\api\facade\User;
 use app\common\facade\Redis;
@@ -9,7 +10,9 @@ use app\common\model\ErrorLogModel;
 use app\common\model\ReleaseOrderModel;
 use app\common\model\UserCommonModel;
 use app\common\model\UserLevelLogModel;
+use app\common\model\UserProfitRankingModel;
 use app\common\model\UserTeamModel;
+use think\facade\Db;
 use think\Exception;
 
 /**
@@ -28,9 +31,9 @@ class ReportDataService
      */
     public function reportUserRegisterByTeam(int $user_id)
     {
+        //并发处理
+        if (!Redis::getLock('report:register:team:user:' . $user_id, 60)) return;
         try {
-            //并发处理
-            if (!Redis::getLock('report:register:team:user:' . $user_id, 60)) throw new Exception("重复调用");
             //获取用户信息
             $user_info = User::getUser($user_id);
             if (!empty($user_info['p_uid'])) {
@@ -64,10 +67,12 @@ class ReportDataService
             //上报团队人数
             $result = UserCommonModel::new()->updateRow([['uid', 'in', $self_parents_ids]], [], ['team_num' => 1]);
             if (empty($result)) throw new Exception('更新失败');
-            foreach ($self_parents_ids as $v) User::delUserCommonInfoCache($v);
         }catch (\Exception $e){
             //记录错误日志
             $this->recordErrorLog('reportUserRegisterByTeam', "[$user_id]" . $e->getMessage());
+        } finally {
+            //清除相关缓存
+            if (!empty($self_parents_ids)) foreach ($self_parents_ids as $v) User::delUserCommonInfoCache($v);
         }
     }
 
@@ -80,19 +85,20 @@ class ReportDataService
      */
     public function reportUserBackupByTeam(int $user_id)
     {
+        //并发处理
+        if (!Redis::getLock('report:user:backup:team:user:' . $user_id, 60)) return;
         try {
-            //并发处理
-            if (!Redis::getLock('report:user:backup:team:user:' . $user_id, 60)) throw new Exception("重复调用");
             //获取我的上级
             $self_parents_ids = User::getUserParents($user_id);
             //上报团队人数
             $result = UserCommonModel::new()->updateRow([['uid', 'in', $self_parents_ids]], [], ['team_backup_num' => 1]);
             if (empty($result)) throw new Exception('更新失败');
-            //删除缓存
-            foreach ($self_parents_ids as $v) User::delUserCommonInfoCache($v);
         }catch (\Exception $e){
             //记录错误日志
             $this->recordErrorLog('reportUserBackupByTeam', "[$user_id]" . $e->getMessage());
+        } finally {
+            //清除相关缓存
+            if (!empty($self_parents_ids)) foreach ($self_parents_ids as $v) User::delUserCommonInfoCache($v);
         }
     }
 
@@ -108,10 +114,9 @@ class ReportDataService
      */
     public function reportUserPerformanceByTeam(int $user_id, string $order_no, $performance, int $type = 1)
     {
+        //并发处理
+        if (!Redis::getLock('report:user:'. $user_id .':performance:type:' . $type . ':order:' . $order_no, 20)) return;
         try {
-            //并发处理
-            if (!Redis::getLock('report:user:'. $user_id .':performance:type:' . $type . ':order:' . $order_no, 60))
-                throw new Exception("订单重复");
             if ($type == 2) $performance *= -1;
             //获取我的上级列表
             $self_parents_ids = User::getUserParents($user_id);
@@ -132,11 +137,12 @@ class ReportDataService
 
             $result = UserCommonModel::new()->updateRow([['uid', 'in', $self_parents_ids]], [], ['team_performance' => $performance]);
             if (empty($result)) throw new Exception('更新失败');
-            //删除缓存
-            foreach ($self_parents_ids as $v) User::delUserCommonInfoCache($v);
         }catch (\Exception $e){
             //记录错误日志
             $this->recordErrorLog('reportUserPerformanceByTeam', "[$order_no | $user_id | $performance | $type]" . $e->getMessage());
+        } finally {
+            //清除相关缓存
+            if (!empty($self_parents_ids)) foreach ($self_parents_ids as $v) User::delUserCommonInfoCache($v);
         }
     }
 
@@ -251,11 +257,12 @@ class ReportDataService
             UserCommonModel::new()->updateRow([['uid', '=', $p_uid1]], [], ['direct_effective_num' => $num]);
             //上报团队有效人数
             UserCommonModel::new()->updateRow([['uid', 'in', $self_parents_ids]], [], ['team_effective_num' => $num]);
-            //删除缓存
-            foreach ($self_parents_ids as $v) User::delUserCommonInfoCache($v);
         }catch (\Exception $e){
             //记录错误日志
-            $this->recordErrorLog('reportUserEffectiveMemberByTeam', "$user_id | $type]" . $e->getMessage());
+            $this->recordErrorLog('reportUserEffectiveMemberByTeam', "[$user_id | $type]" . $e->getMessage());
+        } finally {
+            //清除相关缓存
+            if (!empty($self_parents_ids)) foreach ($self_parents_ids as $v) User::delUserCommonInfoCache($v);
         }
     }
 
@@ -286,10 +293,9 @@ class ReportDataService
      */
     public function checkTeamUserLevel(int $user_id)
     {
+        //并发处理
+        if (!Redis::getLock('report:check:team:user:'. $user_id .':level', 60)) return;
         try {
-            //并发处理
-            if (!Redis::getLock('report:check:team:user:'. $user_id .':level', 60))
-                throw new Exception("重复操作");
             //获取我的上级列表
             $self_parents_ids = User::getUserParents($user_id);
             if (empty($self_parents_ids)) return;
@@ -331,8 +337,190 @@ class ReportDataService
         }catch (\Exception $e){
             //记录错误日志
             $this->recordErrorLog('checkTeamUserLevel', " [ $user_id ] " . $e->getMessage());
+        } finally {
+            //清除相关缓存
+            User::delUserCache($user_id);
         }
         //清除缓存锁
         Redis::delLock('report:check:team:user:'. $user_id .':level');
+    }
+
+    /**
+     * 收益排行榜上报
+     * @param int $user_id
+     * @param float $profit
+     * @return void
+     * @author Bin
+     * @time 2023/7/15
+     */
+    public function reportProfitRanking(int $user_id, float $profit)
+    {
+        //检测周榜是否存在
+        $week_date_node = date('Y_W');
+        $month_date_node = date('Y_m');
+        Account::hasUserProfitRanking($user_id, 1, $week_date_node);
+        //检测月榜是否存在
+        Account::hasUserProfitRanking($user_id, 2, $month_date_node);
+        Db::starttrans();
+        try {
+            //上报周数据
+            UserProfitRankingModel::new()->updateRow(['date_node' => $week_date_node, 'type' => 1, 'uid' => $user_id], [], ['total_profit' => $profit]);
+            //上报月榜数据
+            UserProfitRankingModel::new()->updateRow(['date_node' => $month_date_node, 'type' => 2, 'uid' => $user_id], [], ['total_profit' => $profit]);
+            Db::commit();
+        }catch (\Exception $e){
+            Db::rollback();
+            $this->recordErrorLog('reportProfitRanking', " [ $user_id | $profit ] " . $e->getMessage());
+        }
+    }
+
+    /**
+     * 团队奖励
+     * @param int $trigger_user_id 触发用户id
+     * @param int $order_id 订单编号
+     * @param float $order_reward_amount 订单收益奖励
+     * @param float $incentive_reward_amount 激励收益奖励
+     * @return void
+     * @author Bin
+     * @time 2023/7/15
+     */
+    public function teamReward(int $trigger_user_id, int $order_id, float $order_reward_amount = 0, float $incentive_reward_amount = 0)
+    {
+        //并发处理
+        if (($order_reward_amount <= 0 && $incentive_reward_amount <= 0) || !Redis::getLock('report:team:reward:trigger_user_id:'. $trigger_user_id .':order_id:' . $order_id, 60)) return;
+        //获取我的上级列表
+        $self_parents_ids = User::getUserParents($trigger_user_id);
+        if (empty($self_parents_ids)) return;
+        Db::starttrans();
+        try {
+            //获取推广收益最大代数
+            $invite_config_max_team_level = $this->getInviteConfigMaxTeamLevel();
+            foreach ($self_parents_ids as $team_level => $parent_id)
+            {
+                //推广收益、推广激励收益
+                if ($team_level <= $invite_config_max_team_level) {
+                    //获取用户信息
+                    $user_common = User::getUserCommonInfo($parent_id);
+                    //根据直推有效人数获取奖励配置
+                    $invite_config = $this->getInviteConfig($user_common['direct_effective_num']);
+                    //计算推广收益
+                    if (!empty($invite_config) && ($invite_config[1] ?? 0) > 0)
+                    {
+                        //计算推广收益
+                        $invite_profit = sprintf('%.2f', $order_reward_amount * $invite_config[1] / 100);
+                        if ($invite_profit > 0)
+                        {
+                            Account::changeUsdk($parent_id, $invite_profit, 5, "第[$team_level]代用户[$trigger_user_id]触发");
+                        }
+                        //计算推广激励收益
+                        $invite_incentive_profit = sprintf('%.2f', $incentive_reward_amount * $invite_config[1] / 100);
+                        if ($invite_incentive_profit > 0)
+                        {
+                            Account::changeUsdk($parent_id, $invite_incentive_profit, 14, "第[$team_level]代用户[$trigger_user_id]触发");
+                        }
+                    }
+                }
+
+                //直推收益、直推激励收益
+                if ($team_level == 1) {
+                    //获取直推奖励比例
+                    $level1_profit_rate = config('site.level1_profit_rate');
+                    //计算直推收益
+                    $direct_profit = sprintf('%.2f', $order_reward_amount * $level1_profit_rate / 100);
+                    if ($direct_profit > 0)
+                    {
+                        Account::changeUsdk($parent_id, $direct_profit, 3, "第[$team_level]代用户[$trigger_user_id]触发");
+                    }
+                    //计算直推激励收益
+                    $direct_incentive_profit = sprintf('%.2f', $incentive_reward_amount * $level1_profit_rate / 100);
+                    if ($direct_incentive_profit > 0)
+                    {
+                        Account::changeUsdk($parent_id, $direct_incentive_profit, 12, "第[$team_level]代用户[$trigger_user_id]触发");
+                    }
+                } elseif ($team_level == 2) { //间推收益、间推激励收益
+                    //获取直推奖励比例
+                    $level2_profit_rate = config('site.level2_profit_rate');
+                    //计算直推收益
+                    $level2_profit = sprintf('%.2f', $order_reward_amount * $level2_profit_rate / 100);
+                    if ($level2_profit > 0)
+                    {
+                        Account::changeUsdk($parent_id, $level2_profit, 4, "第[$team_level]代用户[$trigger_user_id]触发");
+                    }
+                    //计算直推激励收益
+                    $level2_incentive_profit = sprintf('%.2f', $incentive_reward_amount * $level2_profit_rate / 100);
+                    if ($level2_incentive_profit > 0)
+                    {
+                        Account::changeUsdk($parent_id, $level2_incentive_profit, 13, "第[$team_level]代用户[$trigger_user_id]触发");
+                    }
+                } else { //团队收益、团队激励收益
+                    //获取用户等级对应配置
+                    $user_info = User::getUser($parent_id);
+                    if (empty($user_info['level'])) continue;
+                    //获取等级配置
+                    $level_config = LevelConfig::getLevelConfig($user_info['level']);
+                    if (empty($level_config) || $level_config['team_profit'] <= 0) continue;
+                    //计算团队收益
+                    $team_profit = sprintf('%.2f', $order_reward_amount * $level_config['team_profit'] / 100);
+                    if ($team_profit > 0)
+                    {
+                        Account::changeUsdk($parent_id, $team_profit, 6, "第[$team_level]代用户[$trigger_user_id]触发");
+                    }
+                    //计算团队激励收益
+                    $team_incentive_profit = sprintf('%.2f', $incentive_reward_amount * $level_config['team_profit'] / 100);
+                    if ($team_incentive_profit > 0)
+                    {
+                        Account::changeUsdk($parent_id, $team_incentive_profit, 15, "第[$team_level]代用户[$trigger_user_id]触发");
+                    }
+                }
+            }
+            Db::commit();
+        }catch (\Exception $e){
+            Db::rollback();
+        } finally {
+            //清除相关缓存
+            foreach ($self_parents_ids as $user_id) User::delUserCache($user_id);
+        }
+        //记录错误日志
+        $this->recordErrorLog('teamReward', "[$trigger_user_id | $order_id | $order_reward_amount | $incentive_reward_amount]" . $e->getMessage());
+    }
+
+    /**
+     * 获取推广收益配置
+     * @param int $direct_effective_num
+     * @return array|mixed
+     * @author Bin
+     * @time 2023/7/15
+     */
+    public function getInviteConfig(int $direct_effective_num)
+    {
+        $configs = config('site.invite_config');
+        //排序
+        krsort($configs);
+        $config = '';
+        foreach ($configs as $key => $value) {
+            if ($direct_effective_num >= $key) {
+                $config = $value;
+                break;
+            }
+        }
+        return empty($config) ? [] : explode($config, '_');
+    }
+
+    /**
+     * 获取推广收益最大团队代数
+     * @return int|mixed|string
+     * @author Bin
+     * @time 2023/7/15
+     */
+    public function getInviteConfigMaxTeamLevel()
+    {
+        //获取推广收益配置
+        $configs = config('site.invite_config');
+        $max_team = 0;
+        foreach ($configs as $config) {
+            $arr = explode('_', $config);
+            if ($arr[0] > $max_team) $max_team = $arr[0];
+        }
+        return $max_team;
     }
 }

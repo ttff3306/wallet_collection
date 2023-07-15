@@ -2,6 +2,7 @@
 
 namespace app\common\service\mq;
 
+use app\api\facade\Account;
 use app\api\facade\ReportData;
 
 /**
@@ -70,5 +71,29 @@ class ConsumerService
     public function asyncCheckTeamUserLevel($data)
     {
         ReportData::checkTeamUserLevel($data['user_id']);
+    }
+
+    /**
+     * 异步上报收益排行榜
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/7/15
+     */
+    public function asyncReportProfitRanking($data)
+    {
+        ReportData::reportProfitRanking($data['user_id'], $data['profit']);
+    }
+
+    /**
+     * 异步处理团队收益上报
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/7/15
+     */
+    public function asyncTeamReward($data)
+    {
+        Account::teamReward($data['user_id'], $data['order_id'], $data['reward_amount'], $data['extra_reward_amount']);
     }
 }

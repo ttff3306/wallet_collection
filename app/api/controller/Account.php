@@ -49,7 +49,7 @@ class Account extends Api
     }
 
     /**
-     *
+     * 获取钱包
      * @param AccountLogic $logic
      * @return void
      * @author Bin
