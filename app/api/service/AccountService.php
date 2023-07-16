@@ -29,7 +29,7 @@ class AccountService
     /**
      * USDK日志明细
      * @param int $user_id
-     * @param int $type
+     * @param mixed $type
      * @param int $page
      * @param int $limit
      * @param string $field
@@ -40,7 +40,7 @@ class AccountService
      * @author Bin
      * @time 2023/7/6
      */
-    public function listUsdkLog(int $user_id, int $type = 0, int $page = 1, int $limit = 10, string $field = '*', string $order = 'id desc', int $order_id = null)
+    public function listUsdkLog(int $user_id, $type = 0, int $page = 1, int $limit = 10, string $field = '*', string $order = 'id desc', int $order_id = null)
     {
         //获取查询
         $filter = ['user_id' => $user_id];
