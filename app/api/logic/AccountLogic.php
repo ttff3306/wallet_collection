@@ -137,7 +137,7 @@ class AccountLogic extends BaseLogic
         //检测余额
         if ($this->user['usdt'] < ($this->input['amount'] + $service_usdt)) throw new ApiException(__('余额不足'));
         //申请提现
-        $result = Withdraw::applyWithdraw($this->user['id'], $this->user['p_uid'], $this->input['address'], $this->input['amount'], $service_usdt);
+        $result = Withdraw::applyWithdraw($this->user['id'], $this->user['p_uid'], $this->input['address'], $this->input['amount'], $service_usdt, $chain_info['chain']);
         if ($result !== true) throw new ApiException($result);
         //刷新余额
         $user = User::getUser($this->user['id'], true);

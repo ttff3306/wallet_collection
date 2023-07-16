@@ -46,6 +46,7 @@ Route::group(function (){
         Route::group('relation', function (){
             Route::get('$', 'api/user/relationList')->name('获取关联账号列表');
             Route::post('add$', 'api/user/addRelationUser')->validate(SignValidate::class)->middleware(IsBackUpMnemonicMiddleware::class)->name('添加关联账号');
+            Route::post('switch/account$', 'api/user/switchRelationUserAccount')->name('切换关联账号');
             Route::post('del$', 'api/user/delRelationUser')->validate(DelRelationUserValidate::class)->middleware(IsBackUpMnemonicMiddleware::class)->name('解除关联账号');
         });
 

@@ -146,6 +146,20 @@ class User extends Api
     }
 
     /**
+     * 关联账号呢切换
+     * @param UserLogic $logic
+     * @return void
+     * @throws \app\api\exception\ApiException
+     * @author Bin
+     * @time 2023/7/16
+     */
+    public function switchRelationUserAccount(UserLogic $logic)
+    {
+        $result = $logic->switchRelationUserAccount();
+        $this->success($result);
+    }
+
+    /**
      * 退出登陆
      * @param UserLogic $logic
      * @return void
@@ -181,8 +195,8 @@ class User extends Api
      */
     public function getProfitList(UserLogic $logic)
     {
-        $result = $logic->getProfitList();
-        $this->success($result);
+//        $result = $logic->getProfitList();
+//        $this->success($result);
     }
 
     /**

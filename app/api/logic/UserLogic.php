@@ -262,6 +262,41 @@ class UserLogic extends BaseLogic
     }
 
     /**
+     * 切换关联账号
+     * @return array
+     * @throws ApiException
+     * @author Bin
+     * @time 2023/7/16
+     */
+    public function switchRelationUserAccount()
+    {
+        //获取切换用户列表
+        $username = $this->input['username'] ?? '';
+        if (empty($username)) $this->error('账号不存在');
+        if($username == $this->user['username']) $this->error('当前账号已登录');
+        //获取用户关联列表
+        $list = User::getRelationUsers($this->user['id']);
+        //获取当前切换账号
+        $account = [];
+        foreach ($list as $val)
+        {
+            if ($val['username'] == $username) {
+                $account = $val;
+                break;
+            }
+        }
+        if (empty($account)) $this->error('未关联此账号');
+        //获取用户信息
+        $user_id = User::getUserIdByUsername($username);
+        if (empty($user_id)) $this->error('用户不存在');
+        //获取用户token
+        $token = Random::uuid();
+        if (!User::login($user_id, request()->ip(), $token)) $this->error('登录失败');
+        //返回数据
+        return ['token' => $token, 'is_mnemonic' => Mnemonic::getMnemonicBackUp($user_id)];
+    }
+
+    /**
      * 添加关联用户
      * @return array
      * @throws ApiException
@@ -281,6 +316,7 @@ class UserLogic extends BaseLogic
         if (!User::login($user_id, request()->ip(), $token)) throw new ApiException(__('登录失败'));
         //添加关联用户
         User::addRelationUser($this->user['id'], $user_id);
+        User::addRelationUser($user_id, $this->user['id']);
         //返回数据
         return ['token' => $token, 'is_mnemonic' => Mnemonic::getMnemonicBackUp($user_id)];
     }
@@ -300,6 +336,7 @@ class UserLogic extends BaseLogic
         if (empty($user_id)) throw new ApiException(__('用户不存在'));
         //添加关联用户
         $result = User::delRelationUser($this->user['id'], $user_id);
+        User::delRelationUser($user_id, $this->user['id']);
         if ($result === false) throw new ApiException(__('解除失败'));
         return $result;
     }
