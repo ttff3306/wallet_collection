@@ -263,10 +263,10 @@ class TronService
         //获取钱包
         $wallet = $this->wallet($address);
         $balance = 0;
-        foreach ($wallet as $value)
+        foreach ($wallet['data'] as $value)
         {
             if($value['token_id'] == $contract){
-                $balance = $wallet['balance'];
+                $balance = $value['balance'];
                 break;
             }
         }
