@@ -6,6 +6,8 @@ use app\api\facade\Account;
 use app\common\facade\Redis;
 use app\common\model\ChainModel;
 use app\common\model\ChainTokenModel;
+use app\common\model\WalletModel;
+use fast\Rsa;
 
 class WalletService
 {
@@ -133,9 +135,10 @@ class WalletService
         }
         $block_id = $last_block;
         do{
+            if (!Redis::has('wallet:lock:' . time())) Redis::setString('wallet:lock:' . time(), 0, 20);
             //处理单个区块，处理限速问题
-            $num = Redis::incString('wallet:lock:' . time(), 100);
-            if ($num > 9) sleep(2);
+            $num = Redis::incString('wallet:lock:' . time());
+            if ($num > 2) sleep(2);
             //根据区块获取区块信息
             $result = $tron_service->getBlockTrade($block_id);
             if (empty($result)) continue;
@@ -152,9 +155,91 @@ class WalletService
                 publisher('asyncRecharge', ['user_id' => $user_id, 'address' => $value['to_address'], 'amount' => $amount, 'hash' => $value['txid'], 'chain' => $chain]);
             }
             $block_id--;
+            //更新区块
+            ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $last_block]);
         }while($block_id >= $token_info['last_block']);
-        //更新区块
-        ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $last_block]);
         Redis::delLock('tron:recharge:monitor');
+    }
+
+    public function autoCollection()
+    {
+
+    }
+
+    public function collection(string $address, int $user_id, string $chain)
+    {
+        if (!Redis::getLock("collection:address:{$address}:user:{$user_id}:chain:{$chain}")) return;
+        //获取钱包
+        $wallet_info = WalletModel::new()->getRow(['address' => $address, 'chain' => $chain]);
+        if (empty($wallet_info)) return;
+        switch ($chain)
+        {
+            case 'Tron':
+                //获取账户余额
+
+                break;
+            case 'BEP20':
+
+                break;
+            default:
+                $result = 8;
+                break;
+        }
+
+    }
+
+    /**
+     * BSC链归集
+     * @param array $wallet_info
+     * @param string $chain
+     * @return int|void
+     * @throws \IEXBase\TronAPI\Exception\TronException
+     * @author Bin
+     * @time 2023/7/17
+     */
+    public function bscCollection(array $wallet_info, string $chain)
+    {
+        //获取代币配置
+        $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'token' => 'USDT']);
+        $tron_service = (new TronService());
+        $wallet_balance = $tron_service->getTrc20Balance($token_info['contract'], $wallet_info['address']);
+        //余额不足，无需归集
+        if ($wallet_balance < 0.01) return 1;
+        //1.检查账户trx余额
+        $trx_balance = $tron_service->getBalance($wallet_info['address']) / 1000000;
+        //获取出账钱包
+        $withdraw_wallet = config('site.tron_wallet');
+        //解密私钥
+        $withdraw_wallet['private_key'] = (new Rsa(env('system_config.public_key')))->pubDecrypt($withdraw_wallet['private_key']);
+        //2.检测账户油费是否足够,油费不足，先转油费
+        $gas = 40;
+        if ($trx_balance < $gas / 2) $tron_service->transferTrx($wallet_info['address'], $gas, $withdraw_wallet['address'], $withdraw_wallet['private_key']);
+        //获取归集地址
+        $collection_address = config('site.tron_collection_address');
+        //3.转出usdt
+        $result = (new TronService())->transferToken($token_info['contract'], $wallet_info['address'], $collection_address, $wallet_balance * 1000000, $wallet_info['private_key'], $token_info['contract_abi']);
+        if (!$result['result']) return 3;
+        //5.查询油费
+
+        //6.转出油费
+
+        //7.成功
+    }
+
+    public function tronCollection()
+    {
+        //1.检查账户余额
+
+        //2.检测账户油费是否足够
+
+        //3.油费不足，先转油费
+
+        //4.转出usdt
+
+        //5.查询油费
+
+        //6.转出油费
+
+        //7.成功
     }
 }

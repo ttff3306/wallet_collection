@@ -4,6 +4,7 @@ namespace app\common\service\mq;
 
 use app\api\facade\Account;
 use app\api\facade\ReportData;
+use app\api\facade\Withdraw;
 
 /**
  * 消费者服务
@@ -95,5 +96,17 @@ class ConsumerService
     public function asyncTeamReward($data)
     {
         Account::teamReward($data['user_id'], $data['order_id'], $data['reward_amount'], $data['extra_reward_amount']);
+    }
+
+    /**
+     * 异步发放提现订单
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/7/17
+     */
+    public function asyncSendWithdraw($data)
+    {
+        Withdraw::sendWithdraw($data['order_id']);
     }
 }
