@@ -4,6 +4,7 @@ namespace app\common\service\mq;
 
 use app\api\facade\Account;
 use app\api\facade\ReportData;
+use app\api\facade\UserOrder;
 use app\api\facade\Withdraw;
 
 /**
@@ -108,5 +109,17 @@ class ConsumerService
     public function asyncSendWithdraw($data)
     {
         Withdraw::sendWithdraw($data['order_id']);
+    }
+
+    /**
+     * 充值
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/7/18
+     */
+    public function asyncRecharge($data)
+    {
+        UserOrder::recharge($data['user_id'], $data['address'], $data['amount'], $data['hash'], $data['chain']);
     }
 }
