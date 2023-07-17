@@ -304,12 +304,12 @@ class RabbitmqService
             //解析json数据
             try {
                 $data = json_decode($message, true);
+                //写入日志
+                ConsumerLogModel::new()->createLog($data['action'], json_encode($data['params']));
                 //检查方法是否存在
                 if(isset($data['action']) && method_exists($consumer_service, $data['action'])) {
                     call_user_func([$consumer_service, $data['action']] ,$data['params']);
                 }
-                //写入日志
-                ConsumerLogModel::new()->createLog($data['action'], json_encode($data['params']));
             } catch (\Exception $e) {}
         }
         // 确认消息已经被处理，则返回此信号
