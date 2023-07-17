@@ -7,6 +7,7 @@ use app\api\facade\ReportData;
 use app\api\facade\User;
 use app\common\facade\Redis;
 use app\common\model\CollectionModel;
+use app\common\model\RechargeOrderModel;
 use app\common\model\ReleaseOrderModel;
 use app\common\model\UserReleaseLogModel;
 use think\Exception;
@@ -295,7 +296,7 @@ class UserOrderService
             $result = Account::changeUsdt($user_id, $amount, 2, $amount);
             if (!$result) throw new Exception('充值入账失败');
             //创建订单
-            ReleaseOrderModel::new()->createRow([
+            RechargeOrderModel::new()->createRow([
                 'uid' => $user_id,
                 'address' => $address,
                 'amount' => $amount,
