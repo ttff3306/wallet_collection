@@ -121,7 +121,7 @@ class WalletService
     public function tronRechargeMonitor()
     {
         //缓存锁
-        if (!Redis::getLock('tron:recharge:monitor', 300)) return;
+        if (!Redis::getLock('tron:recharge:monitor', 50)) return;
         $chain = 'Tron';
         //获取usdt最新的区块编号
         $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'token' => 'USDT']);
@@ -133,11 +133,12 @@ class WalletService
             Redis::delLock('tron:recharge:monitor');
             return;
         }
+        if ($last_block - $token_info['last_block'] > 100) $last_block = $token_info['last_block'] + 100;
         $block_id = $last_block;
         do{
-            if (!Redis::has('wallet:lock:' . time())) Redis::setString('wallet:lock:' . time(), 0, 20);
             //处理单个区块，处理限速问题
             $num = Redis::incString('wallet:lock:' . time());
+            Redis::expire('wallet:lock:' . time(), 20);
             if ($num > 2) sleep(2);
             //根据区块获取区块信息
             $result = $tron_service->getBlockTrade($block_id);
@@ -148,16 +149,16 @@ class WalletService
                 //检测收款地址是否属于平台地址
                 $user_id = Account::getUserIdByAddress($value['to_address']);
                 if (empty($user_id)) continue;
-                $amount = $value['amount'] / 1000000;
+                $amount = $value['amount'];
                 //检测金额小于0.01不做处理
                 if ($amount < 0.01) continue;
                 //交由队列异步执行
                 publisher('asyncRecharge', ['user_id' => $user_id, 'address' => $value['to_address'], 'amount' => $amount, 'hash' => $value['txid'], 'chain' => $chain]);
             }
             $block_id--;
-            //更新区块
-            ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $last_block]);
         }while($block_id >= $token_info['last_block']);
+        //更新区块
+        ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $last_block]);
         Redis::delLock('tron:recharge:monitor');
     }
 
