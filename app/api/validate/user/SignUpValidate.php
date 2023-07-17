@@ -12,7 +12,7 @@ use think\Validate;
 class SignUpValidate extends Validate
 {
     protected $rule = [
-        "username" => ["require", "chsAlphaNum", "length:2,10"],
+        "username" => ["require", "chsAlphaNum", "length:2,12"],
         "password" => ["require", "alphaNum", "length:6,16"],
         "nickname" => ["require", "chsDash", "length:1,8"],
         "pay_password" => ["require", "number", "length:6"],
@@ -22,7 +22,7 @@ class SignUpValidate extends Validate
     protected $message = [
         "username.require" => '请输入用户名',
         "username.chsAlphaNum" => '用户名由汉字、英文、数字组成',
-        "username.length" => '用户名长度为2~10位',
+        "username.length" => '用户名长度为2~12位',
         "password.require" => "请输入登录密码",
         "password.alphaNum" => "登录密码由数字、字母组成",
         "password.length" => "登录密码长度为6~16位",
