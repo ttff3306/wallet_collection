@@ -218,7 +218,7 @@ class TronService
         $transfer = $this->tron->sendRawTransaction($signTransaction);
         //获取结果
         if (isset($transfer['result']) && $transfer['result'] && !empty($transfer['txid'])) {
-            return ['status' => true, 'txID' => $transfer['txid']];
+            return ['status' => true, 'txid' => $transfer['txid']];
         } else {
             return ['status' => false, 'errmsg' => $transfer['code']];
         }
@@ -248,5 +248,28 @@ class TronService
         $result = json_decode(file_get_contents("https://apilist.tronscanapi.com/api/system/status"),true);
         //返回结果
         return $result['database']['block'] ?? 0;
+    }
+
+    /**
+     * 获取代币余额
+     * @param string $contract
+     * @param string $address
+     * @return int|mixed
+     * @author Bin
+     * @time 2023/7/17
+     */
+    public function getTrc20Balance(string $contract, string $address)
+    {
+        //获取钱包
+        $wallet = $this->wallet($address);
+        $balance = 0;
+        foreach ($wallet as $value)
+        {
+            if($value['token_id'] == $contract){
+                $balance = $wallet['balance'];
+                break;
+            }
+        }
+        return $balance;
     }
 }
