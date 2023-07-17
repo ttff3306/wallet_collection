@@ -68,7 +68,7 @@ class WalletService
         if (!Redis::getLock('bsc:recharge:monitor', 300)) return;
         $chain = 'BEP20';
         //获取usdt最新的区块编号
-        $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'name' => 'USDT']);
+        $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'token' => 'USDT']);
         $api_key = 'WF9HJN92Y26F3KDK72SESPP7P1JHS34ZIH';
         //获取代币交易记录
         $tx_list = (new BscService())->getTxList($token_info['address'], $token_info['last_block'], $api_key);
@@ -122,7 +122,7 @@ class WalletService
         if (!Redis::getLock('tron:recharge:monitor', 300)) return;
         $chain = 'Tron';
         //获取usdt最新的区块编号
-        $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'name' => 'USDT']);
+        $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'token' => 'USDT']);
 
         //获取tron最新区块
         $tron_service = (new TronService());
