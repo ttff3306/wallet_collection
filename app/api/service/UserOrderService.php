@@ -319,6 +319,6 @@ class UserOrderService
         //添加hash
         Redis::addSet($key, $hash, 10 * 24 * 3600);
         //充值数据上报
-        Redis::reportUserRechargeUsdt($user_id, $amount);
+        ReportData::reportUserRechargeUsdt($user_id, $amount);
     }
 }
