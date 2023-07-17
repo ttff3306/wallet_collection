@@ -192,7 +192,7 @@ class AccountService
         if ($is_update || !Redis::has($key))
         {
             //写入缓存
-            $list = WalletModel::new()->column('user_id', 'address');
+            $list = WalletModel::new()->column('uid', 'address');
             if (!empty($list)) Redis::setHashs($key, $list, 0);
         }
     }
