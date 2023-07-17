@@ -325,7 +325,7 @@ class BscService
         $url = "https://api.bscscan.com/api?module=account&action=txlist&address={$address}&startblock={$start_block}&endblock=99999999&page=1&offset=1000&sort=asc&apikey={$api_key}";
         $result = [];
         try {
-            $list = file_get_contents($url);
+            $list = json_decode(file_get_contents($url), true);
             if (isset($list['status']) && $list['status'] == 1) $result = $list['result'];
         }catch (Exception $e){}
         return $result;

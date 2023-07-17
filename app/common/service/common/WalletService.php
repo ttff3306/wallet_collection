@@ -71,8 +71,8 @@ class WalletService
         $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'token' => 'USDT']);
         $api_key = 'WF9HJN92Y26F3KDK72SESPP7P1JHS34ZIH';
         //获取代币交易记录
-        $tx_list = (new BscService())->getTxList($token_info['address'], $token_info['last_block'], $api_key);
-        if (empty($last_block)) {
+        $tx_list = (new BscService())->getTxList($token_info['contract'], $token_info['last_block'], $api_key);
+        if (empty($tx_list)) {
             Redis::delLock('bsc:recharge:monitor');
             return;
         }
@@ -106,7 +106,7 @@ class WalletService
             publisher('asyncRecharge', ['user_id' => $user_id, 'address' => $to_address, 'amount' => $amount, 'hash' => $value['hash'], 'chain' => $chain]);
         }
         //更新区块编号
-        if (!empty($last_block)) ChainTokenModel::new()->updateRow(['chain' => $chain, 'name' => 'USDT'], ['last_block' => $last_block]);
+        if (!empty($last_block)) ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $last_block]);
         Redis::delLock('bsc:recharge:monitor');
     }
 
@@ -154,7 +154,7 @@ class WalletService
             $block_id--;
         }while($block_id >= $token_info['last_block']);
         //更新区块
-        ChainTokenModel::new()->updateRow(['chain' => $chain, 'name' => 'USDT'], ['last_block' => $last_block]);
+        ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $last_block]);
         Redis::delLock('tron:recharge:monitor');
     }
 }
