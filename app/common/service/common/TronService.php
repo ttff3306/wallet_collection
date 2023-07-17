@@ -58,7 +58,10 @@ class TronService
 
     /**
      * 查询当前服务器区块高度
-     * @return  区块的高度
+     * @return array
+     * @throws \IEXBase\TronAPI\Exception\TronException
+     * @author Bin
+     * @time 2023/7/17
      */
     public function getBlockId()
     {
@@ -67,11 +70,10 @@ class TronService
 
     /**
      * 查询区块中的交易信息
-     *
      * @param int $block_id 区块ID
-     * @return float                    交易数据
+     * @return array 交易数据
      */
-    public function getBlockTrade($block_id = 0)
+    public function getBlockTrade(int $block_id = 0)
     {
         $result = $this->tron->getBlock($block_id);
         $data = [];
@@ -84,7 +86,7 @@ class TronService
                 $amount = 0;
                 if (strlen($contract_data) == 136) {
                     $to_address = '41' . substr($contract_data, 32, 40);
-                    $amount = hexdec(substr($contract_data, 72));
+                    $amount = hexdec(substr($contract_data, 72)) / 1000000;
                 }
             } else {
                 $contract_address = 'TRX';
@@ -110,7 +112,7 @@ class TronService
      * 通过tronscan查询钱包交易信息
      *
      * @param string $address BASE58钱包地址
-     * @return                     交易数据
+     * @return array 交易数据
      */
     public function trc20TransfersByTronScan(string $address)
     {
@@ -232,5 +234,19 @@ class TronService
     public function isAddress(string $address)
     {
         return $this->tron->isAddress($address);
+    }
+
+    /**
+     * 获取最新的区块高度
+     * @return int|mixed
+     * @author Bin
+     * @time 2023/7/17
+     */
+    public function getLastBlockId()
+    {
+        //获取数据
+        $result = json_decode(file_get_contents("https://apilist.tronscanapi.com/api/system/status"),true);
+        //返回结果
+        return $result['database']['block'] ?? 0;
     }
 }

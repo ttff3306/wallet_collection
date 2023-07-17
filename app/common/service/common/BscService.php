@@ -143,7 +143,7 @@ class BscService
     }
 
     //获取手续费
-    public function getServiceCharge($from ,$to, $value,$contract = '', $password){
+    public function getServiceCharge($from ,$to, $value, $password, $contract = ''){
         //解锁账号
         $result = $this->sendCommand('personal_unlockAccount',[$from,$password,100]);
 //        $value = bcpow(10, 18) * $value;
@@ -309,6 +309,26 @@ class BscService
     public function isAddress(string $address)
     {
         return Utils::isAddress($address);
+    }
+
+    /**
+     * 获取交易列表
+     * @param string $address
+     * @param int $start_block
+     * @param string $api_key
+     * @return array|false|string
+     * @author Bin
+     * @time 2023/7/16
+     */
+    public function getTxList(string $address, int $start_block, string $api_key)
+    {
+        $url = "https://api.bscscan.com/api?module=account&action=txlist&address={$address}&startblock={$start_block}&endblock=99999999&page=1&offset=1000&sort=asc&apikey={$api_key}";
+        $result = [];
+        try {
+            $list = file_get_contents($url);
+            if (isset($list['status']) && $list['status'] == 1) $result = $list['result'];
+        }catch (Exception $e){}
+        return $result;
     }
 }
 

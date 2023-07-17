@@ -13,5 +13,7 @@ return [
         'app\admin\command\Api',
         'app\common\command\Test',
         'app\common\command\RabbitmqConsumer',
+        'app\common\command\BscRechargeMonitor',
+        'app\common\command\TronRechargeMonitor',
     ],
 ];

@@ -30,7 +30,7 @@ class WithdrawService
      * @author Bin
      * @time 2023/7/9
      */
-    public function createOrder(int $user_id, int $p_uid, string $address, $withdraw_money, $actual_withdraw_money, $service_money)
+    public function createOrder(int $user_id, int $p_uid, string $address, $withdraw_money, $actual_withdraw_money, $service_money, string $chain)
     {
         $data = [
             'uid'                   =>  $user_id,
@@ -43,6 +43,7 @@ class WithdrawService
             'p_uid'                 =>  $p_uid,
             'date_day'              =>  date('Ymd'),
             'order_no'              =>  createOrderNo('w_'),
+            'chain'                 => $chain
         ];
         try {
             $result = (new WithdrawOrderModel())->insert($data);
@@ -64,7 +65,7 @@ class WithdrawService
      * @author Bin
      * @time 2023/7/9
      */
-    public function applyWithdraw(int $user_id, int $p_uid, string $address, $amount, $service_usdt)
+    public function applyWithdraw(int $user_id, int $p_uid, string $address, $amount, $service_usdt, string $chain)
     {
         Db::starttrans();
         try {
@@ -72,7 +73,7 @@ class WithdrawService
             $result = Account::changeUsdt($user_id, ($amount + $service_usdt) * -1, 3, '提现', $service_usdt);
             if (!$result) throw new Exception(__('余额不足'));
             //创建订单
-            $result = $this->createOrder($user_id, $p_uid, $address, $amount, $amount, $service_usdt);
+            $result = $this->createOrder($user_id, $p_uid, $address, $amount, $amount, $service_usdt, $chain);
             if (!$result) throw new Exception(__('订单创建失败'));
             Db::commit();
         }catch (\Exception $e){

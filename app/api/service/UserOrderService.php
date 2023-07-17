@@ -6,6 +6,7 @@ use app\api\facade\Account;
 use app\api\facade\ReportData;
 use app\api\facade\User;
 use app\common\facade\Redis;
+use app\common\model\CollectionModel;
 use app\common\model\ReleaseOrderModel;
 use app\common\model\UserReleaseLogModel;
 use think\Exception;
@@ -262,5 +263,61 @@ class UserOrderService
             Redis::setString($key, $list, 24 * 3600);
         }
         return $list ?? Redis::getString($key);
+    }
+
+    /**
+     * 充值入账
+     * @param int $user_id
+     * @param string $address
+     * @param $amount
+     * @param string $hash
+     * @param string $chain
+     * @return void
+     * @author Bin
+     * @time 2023/7/17
+     */
+    public function recharge(int $user_id, string $address, $amount, string $hash, string $chain)
+    {
+        $key = "recharge:hash:list:chain:{$chain}";
+        if (Redis::hasSetMember($key, $hash)) return;
+        //缓存锁
+        if (!Redis::getLock("recharge:chain:{$chain}:hash:{$hash}")) return;
+        Db::starttrans();
+        try {
+            //创建归集数据
+            CollectionModel::new()->createRow([
+                'chain' => $chain,
+                'hash' => $hash,
+                'address' => $address,
+                'amount' => $amount,
+            ]);
+            //充值入账
+            $result = Account::changeUsdt($user_id, $amount, 2, $amount);
+            if (!$result) throw new Exception('充值入账失败');
+            //创建订单
+            ReleaseOrderModel::new()->createRow([
+                'uid' => $user_id,
+                'address' => $address,
+                'amount' => $amount,
+                'create_time' => time(),
+                'update_time' => time(),
+                'date_day' => date('Ymd'),
+                'hash' => $hash,
+                'order_no' => createOrderNo('a_'),
+                'chain' => $chain
+            ]);
+            Db::commit();
+        }catch (\Exception $e){
+            Db::rollback();
+            ReportData::recordErrorLog('recharge', "[$user_id | $amount | $address | $hash | $chain]" . $e->getMessage());
+            return;
+        } finally {
+            //删除用户缓存
+            User::delUserCache($user_id);
+        }
+        //添加hash
+        Redis::addSet($key, $hash, 10 * 24 * 3600);
+        //充值数据上报
+        Redis::reportUserRechargeUsdt($user_id, $amount);
     }
 }
