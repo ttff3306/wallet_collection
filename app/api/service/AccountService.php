@@ -211,7 +211,7 @@ class AccountService
         //缓存key
         $key = "address:relation:user:id";
         if (!is_null($set_value)) return Redis::setHash($key, $address, $set_value, 0);
-        if ($is_update) $this->listAddress($is_update);
+        if ($is_update || !Redis::has($key)) $this->listAddress($is_update);
         //检测缓存是否存在
         return Redis::getHash($key, $address);
     }
