@@ -67,7 +67,7 @@ class WalletService
     public function bscRechargeMonitor()
     {
         //缓存锁
-        if (!Redis::getLock('bsc:recharge:monitor', 300)) return;
+        if (!Redis::getLock('bsc:recharge:monitor', 50)) return;
         $chain = 'BEP20';
         //获取usdt最新的区块编号
         $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'token' => 'USDT']);
@@ -93,8 +93,8 @@ class WalletService
             if (empty($user_id)) continue;
             //从中input解析出转账金额
             $amount = '';
-            $amount_arr = str_split(str_replace('0xa9059cbb000000000000000000000000' . $to_address, '', $value['input']));
             //解析金额
+            $amount_arr = str_split(substr($value['input'], 74));
             foreach ($amount_arr as $v) {
                 if (!empty($amount) || $v != '0') {
                     $amount .= $v;

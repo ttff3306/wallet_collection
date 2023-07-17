@@ -397,8 +397,10 @@ class ReportDataService
             $invite_config_max_team_level = $this->getInviteConfigMaxTeamLevel();
             foreach ($self_parents_ids as $team_level => $parent_id)
             {
-                //推广收益、推广激励收益
-                if ($team_level <= $invite_config_max_team_level) {
+                //获取用户等级对应配置
+                $user_info = User::getUser($parent_id);
+                //推广收益、推广激励收益，成为达人后推广收益停止
+                if ($team_level <= $invite_config_max_team_level && empty($user_info['level'])) {
                     //获取用户信息
                     $user_common = User::getUserCommonInfo($parent_id);
                     //根据直推有效人数获取奖励配置
@@ -453,8 +455,6 @@ class ReportDataService
                         Account::changeUsdk($parent_id, $level2_incentive_profit, 13, "第[$team_level]代用户[$trigger_user_id]触发");
                     }
                 } else { //团队收益、团队激励收益
-                    //获取用户等级对应配置
-                    $user_info = User::getUser($parent_id);
                     if (empty($user_info['level'])) continue;
                     //获取等级配置
                     $level_config = LevelConfig::getLevelConfig($user_info['level']);
