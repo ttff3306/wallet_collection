@@ -15,5 +15,8 @@ return [
         'app\common\command\RabbitmqConsumer',
         'app\common\command\BscRechargeMonitor',
         'app\common\command\TronRechargeMonitor',
+        'app\common\command\AutoCollectionInGas',
+        'app\common\command\AutoCollectionOutGas',
+        'app\common\command\AutoCollectionOutToken',
     ],
 ];

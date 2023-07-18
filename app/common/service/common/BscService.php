@@ -101,7 +101,7 @@ class BscService
      */
     public function getGasPrice(){
         $result = $this->sendCommand('eth_gasPrice',[]);
-        return $result['result'];
+        return $result['result'] ?? 0;
     }
 
     /*
