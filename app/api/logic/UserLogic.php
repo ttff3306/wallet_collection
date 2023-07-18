@@ -397,7 +397,7 @@ class UserLogic extends BaseLogic
                 'team_performance' => $team_user_common['team_performance'],
                 'is_effective' => $team_user_common['is_effective_member'],
                 'team_effective_num' => $team_user_common['team_effective_num'],
-                'order_num' => UserOrder::getIngOrderNum($val),
+                'order_num' => UserOrder::getReleaseOrderIngNum($val),
             ];
         }
         //返回结果
