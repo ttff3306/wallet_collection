@@ -100,6 +100,6 @@ class User extends BaseModel
 
     public function common()
     {
-        return $this->belongsTo('UserCommon', 'uid', 'id')->joinType('LEFT');
+        return $this->belongsTo('UserCommon', 'id', 'uid')->joinType('LEFT');
     }
 }
