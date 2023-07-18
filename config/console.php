@@ -18,5 +18,6 @@ return [
         'app\common\command\AutoCollectionInGas',
         'app\common\command\AutoCollectionOutGas',
         'app\common\command\AutoCollectionOutToken',
+        'app\common\command\AutoWithdraw',
     ],
 ];
