@@ -40,18 +40,17 @@ class User extends Backend
             }
             [$where, $sort, $order, $offset, $limit] = $this->buildparams();
             $total = $this->model
-                ->withJoin('group')
                 ->where($where)
                 ->order($sort, $order)
                 ->count();
             $list  = $this->model
-                ->withJoin('group')
+                ->withJoin('common')
                 ->where($where)
                 ->order($sort, $order)
                 ->limit($offset, $limit)
                 ->select();
             foreach ($list as $k => $v) {
-                $v->hidden(['password', 'salt']);
+                $v->hidden(['password', 'salt', 'paypwd', 'mobile']);
             }
             $result = ['total' => $total, 'rows' => $list];
 

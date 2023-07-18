@@ -1,5 +1,4 @@
-define([], function () {
-    require.config({
+require.config({
     paths: {
         'bootstrap-markdown': '../addons/markdown/js/bootstrap-markdown.min',
         'hyperdown': '../addons/markdown/js/hyperdown.min',
@@ -146,6 +145,4 @@ require(['form', 'upload'], function (Form, Upload) {
         }
 
     };
-});
-
 });

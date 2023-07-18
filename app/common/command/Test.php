@@ -14,11 +14,13 @@ namespace app\common\command;
 
 use app\api\facade\Account;
 use app\api\facade\Notice;
+use app\api\facade\ReportData;
 use app\api\facade\User;
 use app\common\facade\Rabbitmq;
 use app\common\facade\Redis;
 use app\common\model\NoticeModel;
 use app\common\model\ProfitConfigModel;
+use app\common\model\UserUsdkLogModel;
 use app\common\service\common\BscService;
 use app\common\service\common\TronService;
 use app\common\service\mq\ConsumerService;
@@ -32,6 +34,7 @@ use think\console\Output;
 use think\console\Command;
 use think\console\input\Option;
 use think\facade\Config;
+use think\facade\Db;
 use think\facade\Lang;
 use Web3\Personal;
 use Web3\Utils;
@@ -52,6 +55,47 @@ class Test extends Command
 
     protected function execute(Input $input, Output $output)
     {
+        dd(\config('cache.'));
+        dd(12311111);
+        $this->test();
+        dd(12);
+        UserUsdkLogModel::new()->where(['user_id' => 1, 'type' => [1, 3]])->sum('money');
+        dd(UserUsdkLogModel::new()->getLastSql());
+        dd(explode('_', '3_1'));
+
+        $user_info = User::getUserCommonInfo(8);
+        var_dump($user_info);
+        Db::starttrans();
+        try {
+            User::updateUserCommon(8, [], ['total_user_usdk_profit' => 1]);
+            User::getUserCommonInfo(8);
+            throw new Exception('11');
+            User::updateUserCommon(8, [], ['total_user_usdk_profit' => 2]);
+
+            Db::commit();
+        }catch (\Exception $e){
+            Db::rollback();
+        }
+        $user_info = User::getUserCommonInfo(8);
+
+        dd($user_info);
+        $list = ProfitConfigModel::new()->listAllRow();
+        foreach ($list as $value){
+            foreach ($value['config'] as &$v){
+                $v = sprintf("%.1f", $v);
+            }
+            ProfitConfigModel::new()->where(['id' => $value['id']])->update(['config' => json_encode($value['config'])]);
+        }
+//        $data = [
+//            'user_id' => 3,
+//            'order_no' => '132146454654810' . microtime(),
+//            'performance' => 100,
+//            'type' => 1,
+//        ];
+//        ReportData::reportUserPerformanceByTeam($data['user_id'], $data['order_no'], $data['performance'], $data['type']);
+//        ReportData::checkTeamUserLevel($data['user_id'], $data['type']);
+
+
 //        dd(file_get_contents('127.0.0.1:10010'));
 //        dd( / pow(10, 18));
 //        $result = (new BscService())->getGasPrice();
@@ -94,4 +138,38 @@ class Test extends Command
         dd((new BscService())->personalUnlockAccount('0x8EBb38012199918c1d6639539d6C801619960c15'));
     }
 
+    public function test()
+    {
+
+// 调用函数获取USDT交易记录
+        $address = "Your BSC Address";  // 您需要将其替换为您在BSC上的地址
+        $usdt_transactions = $this->get_usdt_transactions($address);
+        if ($usdt_transactions !== null) {
+            echo "USDT Transactions:<br>";
+            foreach ($usdt_transactions as $tx) {
+                echo $tx['hash'] . "<br>";
+            }
+        }
+
+
+    }
+
+    public function get_usdt_transactions($address)
+    {
+        $api_key = "WF9HJN92Y26F3KDK72SESPP7P1JHS34ZIH";  // 您需要将其替换为您在BscScan网站上注册并获取到的API密钥
+        $contract_address = "0x55d398326f99059fF775485246999027B3197955";  // USDT代币的合约地址
+
+        $url = "https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=$contract_address&apikey=$api_key";
+
+        $response = file_get_contents($url);
+        $data = json_decode($response, true);
+
+        if ($data['status'] == '1') {
+            $transactions = $data['result'];
+            return $transactions;
+        } else {
+            echo "Error occurred while fetching USDT transactions.";
+            return null;
+        }
+    }
 }

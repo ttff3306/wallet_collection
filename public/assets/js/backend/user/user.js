@@ -8,7 +8,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'user.user/index',
                     add_url: 'user.user/add',
                     edit_url: 'user.user/edit',
-                    del_url: 'user.user/del',
                     multi_url: 'user.user/multi',
                     table: 'user',
                 }
@@ -25,11 +24,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id'), sortable: true},
-                        {field: 'group.name', title: __('Group')},
-                        {field: 'username', title: __('Username'), operate: 'LIKE'},
-                        {field: 'nickname', title: __('Nickname'), operate: 'LIKE'},
-                        {field: 'email', title: __('Email'), operate: 'LIKE'},
-                        {field: 'mobile', title: __('Mobile'), operate: 'LIKE'},
+                        {field: 'uuid', title: __('UUID'), sortable: true},
                         {
                             field: 'avatar',
                             title: __('Avatar'),
@@ -37,26 +32,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             formatter: Table.api.formatter.image,
                             operate: false
                         },
+                        {field: 'username', title: __('Username'), operate: 'LIKE'},
+                        {field: 'nickname', title: __('Nickname'), operate: 'LIKE'},
+                        {field: 'usdt', title: __('USDT余额'), operate: 'LIKE', sortable: true},
+                        {field: 'usdk', title: __('USDK余额'), operate: 'LIKE', sortable: true},
                         {field: 'level', title: __('Level'), operate: 'BETWEEN', sortable: true},
+                        {field: 'p_uid', title: __('直推人id')},
+                        {field: 'p_uid2', title: __('间推人id')},
+                        {field: 'invite_code', title: __('推广码')},
                         {
-                            field: 'gender',
-                            title: __('Gender'),
-                            visible: false,
-                            searchList: {1: __('Male'), 0: __('Female')}
-                        },
-                        {field: 'score', title: __('Score'), operate: 'BETWEEN', sortable: true},
-                        {
-                            field: 'successions',
-                            title: __('Successions'),
-                            visible: false,
-                            operate: 'BETWEEN',
-                            sortable: true
-                        },
-                        {
-                            field: 'maxsuccessions',
-                            title: __('Maxsuccessions'),
-                            visible: false,
-                            operate: 'BETWEEN',
+                            field: 'createtime',
+                            title: __('注册时间'),
+                            formatter: Table.api.formatter.datetime,
+                            operate: 'RANGE',
+                            addclass: 'datetimerange',
                             sortable: true
                         },
                         {

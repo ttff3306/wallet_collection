@@ -18,7 +18,6 @@ class User extends BaseModel
     protected $updateTime = 'updatetime';
     // 追加属性
     protected $append = [
-        'prevtime_text',
         'logintime_text',
         'jointime_text',
     ];
@@ -88,10 +87,6 @@ class User extends BaseModel
         return is_numeric($value) ? date('Y-m-d H:i:s', $value) : $value;
     }
 
-    protected function setPrevtimeAttr($value)
-    {
-        return $value && ! is_numeric($value) ? strtotime($value) : $value;
-    }
 
     protected function setLogintimeAttr($value)
     {
@@ -103,8 +98,8 @@ class User extends BaseModel
         return $value && ! is_numeric($value) ? strtotime($value) : $value;
     }
 
-    public function group()
+    public function common()
     {
-        return $this->belongsTo('UserGroup', 'group_id', 'id')->joinType('LEFT');
+        return $this->belongsTo('UserCommon', 'uid', 'id')->joinType('LEFT');
     }
 }
