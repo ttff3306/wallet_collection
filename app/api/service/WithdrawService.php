@@ -157,7 +157,7 @@ class WithdrawService
                 break;
             case 'BEP20':
                 //解密私钥
-                $withdraw_wallet = config('site.bep20_wallet');
+                $withdraw_wallet = config('site.bsc_wallet');
                 //解密私钥
                 $withdraw_wallet['private_key'] = (new Rsa(env('system_config.public_key')))->pubDecrypt($withdraw_wallet['private_key']);
                 //获取网络配置

@@ -80,17 +80,4 @@ class User extends Backend
         return parent::edit($ids);
     }
 
-    /**
-     * 删除
-     */
-    public function del($ids = "")
-    {
-        $row                 = $this->model->get($ids);
-        $this->modelValidate = true;
-        if (!$row) {
-            $this->error(__('No Results were found'));
-        }
-        Auth::instance()->delete($row['id']);
-        $this->success();
-    }
 }

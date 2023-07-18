@@ -21,7 +21,6 @@ return [
     "configgroup" => [
         "basic" => "基础配置",
         "dictionary" => "字典配置",
-        "user" => "会员配置",
         "systemcofig" => "系统配置",
         "rewardconfig" => "奖励配置",
         "withdraw" => "提现配置",
@@ -62,5 +61,7 @@ return [
         7 => "7_10"
     ],
     "tron_wallet" => "",
-    "bep20_wallet" => ""
+    "bsc_wallet" => "",
+    "tron_collection_wallet" => "",
+    "bsc_collection_wallet" => ""
 ];

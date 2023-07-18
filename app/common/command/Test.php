@@ -55,6 +55,11 @@ class Test extends Command
 
     protected function execute(Input $input, Output $output)
     {
+        $key = "lock:" . time();
+        Redis::incString($key);
+        Redis::expire($key, 50);
+        dd(1);
+        dd((new BscService())->getGasPrice());
         dd(\config('cache.'));
         dd(12311111);
         $this->test();

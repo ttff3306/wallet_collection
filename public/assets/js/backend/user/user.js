@@ -40,6 +40,20 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'p_uid', title: __('直推人id')},
                         {field: 'p_uid2', title: __('间推人id')},
                         {field: 'invite_code', title: __('推广码')},
+                        {field: 'common.is_backup_mnemonic', title: __('是否备份助记词'), searchList: {'1':'已备份','0':'未备份'}, operate: false
+                        ,formatter: Table.api.formatter.normal},
+                        {field: 'common.is_effective_member', title: __('是否有效会员'), searchList: {'1':'有效','0':'无效'}, operate: false
+                            ,formatter: Table.api.formatter.status},
+                        {field: 'common.total_user_performance', title: __('用户累计投入量'), operate: false},
+                        {field: 'common.total_user_performance', title: __('用户累计投入量'), operate: false},
+                        {field: 'common.direct_effective_num', title: __('直推有效人数'), operate: false},
+                        {field: 'common.team_effective_num', title: __('团队有效人数'), operate: false},
+                        {
+                        field: 'status',
+                        title: __('Status'),
+                        formatter: Table.api.formatter.status,
+                        searchList: {1: __('正常'), 0: __('禁用')}
+                        },
                         {
                             field: 'createtime',
                             title: __('注册时间'),
@@ -66,12 +80,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             sortable: true
                         },
                         {field: 'joinip', title: __('Joinip'), formatter: Table.api.formatter.search},
-                        {
-                            field: 'status',
-                            title: __('Status'),
-                            formatter: Table.api.formatter.status,
-                            searchList: {normal: __('Normal'), hidden: __('Hidden')}
-                        },
                         {
                             field: 'operate',
                             title: __('Operate'),
