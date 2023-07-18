@@ -137,8 +137,9 @@ class WalletService
         $block_id = $last_block;
         do{
             //处理单个区块，处理限速问题
-            $num = Redis::incString('wallet:lock:' . time());
-            Redis::expire('wallet:lock:' . time(), 20);
+            $lock_key = 'wallet:lock:' . time();
+            $num = Redis::incString($lock_key);
+            Redis::expire($lock_key, 5);
             if ($num > 2) sleep(2);
             //根据区块获取区块信息
             $result = $tron_service->getBlockTrade($block_id);
