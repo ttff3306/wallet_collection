@@ -36,41 +36,28 @@ class User extends BaseModel
                 $salt = \fast\Random::alnum();
                 $row->password = \app\common\library\Auth::instance()->getEncryptPassword($changed['password'], $salt);
                 $row->salt = $salt;
+                //清除用户缓存
+                \app\api\facade\User::getUser($row['id'], true);
                 Token::clear($row->id);
             } else {
                 unset($row->password);
             }
         }
 
-        $changedata = $row->getChangedData();
-        if (isset($changedata['money'])) {
-            $origin = $row->getOrigin();
-            MoneyLog::create([
-                'user_id' => $row['id'], 'money' => $changedata['money'] - $origin['money'],
-                'before'  => $origin['money'], 'after' => $changedata['money'], 'memo' => '管理员变更金额',
-            ]);
+        if (isset($changed['paypwd'])) {
+            if ($changed['paypwd']) {
+                $row->paypwd = \app\common\library\Auth::instance()->getEncryptPassword($changed['paypwd']);
+                //清除用户缓存
+                \app\api\facade\User::getUser($row['id'], true);
+            } else {
+                unset($row->paypwd);
+            }
         }
-        if (isset($changedata['score'])) {
-            $origin = $row->getOrigin();
-            ScoreLog::create(['user_id' => $row['id'], 'score' => $changedata['score'] - $origin['score'], 'before' => $origin['score'], 'after' => $changedata['score'], 'memo' => '管理员变更积分']);
-        }
-    }
-
-    public function getGenderList()
-    {
-        return ['1' => __('Male'), '0' => __('Female')];
     }
 
     public function getStatusList()
     {
         return ['normal' => __('Normal'), 'hidden' => __('Hidden')];
-    }
-
-    public function getPrevtimeTextAttr($value, $data)
-    {
-        $value = $value ? $value : $data['prevtime'];
-
-        return is_numeric($value) ? date('Y-m-d H:i:s', $value) : $value;
     }
 
     public function getLogintimeTextAttr($value, $data)

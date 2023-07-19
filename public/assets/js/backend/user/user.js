@@ -8,7 +8,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     index_url: 'user.user/index',
                     add_url: 'user.user/add',
                     edit_url: 'user.user/edit',
-                    multi_url: 'user.user/multi',
                     table: 'user',
                 }
             });
@@ -85,7 +84,31 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             title: __('Operate'),
                             table: table,
                             events: Table.api.events.operate,
-                            formatter: Table.api.formatter.operate
+                            formatter: Table.api.formatter.operate,
+                            buttons: [
+                                {
+                                    name: 'edit',
+                                    text: '编辑',
+                                    title: '编辑',
+                                    icon: 'fa fa-edit',
+                                    classname: 'btn btn-xs btn-success btn-editone btn-dialog',
+                                    url: 'user.user/edit',
+                                },
+                                {
+                                    name: 'editusdt',
+                                    text: 'USDT调整',
+                                    icon: 'fa fa-pencil',
+                                    classname: 'btn btn-success btn-xs btn-dialog',
+                                    url: 'user.user/editUsdt'
+                                },
+                                {
+                                    name: 'editusdk',
+                                    text: 'USDK调整',
+                                    icon: 'fa fa-pencil',
+                                    classname: 'btn btn-success btn-xs btn-dialog',
+                                    url: 'user.user/editUsdk'
+                                },
+                            ]
                         }
                     ]
                 ]
@@ -98,6 +121,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
         },
         edit: function () {
+            Controller.api.bindevent();
+        },
+        editusdt: function () {
+            Controller.api.bindevent();
+        },
+        editusdk: function () {
             Controller.api.bindevent();
         },
         api: {

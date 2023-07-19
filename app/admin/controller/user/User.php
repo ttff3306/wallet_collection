@@ -2,8 +2,13 @@
 
 namespace app\admin\controller\user;
 
+use app\api\facade\Account;
 use app\common\controller\Backend;
 use app\common\library\Auth;
+use app\common\model\UserUsdtLogModel;
+use think\Exception;
+use think\exception\PDOException;
+use think\exception\ValidateException;
 
 /**
  * 会员管理.
@@ -73,11 +78,134 @@ class User extends Backend
         if (!$row) {
             $this->error(__('No Results were found'));
         }
-        $this->view->assign('groupList',
-            build_select('row[group_id]', \app\admin\model\UserGroup::column('name', 'id'), $row['group_id'],
-                ['class' => 'form-control selectpicker']));
 
         return parent::edit($ids);
     }
 
+    /**
+     * 账户调整
+     * @param null $ids
+     * @return string
+     * @throws Exception
+     * @throws
+     */
+    public function editUsdt($ids = null)
+    {
+        $row = $this->model->get($ids);
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                if ($params['t_num'] <= 0){
+                    $this->error('调整数量错误');
+                }
+                $t_num = $params['t_num'];
+                if ($params['type'] == 2){  //减少
+                    if ($row->usdt <= 0){
+                        $this->error('账户余额不足');
+                    }
+                    $t_num *= -1;
+                }
+                $result = false;
+                $this->model->startTrans();
+                try {
+                    $remark = empty($params['remark']) ? '系统调整' : $params['remark'];
+                    $result = Account::changeUsdt($row['id'], $t_num, 1, $remark);
+                    if (!$result) throw new Exception('余额更新失败');
+                    $this->model->commit();
+                } catch (ValidateException $e) {
+                    $this->model->rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    $this->model->rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    $this->model->rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success('',url('editUsdt',['ids' => $ids]));
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
+
+    /**
+     *
+     * @param $ids
+     * @return mixed
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @author Bin
+     * @time 2023/7/19
+     */
+    public function editUsdk($ids = null)
+    {
+        $row = $this->model->get($ids);
+        $adminIds = $this->getDataLimitAdminIds();
+        if (is_array($adminIds)) {
+            if (!in_array($row[$this->dataLimitField], $adminIds)) {
+                $this->error(__('You have no permission'));
+            }
+        }
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+        if ($this->request->isPost()) {
+            $params = $this->request->post("row/a");
+            if ($params) {
+                $params = $this->preExcludeFields($params);
+                if ($params['t_num'] <= 0){
+                    $this->error('调整数量错误');
+                }
+                $t_num = $params['t_num'];
+                if ($params['type'] == 2){  //减少
+                    if ($row->usdk <= 0){
+                        $this->error('账户余额不足');
+                    }
+                    $t_num *= -1;
+                }
+                $result = false;
+                $this->model->startTrans();
+                try {
+                    $remark = empty($params['remark']) ? '系统调整' : $params['remark'];
+                    $result = Account::changeUsdk($row['id'], $t_num, 1, $remark);
+                    if (!$result) throw new Exception('余额更新失败');
+                    $this->model->commit();
+                } catch (ValidateException $e) {
+                    $this->model->rollback();
+                    $this->error($e->getMessage());
+                } catch (PDOException $e) {
+                    $this->model->rollback();
+                    $this->error($e->getMessage());
+                } catch (Exception $e) {
+                    $this->model->rollback();
+                    $this->error($e->getMessage());
+                }
+                if ($result !== false) {
+                    $this->success('',url('editUsdk',['ids' => $ids]));
+                } else {
+                    $this->error(__('No rows were updated'));
+                }
+            }
+            $this->error(__('Parameter %s can not be empty', ''));
+        }
+        $this->view->assign("row", $row);
+        return $this->view->fetch();
+    }
 }

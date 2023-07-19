@@ -1,0 +1,47 @@
+<form id="edit-form" class="form-horizontal form-ajax" role="form" data-toggle="validator" method="POST" action="">
+    {:input_token()}
+    <div class="form-group">
+        <label for="c-username" class="control-label col-xs-12 col-sm-2">会员ID:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-id" data-rule="required" readonly class="form-control" name="row[id]" type="text" value="{$row.id|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-username" class="control-label col-xs-12 col-sm-2">{:__('Username')}:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-username" readonly data-rule="required" class="form-control" name="row[username]" type="text" value="{$row.username|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-username" class="control-label col-xs-12 col-sm-2">USDT余额:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-account_otc_lock" disabled data-rule="required" class="form-control" type="text" value="{$row.usdt|htmlentities}">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="content" class="control-label col-xs-12 col-sm-2">调整类型:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_radios('row[type]', ['1'=>'增加', '2'=>'扣除'], 1)}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-t_num-num" class="control-label col-xs-12 col-sm-2">调整数量:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-t_num-num" data-rule="required" class="form-control" name="row[t_num]" type="number" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-t_num-num" class="control-label col-xs-12 col-sm-2">备注(可选):</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-remark" class="form-control" name="row[remark]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

@@ -9,7 +9,6 @@ use app\common\facade\Redis;
 use app\common\facade\SystemConfig;
 use app\common\facade\Wallet;
 use app\common\model\ChainModel;
-use app\common\model\CollectionModel;
 use app\common\model\ProfitConfigModel;
 use app\common\model\ReleaseOrderModel;
 use app\common\model\UserModel;
