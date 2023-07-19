@@ -122,4 +122,16 @@ class ConsumerService
     {
         UserOrder::recharge($data['user_id'], $data['address'], $data['amount'], $data['hash'], $data['chain']);
     }
+
+    /**
+     * 订单收益
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/7/19
+     */
+    public function asyncOrderRevenueReleaseProfit($data)
+    {
+        Account::orderRevenueReleaseProfit($data['order_id']);
+    }
 }
