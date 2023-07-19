@@ -127,7 +127,7 @@ class MarketLogic extends BaseLogic
         $order = UserOrder::getOrder($order_id, $this->user['id'], 'id,order_no,amount,reward_amount,status,next_release_time,input_day_num');
         if (empty($order)) $this->error('订单不存在');
         //获取订单记录
-        $result = Account::listUsdkLog($this->user['id'], 10, $page, $limit, 'id,type,money,title,create_time', 'id desc', $order_id);
+        $result = Account::listUsdkLog($this->user['id'], 10, $page, $limit, 'id,type,money,create_time', 'id desc', $order_id);
         //返回结果
         return array_merge(['order' => $order], $result);
     }
