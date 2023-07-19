@@ -72,6 +72,7 @@ class UserLogic extends BaseLogic
         $result = [
             'id' => $this->user['uuid'],
             'nickname' => $this->user['nickname'],
+            'username' => $this->user['username'],
             'avatar' => $this->user['avatar'],
             'level_star' => LevelConfig::getLevelStar($this->user['level']),
             'usdt' => $this->user['usdt'],
