@@ -96,7 +96,7 @@ class ConsumerService
      */
     public function asyncTeamReward($data)
     {
-        Account::teamReward($data['user_id'], $data['order_id'], $data['reward_amount'], $data['extra_reward_amount']);
+        ReportData::teamReward($data['user_id'], $data['order_id'], $data['reward_amount'], $data['extra_reward_amount']);
     }
 
     /**

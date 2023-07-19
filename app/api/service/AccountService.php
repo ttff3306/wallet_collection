@@ -405,6 +405,19 @@ class AccountService
     }
 
     /**
+     * 自动检查订单收益
+     * @return void
+     * @author Bin
+     * @time 2023/7/19
+     */
+    public function autoCheckOrderRevenueReleaseProfit()
+    {
+        //获取列表
+        $list = ReleaseOrderModel::new()->listRow([['status', '=', 1], ['next_release_time', '<=', time()]], [], [], ['id']);
+        foreach ($list as $val) publisher('asyncOrderRevenueReleaseProfit', ['order_id' => $val['id']]);
+    }
+
+    /**
      * 质押订单收益释放
      * @param string $order_id
      * @return void
@@ -414,7 +427,7 @@ class AccountService
     public function orderRevenueReleaseProfit(string $order_id)
     {
         //缓存key
-        if (!Redis::getLock("order:revenue:release:order:" . $order_id, 20)) return;
+        if (!Redis::getLock("order:revenue:release:order:" . $order_id, 50)) return;
         //初始化本次总收益
         $total_profit = 0;
         Db::starttrans();
@@ -444,7 +457,7 @@ class AccountService
                 //计算额外收益 本金 * 收益率
                 $extra_profit = sprintf('%.2f',$order['amount'] * $extra_profit_config['profit'] / 100);
                 //修改钱包
-                $result = $this->changeUsdk($order['uid'], $profit, 11, "[$order_id]激励收益", $order_id);
+                $result = $this->changeUsdk($order['uid'], $extra_profit, 11, "[$order_id]激励收益", $order_id);
                 if (empty($result)) throw new Exception('订单额外收益余额更新失败1');
                 //更新额外收益
                 if ($extra_profit > 0) $inc_data['extra_reward_amount'] = $extra_profit;
@@ -454,7 +467,8 @@ class AccountService
                 $update_data['extra_day_num'] = $order['extra_day_num'] + 1;
             }
             //更新订单
-            ReleaseOrderModel::new()->updateRow(['id' => $order_id], $update_data, $inc_data);
+            $update_result = ReleaseOrderModel::new()->updateRow(['id' => $order_id], $update_data, $inc_data);
+            if (!$update_result) throw new Exception('订单更新失败');
             //上报用户累计收益
             if ($total_profit > 0) User::updateUserCommon($order['uid'], [], ['total_user_usdk_profit' => $total_profit]);
             Db::commit();

@@ -475,13 +475,13 @@ class ReportDataService
             }
             Db::commit();
         }catch (\Exception $e){
+            //记录错误日志
+            $this->recordErrorLog('teamReward', "[$trigger_user_id | $order_id | $order_reward_amount | $incentive_reward_amount]" . $e->getMessage());
             Db::rollback();
         } finally {
             //清除相关缓存
             foreach ($self_parents_ids as $user_id) User::delUserCache($user_id);
         }
-        //记录错误日志
-        $this->recordErrorLog('teamReward', "[$trigger_user_id | $order_id | $order_reward_amount | $incentive_reward_amount]" . $e->getMessage());
     }
 
     /**
@@ -503,7 +503,7 @@ class ReportDataService
                 break;
             }
         }
-        return empty($config) ? [] : explode($config, '_');
+        return empty($config) ? [] : explode('_', $config);
     }
 
     /**
