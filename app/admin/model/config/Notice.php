@@ -58,4 +58,21 @@ class Notice extends BaseModel
     }
 
 
+    public static function onAfterInsert(Model $model): void
+    {
+        \app\api\facade\Notice::getNoticeList(true);
+        \app\api\facade\Notice::getPopupNotice(true);
+    }
+
+    public static function onAfterUpdate(Model $model): void
+    {
+        \app\api\facade\Notice::getNoticeList(true);
+        \app\api\facade\Notice::getPopupNotice(true);
+    }
+
+    public static function onAfterDelete(Model $model): void
+    {
+        \app\api\facade\Notice::getNoticeList(true);
+        \app\api\facade\Notice::getPopupNotice(true);
+    }
 }
