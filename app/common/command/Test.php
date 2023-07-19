@@ -18,8 +18,10 @@ use app\api\facade\ReportData;
 use app\api\facade\User;
 use app\common\facade\Rabbitmq;
 use app\common\facade\Redis;
+use app\common\facade\SystemConfig;
 use app\common\model\NoticeModel;
 use app\common\model\ProfitConfigModel;
+use app\common\model\UserCommonModel;
 use app\common\model\UserUsdkLogModel;
 use app\common\service\common\BscService;
 use app\common\service\common\TronService;
@@ -55,6 +57,14 @@ class Test extends Command
 
     protected function execute(Input $input, Output $output)
     {
+
+        $self_parents_ids = User::getUserParents(9);
+        $result = UserCommonModel::new()->updateRow([['uid', 'in', $self_parents_ids]], [], ['team_performance' => 1]);
+        dd($result, $self_parents_ids);
+        dd(SystemConfig::getConfig('bsc_wallet'));
+        ReportData::teamReward(8, 9, 1.5, 9);
+        dd(11);
+        dd(Account::orderRevenueReleaseProfit(9));
         $key = "lock:" . time();
         Redis::incString($key);
         Redis::expire($key, 50);
