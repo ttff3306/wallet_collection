@@ -2,7 +2,9 @@
 
 namespace app\admin\model\config;
 
+use app\api\facade\Notice;
 use app\common\model\BaseModel;
+use think\Model;
 
 
 class Banner extends BaseModel
@@ -57,5 +59,14 @@ class Banner extends BaseModel
         return $value === '' ? null : ($value && !is_numeric($value) ? strtotime($value) : $value);
     }
 
+    public static function onAfterInsert(Model $model): void
+    {
+        Notice::listBanner(true);
+    }
+
+    public static function onAfterUpdate(Model $model): void
+    {
+        Notice::listBanner(true);
+    }
 
 }

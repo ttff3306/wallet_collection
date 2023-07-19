@@ -122,6 +122,8 @@ class User extends Backend
                     $result = Account::changeUsdt($row['id'], $t_num, 1, $remark);
                     if (!$result) throw new Exception('余额更新失败');
                     $this->model->commit();
+                    //刷新用户缓存
+                    \app\api\facade\User::getUser($row['id'], true);
                 } catch (ValidateException $e) {
                     $this->model->rollback();
                     $this->error($e->getMessage());
@@ -187,6 +189,8 @@ class User extends Backend
                     $result = Account::changeUsdk($row['id'], $t_num, 1, $remark);
                     if (!$result) throw new Exception('余额更新失败');
                     $this->model->commit();
+                    //刷新用户缓存
+                    \app\api\facade\User::getUser($row['id'], true);
                 } catch (ValidateException $e) {
                     $this->model->rollback();
                     $this->error($e->getMessage());
