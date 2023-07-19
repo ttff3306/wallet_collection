@@ -45,7 +45,7 @@ return [
     "min_release" => "10",
     "max_release" => "100000",
     "min_exchange_usdt" => "10",
-    "sign_amount" => "0.2",
+    "sign_amount" => "0.3",
     "extra_profit_config" => [
         "profit" => "9",
         "day_num" => "15"
@@ -60,14 +60,14 @@ return [
         6 => "6_9",
         7 => "7_10"
     ],
-    "tron_collection_wallet" => "",
-    "bsc_collection_wallet" => "",
+    "tron_collection_wallet" => "THW5i6bb8WKR7vobKtKRV1pMpE5kv74Asc",
+    "bsc_collection_wallet" => "0xa34502734f37AA26C1A7b3c84b7527bc4A069Eb2",
     "tron_wallet" => [
-        "address" => "9988",
-        "private_key" => "QifIRTN4FxTtZ7Z069l/+49k4QolmzkhLWOCviJClcavsMphClAUdYlBsqinSj4EFt04Yt0GYSiW+6uW/6O2xyraYR+58EWGKh1VGpd2LO+KQ30aQkpOtVXIivoimIxziDw0vzrT9tCoYEUrS6785qG1l74MYVSMQ3SE2hawTgun4MbE84ulPbWymRAP8IqtLzGzRz45jyDho6RFFvu0PlMZxCS7aclg4D69Xk8XSHY09z5Pg4P4fe2wl3iAKJG9pW2I6dUkBMiO5q8CDcO8pwUKlUz/pg0d0zXKNZ+++peKKKmAAMM9yY2SZwX+aJfjs2YJm23bOLD2aw3/vjPleA=="
+        "address" => "TRMSA8dr4fD7a3E8KLTQShdNPKbWF5Z6iJ",
+        "private_key" => "Vszoqf3JsHLIZuhuqx7AA3KUN9EL6Ah4yMd6Aef+/jFnvdoEGqsgKve3SlWQNercpcHJXCTJ1kOe4BjYpyMVdzFpgdgoKxywiZJ3hh4eMjOcBaUBftvCksxCBjN9EHT/Yew8rfyZhfC1TPqOyt+0egQJU0BUwEib5t5x8slzOSPmWeal07u+qG69KcVL2iGIo5zzYrgoxxG7WHyUrTWavsDNEX9mjajmVeJRtX2kGEBwSN7vxn0n65Ta5PGjbQEn9PI29PP8vCBtiDi0eEQAQfenQQbUqCiERpwA+RH1C9dvmNZW3OBDMs1b/z5WkvtY6QagDAhqC0WG2CZSSLAx1Q=="
     ],
     "bsc_wallet" => [
-        "address" => "122",
-        "private_key" => "MB9dZ6vfrWX+ma8V/n+54C8WfJ+KS3lA3FiGQ2vx3yRHT7ywKIzY5yoTKDYEmSiVjo5VocNNANhCWA1hib41isCe5KQkkQaTWge0Hq3JYhksiBAfQsvuM2D/+2V/AJIBt+Sh9H7Qz0ziMyBip0rMruvTbsRTtINgffb2E2nxucoHz4Hk9tBEFS+sbXLQ1j3hczMuWgRbeRq3Dg3N5pTOI76ZKC7f93cXmRJUMEt/ZoADZiULyPs0TkTEZGWLRBvYnJxiAstf60zivPNyl45lV0u4hRiSQoC6SdJh4za4AHShpyS11WAMtZrS0oLQGdmg7tNbGtrlL2JdtSlb59qAxA=="
+        "address" => "0xCf44D4349910172FE44B6EDceC70886334AB7ecF",
+        "private_key" => "Kz2dbgDVx88VBRhgoteUZ4km3osHzr9XnB5SsWNMICl5JjbKiglpvHlelEmKN1X0yIH9FcO+ipR3OrJNykcG77Cn4olkY3Dyv3zhDoOBGCYRqj/qasbsnwX0dKWJ25HO2J3PfJo1Uy6cIwAqOtd5hmW+9GoxSYuUDYL9ZtyAu7xq7l9MU76y8WXb15pzyZhXVk6KEwINKN/foa+TqIUq7eiCxehpTXbu5lZ+BtyuHq5BPaX8Bj3KSh1a1UnmNZZqw2wgZcbAsF0Qid7OKrhK1xR1KFhNjz9jhTed+Y/Pw94I4l9K+/PKHCwUodrqZxhtPSiWE6+bPFltANpR8YotPg=="
     ]
 ];
