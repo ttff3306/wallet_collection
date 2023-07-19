@@ -5,6 +5,7 @@ namespace app\api\service;
 use app\api\facade\Account;
 use app\api\facade\User;
 use app\common\facade\Redis;
+use app\common\facade\SystemConfig;
 use app\common\library\Auth;
 use app\common\model\FeedbackModel;
 use app\common\model\UserCommonModel;
@@ -584,7 +585,7 @@ class UserService
     public function userSign(int $user_id)
     {
         //获取签到奖励
-        $reward_amount = config('site.sign_amount', 0.2);
+        $reward_amount = (float)SystemConfig::getConfig('sign_amount');
         if (empty($reward_amount)) return true;
         $date_day = date('Ymd');
         Db::starttrans();

@@ -6,6 +6,7 @@ use app\api\facade\ReportData;
 use app\api\facade\User;
 use app\api\facade\UserOrder;
 use app\common\facade\Redis;
+use app\common\facade\SystemConfig;
 use app\common\facade\Wallet;
 use app\common\model\ChainModel;
 use app\common\model\CollectionModel;
@@ -448,7 +449,7 @@ class AccountService
             if ($profit > 0) $inc_data['reward_amount'] = $profit;
             $total_profit += $profit;
             //获取额外收益配置
-            $extra_profit_config = config('site.extra_profit_config');
+            $extra_profit_config = SystemConfig::getConfig('extra_profit_config');
             //计算是否有额外收益
             if ($extra_profit_config['profit'] > 0 && ($order['extra_day_num'] + 1) == $extra_profit_config['day_num'])
             {

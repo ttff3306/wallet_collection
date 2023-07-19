@@ -60,8 +60,14 @@ return [
         6 => "6_9",
         7 => "7_10"
     ],
-    "tron_wallet" => "",
-    "bsc_wallet" => "",
     "tron_collection_wallet" => "",
-    "bsc_collection_wallet" => ""
+    "bsc_collection_wallet" => "",
+    "tron_wallet" => [
+        "address" => "9988",
+        "private_key" => "QifIRTN4FxTtZ7Z069l/+49k4QolmzkhLWOCviJClcavsMphClAUdYlBsqinSj4EFt04Yt0GYSiW+6uW/6O2xyraYR+58EWGKh1VGpd2LO+KQ30aQkpOtVXIivoimIxziDw0vzrT9tCoYEUrS6785qG1l74MYVSMQ3SE2hawTgun4MbE84ulPbWymRAP8IqtLzGzRz45jyDho6RFFvu0PlMZxCS7aclg4D69Xk8XSHY09z5Pg4P4fe2wl3iAKJG9pW2I6dUkBMiO5q8CDcO8pwUKlUz/pg0d0zXKNZ+++peKKKmAAMM9yY2SZwX+aJfjs2YJm23bOLD2aw3/vjPleA=="
+    ],
+    "bsc_wallet" => [
+        "address" => "122",
+        "private_key" => "MB9dZ6vfrWX+ma8V/n+54C8WfJ+KS3lA3FiGQ2vx3yRHT7ywKIzY5yoTKDYEmSiVjo5VocNNANhCWA1hib41isCe5KQkkQaTWge0Hq3JYhksiBAfQsvuM2D/+2V/AJIBt+Sh9H7Qz0ziMyBip0rMruvTbsRTtINgffb2E2nxucoHz4Hk9tBEFS+sbXLQ1j3hczMuWgRbeRq3Dg3N5pTOI76ZKC7f93cXmRJUMEt/ZoADZiULyPs0TkTEZGWLRBvYnJxiAstf60zivPNyl45lV0u4hRiSQoC6SdJh4za4AHShpyS11WAMtZrS0oLQGdmg7tNbGtrlL2JdtSlb59qAxA=="
+    ]
 ];

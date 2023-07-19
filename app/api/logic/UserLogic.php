@@ -8,6 +8,7 @@ use app\api\facade\LevelConfig;
 use app\api\facade\Mnemonic;
 use app\api\facade\User;
 use app\api\facade\UserOrder;
+use app\common\facade\SystemConfig;
 use app\common\library\Auth;
 use app\common\model\Attachment;
 use fast\Random;
@@ -477,7 +478,7 @@ class UserLogic extends BaseLogic
         //签到
         if (!User::userSign($this->user['id'])) $this->error('签到失败');
         //获取收益
-        $profit = config('site.sign_amount', 0.2);
+        $profit = (float)SystemConfig::getConfig('sign_amount');
         //异步上报收益
         if ($profit > 0) publisher('asyncReportProfitRanking', ['user_id' => $this->user['id'], 'profit' => $profit]);
         //返回余额

@@ -6,6 +6,7 @@ use app\api\facade\Account;
 use app\api\facade\ReportData;
 use app\api\facade\User;
 use app\common\facade\Redis;
+use app\common\facade\SystemConfig;
 use app\common\model\CollectionModel;
 use app\common\model\RechargeOrderModel;
 use app\common\model\ReleaseOrderModel;
@@ -152,7 +153,9 @@ class UserOrderService
         //异步上报团队业绩
         publisher('asyncReportUserPerformanceByTeam', ['user_id' => $user_id, 'order_no' => $data['order_no'], 'performance' => $amount, 'type' => 1]);
         //异步检测有效人数
-        if ($amount >= (int)config('site.effective_amount', 100)) publisher('asyncReportUserEffectiveMember', ['user_id' => $user_id]);
+        //获取有效用户投入达标
+        $effective_amount = (int)SystemConfig::getConfig('effective_amount');
+        if ($amount >= $effective_amount) publisher('asyncReportUserEffectiveMember', ['user_id' => $user_id]);
         //添加质押记录
         $this->addUserReleaseLog($user_id, $amount);
         //返回结果
@@ -212,7 +215,8 @@ class UserOrderService
         //异步上报扣除团队业绩
         publisher('asyncReportUserPerformanceByTeam', ['user_id' => $user_id, 'order_no' => $order_no, 'performance' => $amount, 'type' => 2]);
         //异步检测有效人数
-        if ($amount >= (int)config('site.effective_amount', 100)) publisher('asyncReportUserEffectiveMember', ['user_id' => $user_id]);
+        $effective_amount = (int)SystemConfig::getConfig('effective_amount');
+        if ($amount >= $effective_amount) publisher('asyncReportUserEffectiveMember', ['user_id' => $user_id]);
         //返回结果
         return true;
     }

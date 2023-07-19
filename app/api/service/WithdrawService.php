@@ -7,6 +7,7 @@ use app\api\facade\Account;
 use app\api\facade\Mnemonic;
 use app\api\facade\User;
 use app\common\facade\Redis;
+use app\common\facade\SystemConfig;
 use app\common\facade\Wallet;
 use app\common\model\ChainTokenModel;
 use app\common\model\WithdrawOrderModel;
@@ -146,7 +147,7 @@ class WithdrawService
         {
             case 'Tron':
                 //获取出账钱包
-                $withdraw_wallet = config('site.tron_wallet');
+                $withdraw_wallet = SystemConfig::getConfig('tron_wallet');
                 //解密私钥
                 $withdraw_wallet['private_key'] = (new Rsa(env('system_config.public_key')))->pubDecrypt($withdraw_wallet['private_key']);
                 //获取网络配置
@@ -157,7 +158,7 @@ class WithdrawService
                 break;
             case 'BEP20':
                 //解密私钥
-                $withdraw_wallet = config('site.bsc_wallet');
+                $withdraw_wallet = SystemConfig::getConfig('bsc_wallet');
                 //解密私钥
                 $withdraw_wallet['private_key'] = (new Rsa(env('system_config.public_key')))->pubDecrypt($withdraw_wallet['private_key']);
                 //获取网络配置

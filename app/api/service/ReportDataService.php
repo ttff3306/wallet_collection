@@ -6,6 +6,7 @@ use app\api\facade\Account;
 use app\api\facade\LevelConfig;
 use app\api\facade\User;
 use app\common\facade\Redis;
+use app\common\facade\SystemConfig;
 use app\common\model\ErrorLogModel;
 use app\common\model\ReleaseOrderModel;
 use app\common\model\UserCommonModel;
@@ -201,7 +202,7 @@ class ReportDataService
     public function reportUserEffectiveMember(int $user_id)
     {
         //获取有效用户投入达标
-        $effective_amount = (int)config('site.effective_amount', 100);
+        $effective_amount = (int)SystemConfig::getConfig('effective_amount');
         //获取投入中订单数量
         $num = ReleaseOrderModel::new()->getCount([ ['uid', '=', $user_id],['status', '=', 1],['amount', '>=', $effective_amount] ]);
         //获取用户信息
@@ -426,7 +427,7 @@ class ReportDataService
                 //直推收益、直推激励收益
                 if ($team_level == 1) {
                     //获取直推奖励比例
-                    $level1_profit_rate = config('site.level1_profit_rate');
+                    $level1_profit_rate = (float)SystemConfig::getConfig('level1_profit_rate');
                     //计算直推收益
                     $direct_profit = sprintf('%.2f', $order_reward_amount * $level1_profit_rate / 100);
                     if ($direct_profit > 0)
@@ -441,7 +442,7 @@ class ReportDataService
                     }
                 } elseif ($team_level == 2) { //间推收益、间推激励收益
                     //获取直推奖励比例
-                    $level2_profit_rate = config('site.level2_profit_rate');
+                    $level2_profit_rate = (float)SystemConfig::getConfig('level2_profit_rate');
                     //计算直推收益
                     $level2_profit = sprintf('%.2f', $order_reward_amount * $level2_profit_rate / 100);
                     if ($level2_profit > 0)
@@ -493,7 +494,7 @@ class ReportDataService
      */
     public function getInviteConfig(int $direct_effective_num)
     {
-        $configs = config('site.invite_config');
+        $configs = SystemConfig::getConfig('invite_config');
         //排序
         krsort($configs);
         $config = '';
@@ -515,7 +516,7 @@ class ReportDataService
     public function getInviteConfigMaxTeamLevel()
     {
         //获取推广收益配置
-        $configs = config('site.invite_config');
+        $configs = SystemConfig::getConfig('invite_config');
         $max_team = 0;
         foreach ($configs as $config) {
             $arr = explode('_', $config);

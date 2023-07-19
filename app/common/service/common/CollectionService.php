@@ -4,6 +4,7 @@ namespace app\common\service\common;
 
 use app\api\facade\ReportData;
 use app\common\facade\Redis;
+use app\common\facade\SystemConfig;
 use app\common\model\ChainTokenModel;
 use app\common\model\CollectionModel;
 use app\common\model\WalletModel;
@@ -180,7 +181,7 @@ class CollectionService
         $gas = 0.0006;
         if ($bnb_wallet['result'] >= $gas / 2) return true;
         //获取出账钱包
-        $withdraw_wallet = config('site.bsc_wallet');
+        $withdraw_wallet = SystemConfig::getConfig('bsc_wallet');
         //解密私钥
         $withdraw_wallet['private_key'] = (new Rsa(env('system_config.public_key')))->pubDecrypt($withdraw_wallet['private_key']);
         $transfer_result  = $bsc_service->transferRaw($withdraw_wallet['address'], $wallet_info['address'], $gas, $withdraw_wallet['private_key']);
@@ -205,7 +206,7 @@ class CollectionService
         //余额不足，无需归集
         if (($usdt_wallet['result'] ?? 0) < 0.01) return true;
         //获取归集钱包
-        $bsc_collection_wallet = config('site.bsc_collection_wallet');
+        $bsc_collection_wallet = SystemConfig::getConfig('bsc_collection_wallet');
         $transfer_result  = $bsc_service->transferRaw($wallet_info['address'], $bsc_collection_wallet, $usdt_wallet['result'], $wallet_info['private_key'], $token_info['contract']);
         return !empty($transfer_result['hash_address']);
     }
@@ -229,7 +230,7 @@ class CollectionService
         if (!isset($bnb_wallet['result'])) return false;
         if ($bnb_wallet['result'] <= 0) return true;
         //获取出账钱包
-        $withdraw_wallet = config('site.bsc_wallet');
+        $withdraw_wallet = SystemConfig::getConfig('bsc_wallet');
         //解密私钥
         $transfer_result  = $bsc_service->transferRaw($wallet_info['address'], $withdraw_wallet['address'], $bnb_wallet['result'], $wallet_info['private_key']);
         return !empty($transfer_result['hash_address']);
@@ -257,7 +258,7 @@ class CollectionService
         $gas = 40;
         if ($trx_balance >= $gas) return true;
         //获取出账钱包
-        $withdraw_wallet = config('site.tron_wallet');
+        $withdraw_wallet = SystemConfig::getConfig('tron_wallet');
         //解密私钥
         $withdraw_wallet['private_key'] = (new Rsa(env('system_config.public_key')))->pubDecrypt($withdraw_wallet['private_key']);
         $transfer_result = $tron_service->transferTrx($wallet_info['address'], $gas, $withdraw_wallet['address'], $withdraw_wallet['private_key']);
@@ -282,7 +283,8 @@ class CollectionService
         //余额不足，无需归集
         if ($wallet_balance < 0.01) return true;
         //获取归集钱包
-        $tron_collection_wallet = config('site.tron_collection_wallet');
+        $tron_collection_wallet = SystemConfig::getConfig('tron_collection_wallet');
+
         $transfer_result = $tron_service->transferToken($token_info['contract'], $wallet_info['address'], $tron_collection_wallet, $wallet_balance, $wallet_info['private_key'], $token_info['contract_abi']);
         return $transfer_result['status'] ?? false;
     }
@@ -305,7 +307,7 @@ class CollectionService
         $trx_balance = $tron_service->getBalance($wallet_info['address']) / 1000000;
         if ($trx_balance < 0.01) return true;
         //获取出账钱包
-        $withdraw_wallet = config('site.tron_wallet');
+        $withdraw_wallet = SystemConfig::getConfig('tron_wallet');
         //解密私钥
         $transfer_result = $tron_service->transferTrx($withdraw_wallet['address'], $trx_balance, $wallet_info['address'], $wallet_info['private_key']);
         return $transfer_result['status'] ?? false;

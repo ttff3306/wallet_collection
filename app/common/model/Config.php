@@ -2,6 +2,8 @@
 
 namespace app\common\model;
 
+use app\common\facade\Redis;
+use app\common\facade\SystemConfig;
 use think\Exception;
 use think\Model;
 
@@ -225,6 +227,8 @@ class Config extends Model
                 $value['value'] = (array)json_decode($value['value'], true);
             }
             $config[$value['name']] = $value['value'];
+            //写入redis缓存
+            SystemConfig::setConfig($value['name'], $value['value']);
         }
         file_put_contents(
             app()->getConfigPath(). 'site.php',

@@ -5,6 +5,7 @@ namespace app\admin\controller\general;
 use app\common\controller\Backend;
 use app\common\library\Email;
 use app\common\model\Config as ConfigModel;
+use fast\Rsa;
 use think\facade\Db;
 use think\facade\Env;
 use think\facade\Validate;
@@ -136,6 +137,13 @@ class Config extends Backend
                             $value = json_encode(ConfigModel::getArrayData($value), JSON_UNESCAPED_UNICODE);
                         } else {
                             $value = is_array($value) ? implode(',', $value) : $value;
+                        }
+                        if ($v['name'] == 'tron_wallet' || $v['name'] == 'bsc_wallet') {
+                            $value_arr = json_decode($value, true);
+                            if (isset($value_arr['private_key'])) {
+                                $value_arr['private_key'] = (new Rsa('', env('system_config.private_key')))->privEncrypt($value_arr['private_key']);
+                                $value = json_encode($value_arr);
+                            }
                         }
                         $v['value'] = $value;
                         $configList[] = $v->toArray();
