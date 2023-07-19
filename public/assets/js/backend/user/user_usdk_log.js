@@ -6,10 +6,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 extend: {
                     index_url: 'user.user_usdk_log/index' + location.search,
-                    add_url: 'user.user_usdk_log/add',
-                    edit_url: 'user.user_usdk_log/edit',
-                    del_url: 'user.user_usdk_log/del',
-                    multi_url: 'user.user_usdk_log/multi',
                     table: 'user_usdk_log',
                 }
             });
@@ -27,11 +23,11 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id')},
                         {field: 'user_id', title: __('User_id')},
                         {field: 'money', title: __('Money'), operate:'BETWEEN'},
+                        {field: 'type_name', title: __('Type')},
                         {field: 'before', title: __('Before'), operate:'BETWEEN'},
                         {field: 'after', title: __('After'), operate:'BETWEEN'},
                         {field: 'memo', title: __('Memo')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'type', title: __('Type')},
                         {field: 'date_day', title: __('Date_day')},
                         {field: 'order_id', title: __('Order_id')},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}

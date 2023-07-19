@@ -45,8 +45,12 @@ class UserUsdkLogModel extends  BaseModel
      */
     public function getTitle($type)
     {
-        //1:福利 2:闪兑 3:直推收益 4:间推收益 5:推广奖励 6:团队收益 7:签到 8:投入
-        // 9:解压 10:云服务器收益(质押订单收益) 11:激励收益 12:直推激励收益 13:间推激励收益 14:推广激励奖励 15:团队激励收益
+        $list = $this->listType();
+        return $list[$type] ?? $list[1];
+    }
+
+    public function listType()
+    {
         $list = [
             1 => __('福利'),
             2 => __('闪兑'),
@@ -64,6 +68,6 @@ class UserUsdkLogModel extends  BaseModel
             14 => __('推广激励奖励'),
             15 => __('团队激励收益'),
         ];
-        return $list[$type] ?? $list[1];
+        return $list;
     }
 }

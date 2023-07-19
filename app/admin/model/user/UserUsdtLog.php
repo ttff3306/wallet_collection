@@ -3,6 +3,7 @@
 namespace app\admin\model\user;
 
 use app\common\model\BaseModel;
+use app\common\model\UserUsdtLogModel;
 
 
 class UserUsdtLog extends BaseModel
@@ -25,11 +26,16 @@ class UserUsdtLog extends BaseModel
 
     // 追加属性
     protected $append = [
-        'create_time_text'
+        'create_time_text',
+        'type_name',
     ];
-    
 
-    
+
+
+    public function getTypeNameAttr($value, $data)
+    {
+        return (new UserUsdtLogModel())->getTitle($data['type'] ?? 1);
+    }
 
 
 

@@ -6,10 +6,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 extend: {
                     index_url: 'user.user_usdt_log/index' + location.search,
-                    add_url: 'user.user_usdt_log/add',
-                    edit_url: 'user.user_usdt_log/edit',
-                    del_url: 'user.user_usdt_log/del',
-                    multi_url: 'user.user_usdt_log/multi',
                     table: 'user_usdt_log',
                 }
             });
@@ -31,7 +27,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'after', title: __('After'), operate:'BETWEEN'},
                         {field: 'memo', title: __('Memo')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'type', title: __('Type')},
+                        {field: 'type_name', title: __('Type')},
                         {field: 'date_day', title: __('Date_day')},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]

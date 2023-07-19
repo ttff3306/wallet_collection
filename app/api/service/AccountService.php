@@ -440,7 +440,7 @@ class AccountService
             $profit = sprintf('%.2f', $order['amount'] * $order['profit_rate'] / 100);
             //修改钱包
             $result = $this->changeUsdk($order['uid'], $profit, 10, "[$order_id]订单收益释放", $order_id);
-            if (empty($result)) throw new Exception('余额更新失败');
+            if ($profit > 0 && !$result) throw new Exception('余额更新失败');
             //更新订单数据
             $update_data = ['next_release_time' => $order['next_release_time'] + 24 * 3600, 'input_day_num' => $order['input_day_num'] + 1];
             //自增数据
@@ -458,7 +458,7 @@ class AccountService
                 $extra_profit = sprintf('%.2f',$order['amount'] * $extra_profit_config['profit'] / 100);
                 //修改钱包
                 $result = $this->changeUsdk($order['uid'], $extra_profit, 11, "[$order_id]激励收益", $order_id);
-                if (empty($result)) throw new Exception('订单额外收益余额更新失败1');
+                if ($extra_profit > 0 && empty($result)) throw new Exception('订单额外收益余额更新失败1');
                 //更新额外收益
                 if ($extra_profit > 0) $inc_data['extra_reward_amount'] = $extra_profit;
                 $total_profit += $extra_profit;

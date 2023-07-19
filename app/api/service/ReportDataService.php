@@ -136,8 +136,7 @@ class ReportDataService
             //上报团队业绩
             UserTeamModel::new()->updateRow(['uid' => $user_id], [], ['team_performance' => $performance]);
 
-            $result = UserCommonModel::new()->updateRow([['uid', 'in', $self_parents_ids]], [], ['team_performance' => $performance]);
-            if (empty($result)) throw new Exception('更新失败');
+            UserCommonModel::new()->updateRow([['uid', 'in', $self_parents_ids]], [], ['team_performance' => $performance]);
         }catch (\Exception $e){
             //记录错误日志
             $this->recordErrorLog('reportUserPerformanceByTeam', "[$order_no | $user_id | $performance | $type]" . $e->getMessage());

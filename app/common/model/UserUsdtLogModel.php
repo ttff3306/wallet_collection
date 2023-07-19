@@ -46,6 +46,12 @@ class UserUsdtLogModel extends  BaseModel
      */
     public function getTitle($type)
     {
+        $list = $this->listType();
+        return $list[$type] ?? $list[1];
+    }
+
+    public function listType()
+    {
         // 1:平台福利 2:充值 3:提现 4:闪兑
         $list = [
             1 => __('链上转入'),
@@ -54,6 +60,6 @@ class UserUsdtLogModel extends  BaseModel
             4 => __('闪兑'),
             5 => __('手续费'),
         ];
-        return $list[$type] ?? $list[1];
+        return $list;
     }
 }
