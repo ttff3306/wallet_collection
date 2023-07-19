@@ -379,13 +379,13 @@ class UserLogic extends BaseLogic
         ];
         $list = User::getBelowIds($this->user['id'], $type);
         $page = $this->input['page'] ?? 1;
-        $limit = $this->input['limit'] ?? 1;
+        $limit = $this->input['limit'] ?? 10;
         $result['total_count'] = count($list);
         $result['total_page'] = ceil($result['total_count'] / $limit);
         $offset = ($page - 1) * $limit;
-        $data = empty($list) ? [] : array_slice($list, $offset, $limit);
+//        $data = empty($list) ? [] : array_slice($list, $offset, $limit);
         $result['list'] = [];
-        foreach ($data as $val)
+        foreach ($list as $val)
         {
             //获取用户信息
             $team_user = User::getUser($val);
