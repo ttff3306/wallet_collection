@@ -475,7 +475,7 @@ class AccountService
         }catch (\Exception $e){
             Db::rollback();
             //记录错误日志
-            ReportData::recordErrorLog('orderRevenueRelease', "[$order_id]" . $e->getMessage());
+            ReportData::recordErrorLog('orderRevenueReleaseProfit', "[$order_id]" . $e->getMessage());
             return;
         } finally {
             //删除相关缓存
