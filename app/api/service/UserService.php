@@ -395,6 +395,9 @@ class UserService
             if (empty($parent_ids)) $parent_ids[-1] = 0;
             //写入缓存
             Redis::setHashs($key, $parent_ids, 0);
+            if (!empty($parent_ids)) {
+                foreach ($parent_ids as $k => $v) $this->delBelowIdsCache($v, $k);
+            }
         }
         //获取结果
         $result = Redis::getHashs($key);
@@ -426,9 +429,24 @@ class UserService
             }
             //获取数据
             $list = UserTeamModel::new()->where($where)->order('id', 'desc')->column('uid');
-            Redis::setString($key, $list);
+            Redis::setString($key, $list, 300);
         }
         return $list ?? Redis::getString($key);
+    }
+
+    /**
+     * 清除直推下级缓存
+     * @param int $user_id
+     * @param int $level
+     * @return void
+     * @author Bin
+     * @time 2023/7/19
+     */
+    public function delBelowIdsCache(int $user_id, int $level = 1)
+    {
+        //缓存key
+        $key = 'user:' . $user_id . ':below:ids:level:' . $level;
+        Redis::del($key);
     }
 
     /**
