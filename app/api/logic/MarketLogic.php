@@ -153,7 +153,7 @@ class MarketLogic extends BaseLogic
             //获取最低兑换配置
             $min_exchange_limit = config('site.min_exchange_usdk', 10);
             //获取日志
-            $result = Account::listUsdkLog($this->user['id'], 2, $page, $limit, 'id,type,money,title,create_time');
+            $result = Account::listUsdkLog($this->user['id'], 2, $page, $limit, 'id,type,money,create_time');
         }
         //返回结果
         return array_merge(['min_exchange_limit' => $min_exchange_limit, 'balance' => ($type == 1 ? $this->user['usdt'] : $this->user['usdk'])], $result);
