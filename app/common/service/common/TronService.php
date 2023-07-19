@@ -2,6 +2,7 @@
 
 namespace app\common\service\common;
 
+use GuzzleHttp\Client;
 use IEXBase\TronAPI\Tron;
 use IEXBase\TronAPI\Provider\HttpProvider;
 
@@ -21,8 +22,12 @@ class TronService
     {
         $this->host = env('tron_host', 'https://api.trongrid.io');
         $this->tron_scan = env('tron_scan', 'https://api.tronscan.org');
+        $header = [
+            'TRON_PRO_API_KEY: a84021ad-2f2c-4154-bb07-259b3f16feed'
+        ];
+        $http_provider = new HttpProvider($this->host, 10000, false, false, $header);
         // 创建一个tron对象
-        $this->tron = new Tron(new HttpProvider($this->host), new HttpProvider($this->host), new HttpProvider($this->host));
+        $this->tron = new Tron($http_provider, $http_provider, $http_provider);
     }
 
     /**
@@ -117,9 +122,12 @@ class TronService
     public function trc20TransfersByTronScan(string $address)
     {
         $url = $this->tron_scan . '/api/token_trc20/transfers?limit=20&start=0&sort=-timestamp&count=true&relatedAddress=' . $address;
-        echo $url . "\n";
         try {
-            $result = http_client($url, [], 'GET', [], 3000);
+            $config = [
+                'handler' => 'TRON-PRO-API-KEY:aacc3f55-4566-435b-b445-dfa667b2829f'
+            ];
+            $client = new Client($config);
+            $result = $client->get($url);
             if ($result == '') {
                 echo "延迟1秒在访问...\n";
                 // usleep(100000);
@@ -158,9 +166,12 @@ class TronService
     {
         $url = $this->tron_scan . '/api/account/wallet?address=' . $address;
         try {
-            $result = file_get_contents($url);
+            $config = [
+                'handler' => 'TRON-PRO-API-KEY:aacc3f55-4566-435b-b445-dfa667b2829f'
+            ];
+            $client = new Client($config);
+            $result = $client->get($url);
             if ($result == '') {
-                echo "查询资源[" . $url . "]发生错误\n";
                 return $this->wallet($address);
             }
             return json_decode($result, true);
