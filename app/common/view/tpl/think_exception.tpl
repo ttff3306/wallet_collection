@@ -396,9 +396,6 @@ echo 'Resource';
 <?php } ?>
 
 <div class="copyright">
-    YFCMF-TP6
-    <span>V<?php echo \think\facade\Config::get('fastadmin.version'); ?></span>
-    <span><a href="https://www.iuok.cn/">https://www.iuok.cn</a></span>
 </div>
 <?php if (\think\facade\App::isDebug()) { ?>
 <script>
