@@ -2,7 +2,9 @@
 
 namespace app\admin\model\news;
 
+use app\api\facade\Information;
 use app\common\model\BaseModel;
+use think\Model;
 
 
 class NewsList extends BaseModel
@@ -57,5 +59,18 @@ class NewsList extends BaseModel
         return $value === '' ? null : ($value && !is_numeric($value) ? strtotime($value) : $value);
     }
 
+    public static function onAfterInsert(Model $model): void
+    {
+        Information::listNews(true);
+    }
 
+    public static function onAfterUpdate(Model $model): void
+    {
+        Information::listNews(true);
+    }
+
+    public static function onAfterDelete(Model $model): void
+    {
+        Information::listNews(true);
+    }
 }
