@@ -169,7 +169,7 @@ class MarketLogic extends BaseLogic
     public function exchange()
     {
         //兑换数量
-        $amount = intval($this->input['amount'] ?? 0);
+        $amount = intval($this->input['aomunt'] ?? 0);
         //类型 1 USDT=>USDK 2 USDK=>USDT
         $type = intval($this->input['type'] ?? 1);
         if ($type == 1) {
