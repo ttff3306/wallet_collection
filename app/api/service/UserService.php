@@ -420,13 +420,7 @@ class UserService
         //检测缓存
         if ($is_update || !Redis::has($key))
         {
-            if ($level == 1) {
-                $where = ['p_uid1' => $user_id, 'team_id' => $user_id];
-            }elseif ($level == 2){
-                $where = ['p_uid2' => $user_id, 'team_id' => $user_id];
-            }else{
-                $where = ['team_id' => $user_id, 'team_level' => $level];
-            }
+            $where = ['team_id' => $user_id, 'team_level' => $level];
             //获取数据
             $list = UserTeamModel::new()->where($where)->order('id', 'desc')->column('uid');
             Redis::setString($key, $list, 300);
