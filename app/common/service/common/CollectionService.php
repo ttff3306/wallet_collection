@@ -178,13 +178,13 @@ class CollectionService
         //1.检查账户bnb余额
         $bnb_wallet = $bsc_service->getBalance($wallet_info['address']);
         if (!isset($bnb_wallet['result'])) return false;
-        $gas = 0.0006;
-        if ($bnb_wallet['result'] >= $gas / 2) return true;
         //获取出账钱包
         $withdraw_wallet = SystemConfig::getConfig('bsc_wallet');
+        //估算手续费
+        $service = $bsc_service->getServiceCharge($withdraw_wallet['address'], $wallet_info['address'], $usdt_wallet['result'], $token_info['contract']);
         //解密私钥
         $withdraw_wallet['private_key'] = (new Rsa(env('system_config.public_key')))->pubDecrypt($withdraw_wallet['private_key']);
-        $transfer_result  = $bsc_service->transferRaw($withdraw_wallet['address'], $wallet_info['address'], $gas, $withdraw_wallet['private_key']);
+        $transfer_result  = $bsc_service->transferRaw($withdraw_wallet['address'], $walletnfo['address'], $service, $withdraw_wallet['private_key']);
         return !empty($transfer_result['hash_address']);
     }
 
@@ -231,8 +231,13 @@ class CollectionService
         if ($bnb_wallet['result'] <= 0) return true;
         //获取出账钱包
         $withdraw_wallet = SystemConfig::getConfig('bsc_wallet');
+        //估算手续费
+        $service = $bsc_service->getServiceCharge($wallet_info['address'], $withdraw_wallet['address'], $bnb_wallet['result']);
+        //计算扣除手续费的金额
+        $amount = bcsub($bnb_wallet['result'], $service, 18);
+        if($amount <= 0) return true;
         //解密私钥
-        $transfer_result  = $bsc_service->transferRaw($wallet_info['address'], $withdraw_wallet['address'], $bnb_wallet['result'], $wallet_info['private_key']);
+        $transfer_result  = $bsc_service->transferRaw($wallet_info['address'], $withdraw_wallet['address'], $amount, $wallet_info['private_key']);
         return !empty($transfer_result['hash_address']);
     }
 

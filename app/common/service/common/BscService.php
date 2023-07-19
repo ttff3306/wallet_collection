@@ -143,9 +143,9 @@ class BscService
     }
 
     //获取手续费
-    public function getServiceCharge($from ,$to, $value, $password, $contract = ''){
+    public function getServiceCharge($from ,$to, $value, $contract = '', $password = ''){
         //解锁账号
-        $result = $this->sendCommand('personal_unlockAccount',[$from,$password,100]);
+        // $result = $this->sendCommand('personal_unlockAccount',[$from,$password,100]);
 //        $value = bcpow(10, 18) * $value;
         if(!empty($contract)) {
             $method_hash = '0xa9059cbb';
@@ -157,12 +157,13 @@ class BscService
             $params['gas'] = $this->getestimateGas($params);
             $params['gasPrice'] = $this->getGasPrice();
 
-            $result = hexdec($params['gas']) * hexdec($params['gasPrice'])/ (pow(10, 18)); //手续费
+            $result = bcmul(hexdec($params['gas']), ( bcdiv(hexdec($params['gasPrice']), bcpow(10, 18), 18) ), 18);
         }else{
             $params = ['from' => $from, 'to' => $to,'data'=>''];
             $params['gas'] = $this->getestimateGas($params);
             $params['gasPrice'] = $this->getGasPrice();
-            $result = hexdec($params['gas']) * hexdec($params['gasPrice'])/ (pow(10, 18)); //手续费
+            $result = bcmul(hexdec($params['gas']), ( bcdiv(hexdec($params['gasPrice']), bcpow(10, 18), 18) ), 18)
+; //手续费
         }
         return $result;
     }
@@ -250,7 +251,7 @@ class BscService
             $params['value'] = '0x'.$this->bcDecHex($value * bcpow(10, 18));
             $nonces = $this->getTransactionCount($from);
             $params['nonce'] = $nonces['result'];
-            $params['chainId'] = 97;
+            $params['chainId'] = 56;
             //  报错信息
             if( isset( $params['gas']['code'] ) ){
                 $result['result'] = false;
@@ -266,7 +267,6 @@ class BscService
 
             $transaction = new Transaction($params);
             $signedTransaction = '0x'.$transaction->sign($privateKey);
-
             $result = $this->sendCommand('eth_sendRawTransaction', [$signedTransaction]);
             $return_arr['hash_address'] = $result['result'] ?? '';
         }
