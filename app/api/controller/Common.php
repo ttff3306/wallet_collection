@@ -161,4 +161,9 @@ class Common extends Api
             'url' => $savename,
         ]);
     }
+
+    public function config()
+    {
+        $this->success(['web_site' => 'https://web.tethersay.com/#/', 'web_log' => '']);
+    }
 }

@@ -6,9 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 extend: {
                     index_url: 'order.withdraw_order/index' + location.search,
-                    add_url: 'order.withdraw_order/add',
                     edit_url: 'order.withdraw_order/edit',
-                    del_url: 'order.withdraw_order/del',
                     multi_url: 'order.withdraw_order/multi',
                     table: 'withdraw_order',
                 }
@@ -32,14 +30,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'actual_withdraw_money', title: __('Actual_withdraw_money'), operate:'BETWEEN'},
                         {field: 'service_money', title: __('Service_money'), operate:'BETWEEN'},
                         {field: 'status', title: __('Status')},
-                        {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'hash', title: __('Hash')},
                         {field: 'date_day', title: __('Date_day')},
                         {field: 'p_uid', title: __('P_uid')},
-                        {field: 'pay_time', title: __('Pay_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'chain', title: __('Chain')},
                         {field: 'is_auto', title: __('Is_auto')},
+                        {field: 'pay_time', title: __('Pay_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
                 ]

@@ -101,6 +101,10 @@ Route::group(function (){
     Route::post('sign/up$','api/user/register')->validate(SignUpValidate::class)->name('注册接口');
 });
 
+Route::group(function (){
+    Route::any('config$', 'api/common/config');
+});
+
 /*******************路由不存在*************************/
 Route::miss(function() {
     throw new \think\exception\RouteNotFoundException();
