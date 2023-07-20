@@ -164,6 +164,9 @@ class Common extends Api
 
     public function config()
     {
-        $this->success(['web_site' => 'https://web.tethersay.com/#/', 'web_log' => '']);
+        $this->success([
+            'web_site' => 'https://web.tethersay.com/#/',
+            'web_log' => 'http://39.101.192.177:2574/'
+        ]);
     }
 }
