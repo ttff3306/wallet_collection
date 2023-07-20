@@ -92,17 +92,6 @@ class ExceptionHandle extends Handle
             ]);
         }
 
-        //关闭调试模式，屏蔽错误信息
-        if(!env('APP_DEBUG',false)){
-            Log::write("服务内部错误:" . $e->getMessage());
-            //当关闭DEBUG模式，错误返回改为json返回
-            return json([
-                "code" => 500,
-                "msg" => $e->getMessage(),
-                "data" => null
-            ], 500);
-        }
-
         // 其他错误交给系统处理
         return parent::render($request, $e);
     }
