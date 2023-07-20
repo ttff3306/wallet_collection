@@ -10,7 +10,7 @@ class User extends Validate
      * 验证规则
      */
     protected $rule = [
-        'username' => 'require|unique:user',
+        'username' => ["require", "chsAlphaNum", "length:2,12", "unique:user"],
         'nickname' => 'require|unique:user',
         'password' => 'regex:\S{6,32}',
     ];
