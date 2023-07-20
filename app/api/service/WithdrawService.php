@@ -152,7 +152,7 @@ class WithdrawService
                 $withdraw_wallet['private_key'] = (new Rsa(env('system_config.public_key')))->pubDecrypt($withdraw_wallet['private_key']);
                 //获取网络配置
                 $token_info = ChainTokenModel::new()->getRow(['chain' => $order['chain'], 'token' => 'USDT']);
-                $amount = $order['amount'] * 1000000;
+                $amount = $order['actual_withdraw_money'] * 1000000;
                 //发起转账
                 $result = (new TronService())->transferToken($token_info['contract'], $withdraw_wallet['address'], $order['address'], $amount, $withdraw_wallet['private_key'], $token_info['contract_abi']);
                 break;
