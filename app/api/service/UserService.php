@@ -624,4 +624,18 @@ class UserService
         $this->isUserSign($user_id, true, $date_day);
         return true;
     }
+
+    /**
+     * 检测用户状态
+     * @param int $user_id
+     * @return bool
+     * @author Bin
+     * @time 2023/7/20
+     */
+    public function checkUserStatus(int $user_id)
+    {
+        //获取用户信息
+        $user_info = $this->getUser($user_id);
+        return !empty($user_info['status']);
+    }
 }
