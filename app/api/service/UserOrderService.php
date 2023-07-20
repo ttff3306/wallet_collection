@@ -5,6 +5,7 @@ namespace app\api\service;
 use app\api\facade\Account;
 use app\api\facade\ReportData;
 use app\api\facade\User;
+use app\api\facade\UserOrder;
 use app\common\facade\Redis;
 use app\common\facade\SystemConfig;
 use app\common\model\CollectionModel;
@@ -249,6 +250,8 @@ class UserOrderService
             'user_id' => $user_id,
             'address' => $address
         ]);
+        //清除缓存
+        Redis::del('list:user:release:log:date:' . date('Ymd'));
     }
 
     /**
@@ -265,7 +268,7 @@ class UserOrderService
         {
             $list = UserReleaseLogModel::new()->listRow([], [], ['id' => 'desc'], ['amount','address','create_time', 'user_id']);
             //写入缓存
-            Redis::setString($key, $list, 24 * 3600);
+            Redis::setString($key, $list, 300);
         }
         return $list ?? Redis::getString($key);
     }
