@@ -140,9 +140,9 @@ class WithdrawService
     {
         //获取订单
         $order = WithdrawOrderModel::new()->getRow(['id' => $order_id]);
-        if (empty($order) || $order['status'] != 0 || $order['is_auth'] != 1) return;
+        if (empty($order) || $order['status'] != 0 || $order['is_auto'] != 1) return;
         //缓存key
-        if (!Redis::getLock('handle:withdraw:order:' . $order_id)) return;
+        // if (!Redis::getLock('handle:withdraw:order:' . $order_id)) return;
         switch ($order['chain'])
         {
             case 'Tron':
@@ -164,7 +164,7 @@ class WithdrawService
                 //获取网络配置
                 $token_info = ChainTokenModel::new()->getRow(['chain' => $order['chain'], 'token' => 'USDT']);
                 //转账
-                $result  = (new BscService())->transferRaw($withdraw_wallet['address'], $order['address'], $order['amount'], $withdraw_wallet['private_key'], $token_info['contract']);
+                $result  = (new BscService())->transferRaw($withdraw_wallet['address'], $order['address'], $order['actual_withdraw_money'], $withdraw_wallet['private_key'], $token_info['contract']);
                 $result = [
                     'result' => !empty($result['hash_address']),
                     'txid'   => $result['hash_address'] ?? '',
@@ -180,6 +180,7 @@ class WithdrawService
             'extra' => json_encode($result),
             'status' => $status
         ];
+        if($status == 1) $update['pay_time'] = time();
         if (!empty($result['txid'])) $update['hash'] = $result['txid'];
         WithdrawOrderModel::new()->updateRow(['id' => $order_id], $update);
     }
