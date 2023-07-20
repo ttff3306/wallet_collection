@@ -27,12 +27,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id')},
                         {field: 'cn_title', title: __('Cn_title')},
                         {field: 'en_title', title: __('En_title')},
+                        {field: 'status', title: __('Status'), searchList: {"1":'显示',"2":__('隐藏')}, formatter: Table.api.formatter.normal},
+                        {field: 'index_open', title: '首页广播', searchList: {"0":'否',"1":__('是')}, formatter: Table.api.formatter.normal},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'status', title: __('Status')},
-                        {field: 'description', title: __('Description')},
-                        {field: 'index_open', title: __('Index_open')},
-                        {field: 'img_url', title: __('Img_url'), formatter: Table.api.formatter.url},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
                 ]

@@ -13,24 +13,6 @@
         </div>
     </div>
     <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Create_time')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-create_time" data-rule="required" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[create_time]" type="text" value="{:date('Y-m-d H:i:s')}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Update_time')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-update_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[update_time]" type="text" value="{:date('Y-m-d H:i:s')}">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-status" data-rule="required" class="form-control" name="row[status]" type="number" value="1">
-        </div>
-    </div>
-    <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Description')}:</label>
         <div class="col-xs-12 col-sm-8">
             <input id="c-description" class="form-control" name="row[description]" type="text">
@@ -51,13 +33,7 @@
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">{:__('Index_open')}:</label>
         <div class="col-xs-12 col-sm-8">
-            <input id="c-index_open" data-rule="required" class="form-control" name="row[index_open]" type="number" value="0">
-        </div>
-    </div>
-    <div class="form-group">
-        <label class="control-label col-xs-12 col-sm-2">{:__('Img_url')}:</label>
-        <div class="col-xs-12 col-sm-8">
-            <input id="c-img_url" data-rule="required" class="form-control" name="row[img_url]" type="text" value="">
+            {:Form::radios('row[index_open]', ['1' => '首页广播', '0' => '首页不广播'],'')}
         </div>
     </div>
     <div class="form-group layer-footer">
