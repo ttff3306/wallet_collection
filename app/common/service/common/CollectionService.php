@@ -57,7 +57,7 @@ class CollectionService
             //记录日志
             ReportData::recordErrorLog('stepOneTransferInGas', $e->getMessage());
         } finally {
-            Redis::delLock('step:one:transfer:in:gas');
+            Redis::delLock('auto:check:transfer:in:gas');
         }
     }
 
@@ -259,7 +259,7 @@ class CollectionService
         //余额不足，无需归集
         if ($wallet_balance < 0.01) return true;
         //1.检查账户trx余额
-        $trx_balance = $tron_service->getBalance($wallet_info['address']) / 1000000;
+        $trx_balance = $tron_service->getBalance($wallet_info['address']);
         $gas = 40;
         if ($trx_balance >= $gas) return true;
         //获取出账钱包
@@ -290,7 +290,7 @@ class CollectionService
         //获取归集钱包
         $tron_collection_wallet = SystemConfig::getConfig('tron_collection_wallet');
 
-        $transfer_result = $tron_service->transferToken($token_info['contract'], $wallet_info['address'], $tron_collection_wallet, $wallet_balance, $wallet_info['private_key'], $token_info['contract_abi']);
+        $transfer_result = $tron_service->transferToken($token_info['contract'], $wallet_info['address'], $tron_collection_wallet, $wallet_balance * 1000000, $wallet_info['private_key'], $token_info['contract_abi']);
         return $transfer_result['status'] ?? false;
     }
 
@@ -309,7 +309,7 @@ class CollectionService
         $token_info = ChainTokenModel::new()->getRow(['chain' => "Tron", 'token' => strtoupper($token)]);
         $tron_service = (new TronService());
         //1.检查账户trx余额
-        $trx_balance = $tron_service->getBalance($wallet_info['address']) / 1000000;
+        $trx_balance = $tron_service->getBalance($wallet_info['address']);
         if ($trx_balance < 0.01) return true;
         //获取出账钱包
         $withdraw_wallet = SystemConfig::getConfig('tron_wallet');

@@ -197,11 +197,15 @@ class TronService
     {
         $this->tron->setAddress($out_address);
         $this->tron->setPrivateKey($private);
-        $result = $this->tron->send($input_address, $amount);
+        try {
+            $result = $this->tron->send($input_address, $amount);
+        } catch (\Exception $e) {
+            echo "ERROR:" . $e->getLine() . ":" . $e->getMessage() . "\n";
+        }
         if (isset($result['result']) && $result['result'] && !empty($result['txid'])) {
             return ['status' => true, 'txID' => $result['txid']];
         } else {
-            return ['code' => false, 'errmsg' => $result['code']];
+            return ['code' => false, 'errmsg' => $result['code'] ?? ''];
         }
     }
 
