@@ -460,7 +460,7 @@ class UserLogic extends BaseLogic
         //邀请码
         $result['code'] = $this->user['invite_code'];
         //网页注册地址
-        $result['url'] = 'https://www.baidu.com';
+        $result['url'] = 'https://www.tethersay.com/web/?invite_code=' . $this->user['invite_code'];
         //返回结果
         return $result;
     }
