@@ -31,9 +31,9 @@ class WithdrawOrderModel extends  BaseModel
         if (!isset($data['status'])) return '';
         $arr = [
             0 => __('申请中'),
-            1 => __('到账中'),
-            2 => __('已到账'),
-            3 => __('提现拒绝'),
+            1 => __('已到账'),
+            2 => __('提现拒绝'),
+            3 => __('到账失败'),
         ];
         return $arr[$data['status']] ?? $arr[1];
     }
