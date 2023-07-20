@@ -166,7 +166,7 @@ class WithdrawService
                 //转账
                 $result  = (new BscService())->transferRaw($withdraw_wallet['address'], $order['address'], $order['actual_withdraw_money'], $withdraw_wallet['private_key'], $token_info['contract']);
                 $result = [
-                    'result' => !empty($result['hash_address']),
+                    'status' => !empty($result['hash_address']),
                     'txid'   => $result['hash_address'] ?? '',
                     'errmsg' => $result['msg'] ?? '',
                 ];
@@ -175,7 +175,7 @@ class WithdrawService
                 $result = false;
         }
         //处理订单
-        $status = empty($result['result']) ? 3 : 1;
+        $status = empty($result['status']) ? 3 : 1;
         $update = [
             'extra' => json_encode($result),
             'status' => $status
