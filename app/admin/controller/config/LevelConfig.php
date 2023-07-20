@@ -31,5 +31,9 @@ class LevelConfig extends Backend
      * 需要将application/admin/library/traits/Backend.php中对应的方法复制到当前控制器,然后进行修改
      */
     
-
+    public function listLevel()
+    {
+        $list = $this->model->column('name', 'id');
+        return json($list);
+    }
 }

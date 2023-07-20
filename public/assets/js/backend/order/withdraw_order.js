@@ -7,7 +7,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 extend: {
                     index_url: 'order.withdraw_order/index' + location.search,
                     edit_url: 'order.withdraw_order/edit',
-                    multi_url: 'order.withdraw_order/multi',
                     table: 'withdraw_order',
                 }
             });

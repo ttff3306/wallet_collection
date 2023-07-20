@@ -6,10 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 extend: {
                     index_url: 'order.release_order/index' + location.search,
-                    add_url: 'order.release_order/add',
                     edit_url: 'order.release_order/edit',
-                    del_url: 'order.release_order/del',
-                    multi_url: 'order.release_order/multi',
                     table: 'release_order',
                 }
             });

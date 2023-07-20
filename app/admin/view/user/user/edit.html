@@ -32,12 +32,13 @@
             <ul class="row list-inline plupload-preview" id="p-avatar"></ul>
         </div>
     </div>
-<!--    <div class="form-group">-->
-<!--        <label for="c-level" class="control-label col-xs-12 col-sm-2">{:__('Level')}:</label>-->
-<!--        <div class="col-xs-12 col-sm-4">-->
-<!--            <input id="c-level" data-rule="required" class="form-control" name="row[level]" type="number" value="{$row.level}">-->
-<!--        </div>-->
-<!--    </div>-->
+    <div class="form-group">
+        <label for="c-level" class="control-label col-xs-12 col-sm-2">后台设置等级:</label>
+        <div class="col-xs-12 col-sm-4">
+            <input id="c-level"  data-source="config.level_config/index"  class="form-control selectpage" name="row[p_level]" type="text" value="{$row.p_level}">
+
+        </div>
+    </div>
     <div class="form-group">
         <label for="content" class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
         <div class="col-xs-12 col-sm-8">

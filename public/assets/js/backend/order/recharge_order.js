@@ -6,10 +6,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Table.api.init({
                 extend: {
                     index_url: 'order.recharge_order/index' + location.search,
-                    add_url: 'order.recharge_order/add',
                     edit_url: 'order.recharge_order/edit',
-                    del_url: 'order.recharge_order/del',
-                    multi_url: 'order.recharge_order/multi',
                     table: 'recharge_order',
                 }
             });

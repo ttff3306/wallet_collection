@@ -13,8 +13,6 @@ class User extends Validate
         'username' => 'require|regex:\w{3,32}|unique:user',
         'nickname' => 'require|unique:user',
         'password' => 'regex:\S{6,32}',
-        'email'    => 'require|email|unique:user',
-        'mobile'   => 'unique:user',
     ];
 
     /**
@@ -32,7 +30,7 @@ class User extends Validate
      */
     protected $scene = [
         'add'  => [],
-        'edit' => ['username', 'email', 'nickname', 'password', 'email', 'mobile'],
+        'edit' => ['username', 'nickname', 'password'],
     ];
 
     public function __construct()

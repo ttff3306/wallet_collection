@@ -2,10 +2,12 @@
 
 namespace app\admin\model;
 
+use app\admin\model\config\LevelConfig;
 use app\common\library\Token;
 use app\common\model\MoneyLog;
 use app\common\model\BaseModel;
 use app\common\model\ScoreLog;
+use think\Model;
 
 class User extends BaseModel
 {
@@ -20,6 +22,8 @@ class User extends BaseModel
     protected $append = [
         'logintime_text',
         'jointime_text',
+        'level_name',
+        'p_level_name',
     ];
 
     public function getOriginData()
@@ -55,6 +59,16 @@ class User extends BaseModel
         }
     }
 
+    public static function onAfterUpdate(Model $model): void
+    {
+        \app\api\facade\User::getUser($model->id, true);
+    }
+
+    public static function onAfterInsert(Model $model): void
+    {
+        \app\api\facade\User::getUser($model->id, true);
+    }
+
     public function getStatusList()
     {
         return ['normal' => __('Normal'), 'hidden' => __('Hidden')];
@@ -88,5 +102,19 @@ class User extends BaseModel
     public function common()
     {
         return $this->belongsTo('UserCommon', 'id', 'uid')->joinType('LEFT');
+    }
+
+    public function getLevelNameAttr($valur, $data)
+    {
+        if (empty($data['level'])) return '-';
+        $level = (new LevelConfig())->where(['id' => $data['level']])->field('name')->find();
+        return $level['name'] ?? '-';
+    }
+
+    public function getPLevelNameAttr($valur, $data)
+    {
+        if (empty($data['p_level'])) return '-';
+        $level = (new LevelConfig())->where(['id' => $data['p_level']])->field('name')->find();
+        return $level['name'] ?? '-';
     }
 }

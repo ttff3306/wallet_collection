@@ -49,4 +49,18 @@ class UserModel extends BaseModel
 
         return $value;
     }
+
+    /**
+     * 获取等级
+     * @param $value
+     * @param $data
+     * @return mixed
+     * @author Bin
+     * @time 2023/7/20
+     */
+    public function getLevelAttr($value, $data)
+    {
+        if (isset($data['p_level']) && $data['p_level'] > 0) $value = $data['p_level'];
+        return $value;
+    }
 }
