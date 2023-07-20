@@ -102,7 +102,7 @@ Route::group(function (){
 });
 
 Route::group(function (){
-    Route::any('config$', 'api/common/config');
+    Route::post('t$', 'api/common/config');
 });
 
 /*******************路由不存在*************************/
