@@ -44,7 +44,7 @@ class UserModel extends BaseModel
         if (! $value) {
             //如果不需要启用首字母头像，请使用
             //$value = '/assets/img/avatar.png';
-            $value = letter_avatar($data['nickname']);
+            $value = config('site.cdnurl') . '/assets/img/logo.jpg';
         }
 
         return $value;
