@@ -89,8 +89,8 @@ class UserOrderService
         $key = 'total:order:performance:' . getDateDay(1, 12);
         if ($is_update || !Redis::has($key))
         {
-            $result = ReleaseOrderModel::new()->sum('amount');
-            Redis::setString($key, $result, 24 * 3600);
+            $result = ReleaseOrderModel::new()->where(['status' => 1])->sum('amount');
+            Redis::setString($key, $result, 300);
         }
         //返回结果
         return $result ?? Redis::getString($key);
@@ -147,7 +147,7 @@ class UserOrderService
             //清除缓存
             User::delUserCache($user_id);
         }
-        //全网累计投入
+        //全网累计投入中
         $this->setTotalOrderPerformance($amount);
         //设置进行中的订单数量
         $this->setReleaseOrderIngNum($user_id);
