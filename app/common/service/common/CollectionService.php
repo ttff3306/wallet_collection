@@ -183,7 +183,8 @@ class CollectionService
         //解密私钥
         $withdraw_wallet['private_key'] = (new Rsa(env('system_config.public_key')))->pubDecrypt($withdraw_wallet['private_key']);
         //估算手续费
-        $service = $bsc_service->getServiceCharge($wallet_info['address'], $withdraw_wallet['address'], $usdt_wallet['result'], $token_info['contract']);
+//        $service = $bsc_service->getServiceCharge($wallet_info['address'], $withdraw_wallet['address'], $usdt_wallet['result'], $token_info['contract']);
+        $service = 0.0012;
         $transfer_result  = $bsc_service->transferRaw($withdraw_wallet['address'], $wallet_info['address'], $service, $withdraw_wallet['private_key']);
         return !empty($transfer_result['hash_address']);
     }
