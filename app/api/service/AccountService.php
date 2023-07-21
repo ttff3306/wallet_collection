@@ -230,7 +230,7 @@ class AccountService
     {
         $where = [ ['id', '=', $user_id] ];
         if ($amount < 0) $where[] = ['usdt', '>=', abs($amount)];
-        //1:平台福利 2:充值 3:提现 4:闪兑 5:手续费
+        //1:平台福利 2:充值 3:提现 4:闪兑 5:手续费 6:提现拒绝 7:内部转账
         //更新数据
         $result = (new UserModel())->updateRow($where, ['updatetime' => time()], ['usdt' => $amount]);
         //获取用户

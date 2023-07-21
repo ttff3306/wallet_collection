@@ -36,7 +36,7 @@ class WithdrawService
      * @author Bin
      * @time 2023/7/9
      */
-    public function createOrder(int $user_id, int $p_uid, string $address, $withdraw_money, $actual_withdraw_money, $service_money, string $chain)
+    public function createOrder(int $user_id, int $p_uid, string $address, $withdraw_money, $actual_withdraw_money, $service_money, string $chain, int $type = 1)
     {
         $data = [
             'uid'                   =>  $user_id,
@@ -49,7 +49,8 @@ class WithdrawService
             'p_uid'                 =>  $p_uid,
             'date_day'              =>  date('Ymd'),
             'order_no'              =>  createOrderNo('w_'),
-            'chain'                 => $chain
+            'chain'                 =>  $chain,
+            'type'                  =>  $type
         ];
         try {
             $result = (new WithdrawOrderModel())->insert($data);
@@ -78,8 +79,12 @@ class WithdrawService
             //扣除余额
             $result = Account::changeUsdt($user_id, ($amount + $service_usdt) * -1, 3, '提现', $service_usdt);
             if (!$result) throw new Exception(__('余额不足'));
+            //检查订单类型通过判断地址是否在数据库
+            $address_user_id = Account::getUserIdByAddress($address);
+            //是否内部订单
+            $type = empty($address_user_id) ? 1 : 2;
             //创建订单
-            $result = $this->createOrder($user_id, $p_uid, $address, $amount, $amount, $service_usdt, $chain);
+            $result = $this->createOrder($user_id, $p_uid, $address, $amount, $amount, $service_usdt, $chain, $type);
             if (!$result) throw new Exception(__('订单创建失败'));
             Db::commit();
         }catch (\Exception $e){
@@ -123,7 +128,7 @@ class WithdrawService
     public function handleWithdraw()
     {
         //获取未到账订单
-        $order_list = WithdrawOrderModel::new()->listRow(['status' => 0, 'is_auto' => 1],['page' => 1 ,'page_count' => 30], [], ['id']);
+        $order_list = WithdrawOrderModel::new()->listRow(['status' => 4, 'is_auto' => 1, 'type' => 1],['page' => 1 ,'page_count' => 30], [], ['id']);
         if (empty($order_list)) return;
         foreach ($order_list as $val) publisher('asyncSendWithdraw', ['order_id' => $val['id']]);
     }
@@ -140,9 +145,9 @@ class WithdrawService
     {
         //获取订单
         $order = WithdrawOrderModel::new()->getRow(['id' => $order_id]);
-        if (empty($order) || $order['status'] != 0 || $order['is_auto'] != 1) return;
+        if (empty($order) || $order['status'] != 4 || $order['is_auto'] != 1) return;
         //缓存key
-        // if (!Redis::getLock('handle:withdraw:order:' . $order_id)) return;
+         if (!Redis::getLock('handle:withdraw:order:' . $order_id)) return;
         switch ($order['chain'])
         {
             case 'Tron':

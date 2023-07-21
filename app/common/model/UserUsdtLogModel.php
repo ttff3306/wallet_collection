@@ -59,6 +59,8 @@ class UserUsdtLogModel extends  BaseModel
             3 => __('提现'),
             4 => __('闪兑'),
             5 => __('手续费'),
+            6 => __('提现拒绝'),
+            7 => __('内部转账'),
         ];
         return $list;
     }
