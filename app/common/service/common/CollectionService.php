@@ -222,12 +222,11 @@ class CollectionService
      */
     public function bscCollectionByOutGas(array $wallet_info, string $token = 'USDT')
     {
-        //获取代币配置
-        $token_info = ChainTokenModel::new()->getRow(['chain' => "BEP20", 'token' => strtoupper($token)]);
         $bsc_service = (new BscService());
         //1.检查账户bnb余额
         $bnb_wallet = $bsc_service->getBalance($wallet_info['address']);
         if (!isset($bnb_wallet['result'])) return false;
+        $bnb_wallet['result'] = sprintf('%.18f', $bnb_wallet['result']);
         if ($bnb_wallet['result'] <= 0) return true;
         //获取出账钱包
         $withdraw_wallet = SystemConfig::getConfig('bsc_wallet');
