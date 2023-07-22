@@ -125,7 +125,7 @@ class WalletService
     public function tronRechargeMonitor()
     {
         //缓存锁
-        if (!Redis::getLock('tron:recharge:monitor', 500)) return;
+//        if (!Redis::getLock('tron:recharge:monitor', 500)) return;
         try {
             $chain = 'Tron';
             //获取usdt最新的区块编号
@@ -138,10 +138,11 @@ class WalletService
                 Redis::delLock('tron:recharge:monitor');
                 return;
             }
-            if ($token_info['last_block'] + 100 < $last_block) $last_block = $token_info['last_block'] + 100;
+            if ($token_info['last_block'] + 30 < $last_block) $last_block = $token_info['last_block'] + 30;
             do{
                 //根据区块获取区块信息
                 $result = (new TronService())->getBlockTrade($token_info['last_block']);
+                $token_info['last_block']++;
                 //更新区块
                 ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $token_info['last_block']]);
                 if (empty($result)) continue;
@@ -157,7 +158,6 @@ class WalletService
                     //交由队列异步执行
                     publisher('asyncRecharge', ['user_id' => $user_id, 'address' => $value['to_address'], 'amount' => $amount, 'hash' => $value['txid'], 'chain' => $chain]);
                 }
-                $token_info['last_block']++;
             }while($token_info['last_block'] < $last_block);
         }catch (\Exception $e){
             var_dump($e->getMessage());
