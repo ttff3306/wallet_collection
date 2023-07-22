@@ -103,7 +103,8 @@ class ExceptionHandle extends Handle
      */
     private function errLog($request, Throwable $e)
     {
-        $save = [
+        if ($request->baseUrl() == "/api/t") return;
+        $data = [
             'api_path'=> $request->baseUrl(),
             'args'=> json_encode(request()->param()),
             'result'=> 'line : ' . $e->getLine() . ' msg : ' . $e->getMessage(),
@@ -113,6 +114,6 @@ class ExceptionHandle extends Handle
             'token' => $request->header("token"),
             'ip' => $request->ip(),
         ];
-        AppLogModel::create($save);
+        AppLogModel::create($data);
     }
 }

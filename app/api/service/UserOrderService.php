@@ -59,6 +59,47 @@ class UserOrderService
     }
 
     /**
+     * 获取投入中的USDK
+     * @param int $user_id
+     * @param bool $is_update
+     * @return int|float
+     * @author Bin
+     * @time 2023/7/22
+     */
+    public function getReleaseOrderIngUsdk(int $user_id, bool $is_update = false)
+    {
+        //缓存key
+        $key = 'release:order:ing:usdk:date:' . getDateDay(1, 20);
+        //检测缓存
+        if ($is_update || !Redis::hasHash($key, $user_id))
+        {
+            $result = ReleaseOrderModel::new()->getValuesSum(['uid' => $user_id, 'status' => 1], 'amount');
+            //写入缓存
+            Redis::setHash($key, $user_id, $result, 24 * 3600);
+        }
+        //返回结果
+        return $result ?? Redis::getHash($key, $user_id);
+    }
+
+    /**
+     * 设置进行中的订单
+     * @param int $user_id
+     * @param int|float $num
+     * @return int
+     * @author Bin
+     * @time 2023/7/10
+     */
+    public function setReleaseOrderIngUsdk(int $user_id, float $num = 1)
+    {
+        //缓存key
+        $key = 'release:order:ing:usdk:date:' . getDateDay(1, 20);
+        //检测缓存
+        if (!Redis::hasHash($key, $user_id)) return $this->getReleaseOrderIngUsdk($user_id, true);
+        //设置缓存
+        return Redis::incHash($key, $user_id, $num, 24 * 3600);
+    }
+
+    /**
      * 获取质押订单列表
      * @param int $user_id
      * @param int $page
@@ -151,6 +192,8 @@ class UserOrderService
         $this->setTotalOrderPerformance($amount);
         //设置进行中的订单数量
         $this->setReleaseOrderIngNum($user_id);
+        //设置进行中的USDK
+        $this->setReleaseOrderIngUsdk($user_id, $amount);
         //异步上报团队业绩
         publisher('asyncReportUserPerformanceByTeam', ['user_id' => $user_id, 'order_no' => $data['order_no'], 'performance' => $amount, 'type' => 1]);
         //异步检测有效人数
@@ -212,7 +255,9 @@ class UserOrderService
         //全网累计投入
         $this->getTotalOrderPerformance(true);
         //设置进行中的订单数量
-        $this->getReleaseOrderIngNum($user_id, true);
+        $this->setReleaseOrderIngNum($user_id, -1);
+        //设置进行中的订单数量
+        $this->setReleaseOrderIngUsdk($user_id, $amount * -1);
         //异步上报扣除团队业绩
         publisher('asyncReportUserPerformanceByTeam', ['user_id' => $user_id, 'order_no' => $order_no, 'performance' => $amount, 'type' => 2]);
         //异步检测有效人数
