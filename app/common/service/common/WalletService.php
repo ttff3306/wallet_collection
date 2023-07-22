@@ -67,7 +67,7 @@ class WalletService
     public function bscRechargeMonitor()
     {
         //缓存锁
-        if (!Redis::getLock('bsc:recharge:monitor', 50)) return;
+        if (!Redis::getLock('bsc:recharge:monitor', 500)) return;
         $chain = 'BEP20';
         //获取usdt最新的区块编号
         $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'token' => 'USDT']);
@@ -121,7 +121,7 @@ class WalletService
     public function tronRechargeMonitor()
     {
         //缓存锁
-        if (!Redis::getLock('tron:recharge:monitor', 50)) return;
+        if (!Redis::getLock('tron:recharge:monitor', 500)) return;
         $chain = 'Tron';
         //获取usdt最新的区块编号
         $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'token' => 'USDT']);

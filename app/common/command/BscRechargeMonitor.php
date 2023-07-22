@@ -21,11 +21,7 @@ class BscRechargeMonitor extends Command
      */
     protected function runConsumer(Input $input, Output $output) {
         $output->writeln('['. date('Y-m-d H:i:s') . '] runConsumer...running!');
-        $i = 0;
-        do{
-            Wallet::bscRechargeMonitor();
-            $i++;
-        }while($i < 2);
+        Wallet::bscRechargeMonitor();
         $output->writeln('['. date('Y-m-d H:i:s') . '] runConsumer...end!');
     }
 }

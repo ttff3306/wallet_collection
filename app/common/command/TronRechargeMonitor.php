@@ -21,11 +21,7 @@ class TronRechargeMonitor extends Command
      */
     protected function runConsumer(Input $input, Output $output) {
         $output->writeln('['. date('Y-m-d H:i:s') . '] runConsumer...running!');
-        $i = 0;
-        do{
-            Wallet::tronRechargeMonitor();
-            $i++;
-        }while($i < 2);
+        Wallet::tronRechargeMonitor();
         $output->writeln('['. date('Y-m-d H:i:s') . '] runConsumer...end!');
     }
 }
