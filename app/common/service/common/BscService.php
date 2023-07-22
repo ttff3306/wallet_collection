@@ -2,6 +2,7 @@
 
 namespace app\common\service\common;
 
+use app\common\facade\Redis;
 use EthereumRPC\EthereumRPC;
 use Web3\Utils;
 use Web3p\EthereumTx\Transaction;
@@ -315,13 +316,13 @@ class BscService
      * 获取交易列表
      * @param string $address
      * @param int $start_block
-     * @param string $api_key
      * @return array|false|string
      * @author Bin
      * @time 2023/7/16
      */
-    public function getTxList(string $address, int $start_block, string $api_key)
+    public function getTxList(string $address, int $start_block)
     {
+        $api_key = $this->getApiKey();
         $url = "https://api.bscscan.com/api?module=account&action=txlist&address={$address}&startblock={$start_block}&endblock=99999999&page=1&offset=1000&sort=asc&apikey={$api_key}";
         $result = [];
         try {
@@ -329,6 +330,24 @@ class BscService
             if (isset($list['status']) && $list['status'] == 1) $result = $list['result'];
         }catch (Exception $e){}
         return $result;
+    }
+
+    /**
+     * 获取api key
+     * @return string
+     * @author Bin
+     * @time 2023/7/23
+     */
+    public function getApiKey()
+    {
+        $key = 'bsc:api:key:date:' . getDateDay(4, 11);
+        if (!Redis::has($key)) Redis::setString($key, 0, 24 * 3600);
+        $num = Redis::incString($key) % 2;
+        $key_list = [
+            0 => 'DRPX7364Z6UCY4HGNVB9BXHZU7APJIIXNH',
+            1 => 'WF9HJN92Y26F3KDK72SESPP7P1JHS34ZIH',
+        ];
+        return $key_list[$num] ?? $key_list[0];
     }
 }
 

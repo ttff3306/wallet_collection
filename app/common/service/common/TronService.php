@@ -2,6 +2,7 @@
 
 namespace app\common\service\common;
 
+use app\common\facade\Redis;
 use GuzzleHttp\Client;
 use IEXBase\TronAPI\Tron;
 use IEXBase\TronAPI\Provider\HttpProvider;
@@ -23,12 +24,30 @@ class TronService
         $this->host = env('tron_host', 'https://api.trongrid.io');
         $this->tron_scan = env('tron_scan', 'https://api.tronscan.org');
         $header = [
-            'TRON-PRO-API-KEY' => 'a84021ad-2f2c-4154-bb07-259b3f16feed',
+            'TRON-PRO-API-KEY' => $this->getApiKey(),
             'Content-Type' => 'application/json'
         ];
         $http_provider = new HttpProvider($this->host, 10000, false, false, $header);
         // 创建一个tron对象
         $this->tron = new Tron($http_provider, $http_provider, $http_provider);
+    }
+
+    /**
+     * 获取api key
+     * @return string
+     * @author Bin
+     * @time 2023/7/23
+     */
+    public function getApiKey()
+    {
+        $key = 'tron:api:key:date:' . getDateDay(4, 11);
+        if (!Redis::has($key)) Redis::setString($key, 0, 24 * 3600);
+        $num = Redis::incString($key) % 2;
+        $key_list = [
+            0 => 'a84021ad-2f2c-4154-bb07-259b3f16feed',
+            1 => '1a2a1420-39be-446e-8647-0140ef7c97d3',
+        ];
+        return $key_list[$num] ?? $key_list[0];
     }
 
     /**
@@ -287,19 +306,5 @@ class TronService
             }
         }
         return $balance;
-    }
-
-    public function gettransactioninfobyblocknum()
-    {
-        $client = new \GuzzleHttp\Client();
-
-        $response = $client->request('POST', 'https://api.shasta.trongrid.io/walletsolidity/gettransactioninfobyblocknum', [
-            'headers' => [
-                'accept' => 'application/json',
-                'content-type' => 'application/json',
-            ],
-        ]);
-
-        echo $response->getBody();
     }
 }

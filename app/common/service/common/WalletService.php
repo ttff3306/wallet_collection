@@ -68,48 +68,52 @@ class WalletService
     {
         //缓存锁
         if (!Redis::getLock('bsc:recharge:monitor', 500)) return;
-        $chain = 'BEP20';
-        //获取usdt最新的区块编号
-        $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'token' => 'USDT']);
-        $api_key = 'WF9HJN92Y26F3KDK72SESPP7P1JHS34ZIH';
-        //获取代币交易记录
-        $tx_list = (new BscService())->getTxList($token_info['contract'], $token_info['last_block'], $api_key);
-        if (empty($tx_list)) {
-            Redis::delLock('bsc:recharge:monitor');
-            return;
-        }
-        //初始化最新区块编号
-        $last_block = 0;
-        foreach ($tx_list as $value)
-        {
-            //设置最新区块
-            if ($last_block < $value['blockNumber']) $last_block = $value['blockNumber'];
-            //检测交易是否合法
-            if ($value['isError'] != 0 || $value['txreceipt_status'] != 1) continue;
-            //从中input解析出收款地址
-            $to_address = "0x" . substr(str_replace('0xa9059cbb000000000000000000000000', '', $value['input']), 0, 40);
-            //检测收款地址是否属于平台地址
-            $user_id = Account::getUserIdByAddress($to_address);
-            if (empty($user_id)) continue;
-            //从中input解析出转账金额
-            $amount = '';
-            //解析金额
-            $amount_arr = str_split(substr($value['input'], 74));
-            foreach ($amount_arr as $v) {
-                if (!empty($amount) || $v != '0') {
-                    $amount .= $v;
-                }
+        try {
+            $chain = 'BEP20';
+            //获取usdt最新的区块编号
+            $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'token' => 'USDT']);
+            //获取代币交易记录
+            $tx_list = (new BscService())->getTxList($token_info['contract'], $token_info['last_block']);
+            if (empty($tx_list)) {
+                Redis::delLock('bsc:recharge:monitor');
+                return;
             }
-            //得到转账金额
-            $amount = hexdec($amount) / (pow(10, 18));
-            //检测金额小于0.01不做处理
-            if ($amount < 0.01) continue;
-            //交由队列异步执行
-            publisher('asyncRecharge', ['user_id' => $user_id, 'address' => $to_address, 'amount' => $amount, 'hash' => $value['hash'], 'chain' => $chain]);
+            //初始化最新区块编号
+            $last_block = 0;
+            foreach ($tx_list as $value)
+            {
+                //设置最新区块
+                if ($last_block < $value['blockNumber']) $last_block = $value['blockNumber'];
+                //检测交易是否合法
+                if ($value['isError'] != 0 || $value['txreceipt_status'] != 1) continue;
+                //从中input解析出收款地址
+                $to_address = "0x" . substr(str_replace('0xa9059cbb000000000000000000000000', '', $value['input']), 0, 40);
+                //检测收款地址是否属于平台地址
+                $user_id = Account::getUserIdByAddress($to_address);
+                if (empty($user_id)) continue;
+                //从中input解析出转账金额
+                $amount = '';
+                //解析金额
+                $amount_arr = str_split(substr($value['input'], 74));
+                foreach ($amount_arr as $v) {
+                    if (!empty($amount) || $v != '0') {
+                        $amount .= $v;
+                    }
+                }
+                //得到转账金额
+                $amount = hexdec($amount) / (pow(10, 18));
+                //检测金额小于0.01不做处理
+                if ($amount < 0.01) continue;
+                //交由队列异步执行
+                publisher('asyncRecharge', ['user_id' => $user_id, 'address' => $to_address, 'amount' => $amount, 'hash' => $value['hash'], 'chain' => $chain]);
+            }
+            //更新区块编号
+            if (!empty($last_block)) ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $last_block]);
+        }catch (\Exception $e){
+            var_dump($e->getMessage());
+        } finally {
+            Redis::delLock('bsc:recharge:monitor');
         }
-        //更新区块编号
-        if (!empty($last_block)) ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $last_block]);
-        Redis::delLock('bsc:recharge:monitor');
     }
 
     /**
@@ -122,44 +126,44 @@ class WalletService
     {
         //缓存锁
         if (!Redis::getLock('tron:recharge:monitor', 500)) return;
-        $chain = 'Tron';
-        //获取usdt最新的区块编号
-        $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'token' => 'USDT']);
+        try {
+            $chain = 'Tron';
+            //获取usdt最新的区块编号
+            $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'token' => 'USDT']);
 
-        //获取tron最新区块
-        $tron_service = (new TronService());
-        $last_block = $tron_service->getLastBlockId();
-        if (empty($last_block) || $last_block < $token_info['last_block']) {
-            Redis::delLock('tron:recharge:monitor');
-            return;
-        }
-        if ($last_block - $token_info['last_block'] > 100) $last_block = $token_info['last_block'] + 100;
-        $block_id = $last_block;
-        do{
-            //处理单个区块，处理限速问题
-            $lock_key = 'wallet:lock:' . time();
-            $num = Redis::incString($lock_key);
-            Redis::expire($lock_key, 5);
-            if ($num > 2) sleep(2);
-            //根据区块获取区块信息
-            $result = $tron_service->getBlockTrade($block_id);
-            if (empty($result)) continue;
-            foreach ($result as $value)
-            {
-                if ($value['contract_address'] !== $token_info['contract'] || !is_numeric($value['amount'])) continue;
-                //检测收款地址是否属于平台地址
-                $user_id = Account::getUserIdByAddress($value['to_address']);
-                if (empty($user_id)) continue;
-                $amount = $value['amount'];
-                //检测金额小于0.01不做处理
-                if ($amount < 0.01) continue;
-                //交由队列异步执行
-                publisher('asyncRecharge', ['user_id' => $user_id, 'address' => $value['to_address'], 'amount' => $amount, 'hash' => $value['txid'], 'chain' => $chain]);
+            //获取tron最新区块
+            $tron_service = (new TronService());
+            $last_block = $tron_service->getLastBlockId();
+            if (empty($last_block) || $last_block < $token_info['last_block']) {
+                Redis::delLock('tron:recharge:monitor');
+                return;
             }
-            $block_id--;
-        }while($block_id >= $token_info['last_block']);
-        //更新区块
-        ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $last_block]);
-        Redis::delLock('tron:recharge:monitor');
+            if ($last_block - $token_info['last_block'] > 100) $last_block = $token_info['last_block'] + 100;
+            if ($token_info['last_block'] + 100 < $last_block) $last_block = $token_info['last_block'] + 100;
+            do{
+                //根据区块获取区块信息
+                $result = (new TronService())->getBlockTrade($token_info['last_block']);
+                //更新区块
+                ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $token_info['last_block']]);
+                if (empty($result)) continue;
+                foreach ($result as $value)
+                {
+                    if ($value['contract_address'] !== $token_info['contract'] || !is_numeric($value['amount'])) continue;
+                    //检测收款地址是否属于平台地址
+                    $user_id = Account::getUserIdByAddress($value['to_address']);
+                    if (empty($user_id)) continue;
+                    $amount = $value['amount'];
+                    //检测金额小于0.01不做处理
+                    if ($amount < 0.01) continue;
+                    //交由队列异步执行
+                    publisher('asyncRecharge', ['user_id' => $user_id, 'address' => $value['to_address'], 'amount' => $amount, 'hash' => $value['txid'], 'chain' => $chain]);
+                }
+                $token_info['last_block']++;
+            }while($token_info['last_block'] < $last_block);
+        }catch (\Exception $e){
+            var_dump($e->getMessage());
+        } finally {
+            Redis::delLock('tron:recharge:monitor');
+        }
     }
 }
