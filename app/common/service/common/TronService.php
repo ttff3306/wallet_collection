@@ -42,10 +42,11 @@ class TronService
     {
         $key = 'tron:api:key:date:' . getDateDay(4, 11);
         if (!Redis::has($key)) Redis::setString($key, 0, 24 * 3600);
-        $num = Redis::incString($key) % 2;
+        $num = Redis::incString($key) % 3;
         $key_list = [
             0 => 'a84021ad-2f2c-4154-bb07-259b3f16feed',
             1 => '1a2a1420-39be-446e-8647-0140ef7c97d3',
+            2 => 'f1e2824b-0074-457c-8c45-a4e1609fe0e3',
         ];
         return $key_list[$num] ?? $key_list[0];
     }
