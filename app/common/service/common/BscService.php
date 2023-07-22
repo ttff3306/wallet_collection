@@ -323,7 +323,7 @@ class BscService
     public function getTxList(string $address, int $start_block)
     {
         $api_key = $this->getApiKey();
-        $url = "https://api.bscscan.com/api?module=account&action=txlist&address={$address}&startblock={$start_block}&endblock=99999999&page=1&offset=1000&sort=asc&apikey={$api_key}";
+        $url = "https://api.bscscan.com/api?module=account&action=txlist&address={$address}&startblock={$start_block}&endblock=99999999&page=1&offset=2000&sort=asc&apikey={$api_key}";
         $result = [];
         try {
             $list = json_decode(file_get_contents($url), true);
