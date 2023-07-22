@@ -47,9 +47,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'common.is_effective_member', title: __('是否有效会员'), searchList: {'1':'有效','0':'无效'}, operate: false
                             ,formatter: Table.api.formatter.status},
                         {field: 'common.total_user_performance', title: __('用户累计投入量'), operate: false},
-                        {field: 'common.total_user_performance', title: __('用户累计投入量'), operate: false},
                         {field: 'common.direct_effective_num', title: __('直推有效人数'), operate: false},
                         {field: 'common.team_effective_num', title: __('团队有效人数'), operate: false},
+                        {field: 'common.total_recharge_usdt', title: __('用户累计充值'), operate: false},
+                        {field: 'common.total_withdraw_usdt', title: __('用户累计提现'), operate: false},
+                        {field: 'common.team_total_recharge_usdt', title: __('团队累计充值'), operate: false},
+                        {field: 'common.team_total_withdraw_usdt', title: __('团队累计提现'), operate: false},
                         {
                         field: 'status',
                         title: __('Status'),
