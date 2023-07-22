@@ -125,7 +125,7 @@ class WalletService
     public function tronRechargeMonitor()
     {
         //缓存锁
-//        if (!Redis::getLock('tron:recharge:monitor', 500)) return;
+        if (!Redis::getLock('tron:recharge:monitor', 500)) return;
         try {
             $chain = 'Tron';
             //获取usdt最新的区块编号
