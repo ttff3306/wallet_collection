@@ -283,7 +283,7 @@ class TronService
         //获取数据
         $result = json_decode(file_get_contents("https://apilist.tronscanapi.com/api/system/status"),true);
         //返回结果
-        return $result['database']['block'] ?? 0;
+        return $result['database']['confirmedBlock'] ?? 0;
     }
 
     /**
