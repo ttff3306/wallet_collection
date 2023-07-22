@@ -25,13 +25,14 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     [
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
-                        {field: 'img_url', title: __('Img_url'), formatter: Table.api.formatter.url},
                         {field: 'uid', title: __('Uid')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'status', title: __('Status')},
-                        {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'remarks', title: __('Remarks')},
+                        // {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        // {field: 'remarks', title: __('Remarks')},
                         {field: 'ip', title: __('Ip')},
+                        {field: 'content', title: __('反馈内容'),formatter: function (value,row,index){
+                                return '<textarea cols="30" rows="5" disabled> '+(value == null ? '' : value)+' </textarea>';
+                            },operate: false},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
                 ]

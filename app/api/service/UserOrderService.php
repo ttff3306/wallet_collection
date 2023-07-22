@@ -266,7 +266,7 @@ class UserOrderService
         $key = 'list:user:release:log:date:' . date('Ymd');
         if ($is_update || !Redis::has($key))
         {
-            $list = UserReleaseLogModel::new()->listRow([], [], ['id' => 'desc'], ['amount','address','create_time', 'user_id']);
+            $list = UserReleaseLogModel::new()->listRow([], ['page' => 1 ,'page_count' => 50], ['id' => 'desc'], ['amount','address','create_time', 'user_id']);
             //写入缓存
             Redis::setString($key, $list, 300);
         }
