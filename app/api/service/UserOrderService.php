@@ -62,7 +62,7 @@ class UserOrderService
      * 获取投入中的USDK
      * @param int $user_id
      * @param bool $is_update
-     * @return int|float
+     * @return int
      * @author Bin
      * @time 2023/7/22
      */
@@ -84,12 +84,12 @@ class UserOrderService
     /**
      * 设置进行中的订单
      * @param int $user_id
-     * @param int|float $num
+     * @param int $num
      * @return int
      * @author Bin
      * @time 2023/7/10
      */
-    public function setReleaseOrderIngUsdk(int $user_id, float $num = 1)
+    public function setReleaseOrderIngUsdk(int $user_id, int $num = 1)
     {
         //缓存key
         $key = 'release:order:ing:usdk:date:' . getDateDay(1, 20);
@@ -193,7 +193,7 @@ class UserOrderService
         //设置进行中的订单数量
         $this->setReleaseOrderIngNum($user_id);
         //设置进行中的USDK
-        $this->setReleaseOrderIngUsdk($user_id, $amount);
+        $this->setReleaseOrderIngUsdk($user_id, intval($amount));
         //异步上报团队业绩
         publisher('asyncReportUserPerformanceByTeam', ['user_id' => $user_id, 'order_no' => $data['order_no'], 'performance' => $amount, 'type' => 1]);
         //异步检测有效人数
@@ -257,7 +257,7 @@ class UserOrderService
         //设置进行中的订单数量
         $this->setReleaseOrderIngNum($user_id, -1);
         //设置进行中的订单数量
-        $this->setReleaseOrderIngUsdk($user_id, $amount * -1);
+        $this->setReleaseOrderIngUsdk($user_id, intval($amount * -1));
         //异步上报扣除团队业绩
         publisher('asyncReportUserPerformanceByTeam', ['user_id' => $user_id, 'order_no' => $order_no, 'performance' => $amount, 'type' => 2]);
         //异步检测有效人数
