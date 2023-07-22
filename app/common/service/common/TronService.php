@@ -23,7 +23,8 @@ class TronService
         $this->host = env('tron_host', 'https://api.trongrid.io');
         $this->tron_scan = env('tron_scan', 'https://api.tronscan.org');
         $header = [
-            'TRON_PRO_API_KEY' => 'a84021ad-2f2c-4154-bb07-259b3f16feed'
+            'TRON_PRO_API_KEY' => 'a84021ad-2f2c-4154-bb07-259b3f16feed',
+            'Content-Type' => 'application/json'
         ];
         $http_provider = new HttpProvider($this->host, 10000, false, false, $header);
         // 创建一个tron对象
