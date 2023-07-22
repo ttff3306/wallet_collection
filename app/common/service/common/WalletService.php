@@ -138,7 +138,6 @@ class WalletService
                 Redis::delLock('tron:recharge:monitor');
                 return;
             }
-            if ($last_block - $token_info['last_block'] > 100) $last_block = $token_info['last_block'] + 100;
             if ($token_info['last_block'] + 100 < $last_block) $last_block = $token_info['last_block'] + 100;
             do{
                 //根据区块获取区块信息
