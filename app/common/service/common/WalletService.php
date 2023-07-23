@@ -195,6 +195,7 @@ class WalletService
                 {
                     if ($val['block'] > $block) $block = $val['block'];
                     if ($val['status'] != 0 || $val['contract_address'] != $token_info['contract']) continue;
+                    if (empty($val['trigger_info']['data'])) continue;
                     $amount = 0;
                     if (strlen($val['trigger_info']['data']) == 136) {
                         $t_to_address = '41' . substr($val['trigger_info']['data'], 32, 40);
@@ -213,7 +214,7 @@ class WalletService
                 }
                 //更新区块
                 ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $block]);
-            }while($start < 4);
+            }while($start < 10);
         }catch (\Exception $e){
             var_dump($e->getMessage());
         } finally {
