@@ -134,4 +134,16 @@ class ConsumerService
     {
         Account::orderRevenueReleaseProfit($data['order_id']);
     }
+
+    /**
+     * 异步上报提现
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/7/23
+     */
+    public function asyncReportUserWithdrawUsdt($data)
+    {
+        ReportData::reportUserWithdrawUsdt($data['user_id'], $data['amount']);
+    }
 }

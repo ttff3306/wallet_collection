@@ -188,5 +188,7 @@ class WithdrawService
         if($status == 1) $update['pay_time'] = time();
         if (!empty($result['txid'])) $update['hash'] = $result['txid'];
         WithdrawOrderModel::new()->updateRow(['id' => $order_id], $update);
+        //上报提现
+        if ($status == 1) publisher('asyncReportUserWithdrawUsdt', ['user_id' => $order['uid'], 'amount' => $order['actual_withdraw_money']]);
     }
 }

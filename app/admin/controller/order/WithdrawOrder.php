@@ -118,6 +118,8 @@ class WithdrawOrder extends Backend
             $result = Account::changeUsdt($user_id, $order['actual_withdraw_money'], 7, "订单[{$order['id']}]内部转账");
             if (!$result) throw new Exception('余额更新失败');
             Db::commit();
+            //异步上报提现
+            publisher('asyncReportUserWithdrawUsdt', ['user_id' => $order['uid'], 'amount' => $order['actual_withdraw_money']]);
             return true;
         }catch (\Exception $e){
             Db::rollback();
