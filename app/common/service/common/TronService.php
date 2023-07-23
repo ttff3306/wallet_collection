@@ -190,11 +190,13 @@ class TronService
     {
         $url = $this->tron_scan . '/api/account/wallet?address=' . $address;
         try {
-            $headers = [
-                'TRON-PRO-API-KEY' => 'aacc3f55-4566-435b-b445-dfa667b2829f'
+            $options = [
+                'headers'   => [
+                    'TRON-PRO-API-KEY' => $this->getScanApiApiKey()
+                ]
             ];
             $client = new Client();
-            $response = $client->get($url, $headers);
+            $response = $client->get($url, $options);
             // 获取响应内容
             $result = $response->getBody()->getContents();
             
@@ -310,5 +312,52 @@ class TronService
             }
         }
         return $balance;
+    }
+
+    /**
+     * TRC20转账记录
+     * @param string $contract
+     * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/7/23
+     */
+    public function listTrc20Transfers(string $contract, int $limit = 2000)
+    {
+        $url = "https://apilist.tronscanapi.com/api/token_trc20/transfers?limit={$limit}&start=0&contract_address={$contract}&start_timestamp=&end_timestamp=&filterTokenValue=0";
+        try {
+            $options = [
+                'headers'   => [
+                    'TRON-PRO-API-KEY' => $this->getScanApiApiKey()
+                ]
+            ];
+            $client = new Client();
+            $response = $client->get($url, $options);
+            // 获取响应内容
+            $result = $response->getBody()->getContents();
+            $result = json_decode($result, true);
+            return $result['token_transfers'] ?? [];
+        } catch (\Exception $e) {
+            echo "ERROR:" . $e->getLine() . ":" . $e->getMessage() . "\n";
+            return [];
+        }
+    }
+
+    /**
+     * 获取api key
+     * @return string
+     * @author Bin
+     * @time 2023/7/23
+     */
+    public function getScanApiApiKey()
+    {
+        $key = 'tron:scan:api:key:date:' . getDateDay(4, 11);
+        if (!Redis::has($key)) Redis::setString($key, 0, 24 * 3600);
+        $num = Redis::incString($key) % 2;
+        $key_list = [
+            0 => 'aacc3f55-4566-435b-b445-dfa667b2829f',
+            1 => '99db38d0-181a-4b97-81b1-9bf12efd4c0d',
+        ];
+        return $key_list[$num] ?? $key_list[0];
     }
 }
