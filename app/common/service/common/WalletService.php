@@ -213,7 +213,7 @@ class WalletService
                 }
                 //更新区块
                 ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $block]);
-            }while($start < 2);
+            }while($start < 4);
         }catch (\Exception $e){
             var_dump($e->getMessage());
         } finally {
