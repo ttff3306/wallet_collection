@@ -212,7 +212,7 @@ class WalletService
                     publisher('asyncRecharge', ['user_id' => $user_id, 'address' => $val['to_address'], 'amount' => $amount, 'hash' => $val['transaction_id'], 'chain' => $chain]);
                 }
                 //更新区块
-                ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $token_info['last_block']]);
+                ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $block]);
             }while($start < 2);
         }catch (\Exception $e){
             var_dump($e->getMessage());
