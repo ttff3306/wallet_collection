@@ -181,35 +181,39 @@ class WalletService
             $chain = 'Tron';
             //获取usdt最新的区块编号
             $token_info = ChainTokenModel::new()->getRow(['chain' => $chain, 'token' => 'USDT']);
-
-            //获取tron最新区块
-            $tron_service = (new TronService());
-            //获取交易列表
-            $transfer_list = $tron_service->listTrc20Transfers($token_info['contract']);
-            if (empty($transfer_list)) return;
-            $block = $token_info['last_block'];
-            foreach ($transfer_list as $val)
-            {
-                if ($val['block'] > $block) $block = $val['block'];
-                if ($val['status'] != 0 || $val['contract_address'] != $token_info['contract']) continue;
-                $amount = 0;
-                if (strlen($val['trigger_info']['data']) == 136) {
-                    $t_to_address = '41' . substr($val['trigger_info']['data'], 32, 40);
-                    if ($t_to_address != $val['to_address']) continue;
-                    $amount = hexdec(substr($val['trigger_info']['data'], 72)) / 1000000;
+            $start = 0;
+            $limit = 50;
+            do{
+                //获取tron最新区块
+                $tron_service = (new TronService());
+                //获取交易列表
+                $transfer_list = $tron_service->listTrc20Transfers($token_info['contract'], $start * $limit);
+                $start++;
+                if (empty($transfer_list)) continue;
+                $block = $token_info['last_block'];
+                foreach ($transfer_list as $val)
+                {
+                    if ($val['block'] > $block) $block = $val['block'];
+                    if ($val['status'] != 0 || $val['contract_address'] != $token_info['contract']) continue;
+                    $amount = 0;
+                    if (strlen($val['trigger_info']['data']) == 136) {
+                        $t_to_address = '41' . substr($val['trigger_info']['data'], 32, 40);
+                        if ($t_to_address != $val['to_address']) continue;
+                        $amount = hexdec(substr($val['trigger_info']['data'], 72)) / 1000000;
+                    }
+                    //检测金额小于0.01不做处理
+                    if ($amount < 0.01) continue;
+                    //检测收款地址是否属于平台地址
+                    $user_id = Account::getUserIdByAddress($val['to_address']);
+                    if (empty($user_id)) continue;
+                    //检测交易是否重复添加
+                    if (!Redis::addSet($check_list_key, $val['transaction_id'])) continue;
+                    //交由队列异步执行
+                    publisher('asyncRecharge', ['user_id' => $user_id, 'address' => $val['to_address'], 'amount' => $amount, 'hash' => $val['transaction_id'], 'chain' => $chain]);
                 }
-                //检测金额小于0.01不做处理
-                if ($amount < 0.01) continue;
-                //检测收款地址是否属于平台地址
-                $user_id = Account::getUserIdByAddress($val['to_address']);
-                if (empty($user_id)) continue;
-                //检测交易是否重复添加
-                if (!Redis::addSet($check_list_key, $val['transaction_id'])) continue;
-                //交由队列异步执行
-                publisher('asyncRecharge', ['user_id' => $user_id, 'address' => $val['to_address'], 'amount' => $amount, 'hash' => $val['transaction_id'], 'chain' => $chain]);
-            }
-            //更新区块
-            ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $token_info['last_block']]);
+                //更新区块
+                ChainTokenModel::new()->updateRow(['chain' => $chain, 'token' => 'USDT'], ['last_block' => $token_info['last_block']]);
+            }while($start < 2);
         }catch (\Exception $e){
             var_dump($e->getMessage());
         } finally {

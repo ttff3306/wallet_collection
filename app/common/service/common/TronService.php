@@ -322,9 +322,9 @@ class TronService
      * @author Bin
      * @time 2023/7/23
      */
-    public function listTrc20Transfers(string $contract, int $limit = 2000)
+    public function listTrc20Transfers(string $contract, int $start = 0, int $limit = 50, string $start_timestamp = '', string $end_timestamp = '')
     {
-        $url = "https://apilist.tronscanapi.com/api/token_trc20/transfers?limit={$limit}&start=0&contract_address={$contract}&start_timestamp=&end_timestamp=&filterTokenValue=0";
+        $url = "https://apilist.tronscanapi.com/api/token_trc20/transfers?limit={$limit}&start={$start}&contract_address={$contract}&start_timestamp={$start_timestamp}&end_timestamp={$end_timestamp}&filterTokenValue=0";
         try {
             $options = [
                 'headers'   => [
