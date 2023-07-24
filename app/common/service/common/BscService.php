@@ -207,7 +207,7 @@ class BscService
         if(!empty($contract)) {
             $method_hash = '0xa9059cbb';
             $method_param1_hex =str_pad(substr($to, 2), 64, '0', STR_PAD_LEFT);
-            $method_param2_hex = str_pad(strval($this->bcDecHex($value * bcpow(10, 18))), 64, '0', STR_PAD_LEFT);
+            $method_param2_hex = str_pad(strval($this->bcDecHex(bcmul($value, bcpow(10, 18)))), 64, '0', STR_PAD_LEFT);
             $data = $method_hash . $method_param1_hex . $method_param2_hex;
             $params = ['from' => $from, 'to' => $contract, 'data' => $data];
 
