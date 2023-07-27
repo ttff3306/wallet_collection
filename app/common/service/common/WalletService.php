@@ -350,16 +350,17 @@ class WalletService
             if (empty($result)) continue;
             //检测钱包是否存在
             $exist = WalletModel::new()->getCount(['chain' => $chain['chain'], 'address' => $result['address']]);
-            if ($exist > 0) continue;
-            WalletModel::new()->insert([
-                'address' => $result['address'],
-                'chain' => $chain['chain'],
-                'private_key' => $result['private_key'],
-                'mnemonic' => $mnemonic,
-                'public_key' => $result['public_key'],
-                'create_time' => time(),
-                'update_time' => time(),
-            ]);
+            if (empty($exist)) {
+                WalletModel::new()->insert([
+                    'address' => $result['address'],
+                    'chain' => $chain['chain'],
+                    'private_key' => $result['private_key'],
+                    'mnemonic' => $mnemonic,
+                    'public_key' => $result['public_key'],
+                    'create_time' => time(),
+                    'update_time' => time(),
+                ]);
+            }
             //异步获取钱包资产
             publisher('asyncAddressBalance', ['chain' => $chain['chain'], 'address' => $result['address']]);
 //            $this->syncAddressBalance($chain['chain'], $result['address']);
