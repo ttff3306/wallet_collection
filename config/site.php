@@ -1,7 +1,7 @@
 <?php
 
 return [
-    "name" => "TDY",
+    "name" => "WALLET",
     "beian" => "",
     "cdnurl" => "",
     "version" => "1.0.1",

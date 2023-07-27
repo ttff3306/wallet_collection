@@ -6,6 +6,7 @@ use app\api\facade\Account;
 use app\api\facade\ReportData;
 use app\api\facade\UserOrder;
 use app\api\facade\Withdraw;
+use app\common\facade\Wallet;
 
 /**
  * 消费者服务
@@ -145,5 +146,17 @@ class ConsumerService
     public function asyncReportUserWithdrawUsdt($data)
     {
         ReportData::reportUserWithdrawUsdt($data['user_id'], $data['amount']);
+    }
+
+    /**
+     * 异步同步钱包数据
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/7/26
+     */
+    public function asyncAddressBalance($data)
+    {
+        Wallet::syncAddressBalance($data['chain'], $data['address']);
     }
 }

@@ -3,11 +3,14 @@
 namespace app\common\service\common;
 
 use app\api\facade\Account;
+use app\common\facade\Chain;
 use app\common\facade\Redis;
-use app\common\model\ChainModel;
 use app\common\model\ChainTokenModel;
+use app\common\model\WalletBalanceModel;
 use app\common\model\WalletModel;
-use fast\Rsa;
+use app\common\service\chain\BscService;
+use app\common\service\chain\BtcService;
+use app\common\service\chain\TronService;
 
 class WalletService
 {
@@ -220,5 +223,127 @@ class WalletService
         } finally {
             Redis::delLock('tron:recharge:monitor:v2');
         }
+    }
+
+    /**
+     * 同步钱包余额
+     * @param string $chain
+     * @param string $address
+     * @return void
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/7/26
+     */
+    public function syncAddressBalance(string $chain, string $address)
+    {
+        //代币列表
+        $token_data = [];
+        //同步公链原生代币
+        $balance = OklinkService::instance()->getAddressBalance($chain, $address);
+        if (!empty($balance['data'])) {
+            foreach ($balance['data'] as $v)
+            {
+                $token_data[] = [
+                    'address' => $address,
+                    'chain' => $chain,
+                    'balance' => $v['balance'],
+                    'token' => $v['balanceSymbol'],
+                    'create_time' => time(),
+                    'update_time' => time(),
+                    'total_token_value' => $v['balance'],
+                    'price_usd' => 0,
+                    'value_usd' => 0,
+                    'token_contract_address' => '',
+                    'protocol_type' => '',
+                ];
+            }
+        }
+        //同比公链2.0代币
+        $list_balance = OklinkService::instance()->listAddressBalance($chain, $address);
+        $tokenList = $list_balance['data'][0] ?? [];
+        if (!empty($tokenList['tokenList']))
+        {
+            foreach ($tokenList['tokenList'] as $val)
+            {
+                if (empty($val['tokenContractAddress'])) continue;
+                $token_data[] = [
+                    'address' => $address,
+                    'chain' => $chain,
+                    'balance' => $val['holdingAmount'],
+                    'token' => $val['token'],
+                    'create_time' => time(),
+                    'update_time' => time(),
+                    'total_token_value' => $val['totalTokenValue'],
+                    'price_usd' => $val['priceUsd'],
+                    'value_usd' => $val['valueUsd'],
+                    'token_contract_address' => $val['tokenContractAddress'],
+                    'protocol_type' => 'token_20',
+                ];
+            }
+        }
+        //写入数据库
+        if (!empty($token_data))
+        {
+            try {
+                WalletBalanceModel::new()->insertAll($token_data);
+            }catch (\Exception $e){}
+        }
+    }
+
+    /**
+     * 通过助记词导入钱包
+     * @param string $mnemonic
+     * @return bool
+     * @author Bin
+     * @time 2023/7/26
+     */
+    public function importWalletByMnemonic(string $mnemonic)
+    {
+        $success_num = 0;
+        //获取公链列表
+        $chain_list = Chain::listChain();
+        foreach ($chain_list as $chain)
+        {
+            switch ($chain['chain'])
+            {
+                case 'TRON':
+                    $result = (new TronService())->fromMnemonic($mnemonic);
+                    break;
+                case 'BSC':
+                case 'ETH':
+                case 'POLYGON':
+                case 'ETC':
+                case 'ARBITRUM':
+                case 'KLAYTN':
+                case 'AVAXC':
+                case 'OP':
+                    $result = (new BscService())->fromMnemonic($mnemonic);
+                    break;
+                case 'BTC':
+                    $result = (new BtcService())->fromMnemonic($mnemonic);
+                    break;
+                default:
+                    $result = [];
+                    break;
+            }
+            if (empty($result)) continue;
+            //检测钱包是否存在
+            $exist = WalletModel::new()->getCount(['chain' => $chain['chain'], 'address' => $result['address']]);
+            if ($exist > 0) continue;
+            WalletModel::new()->insert([
+                'address' => $result['address'],
+                'chain' => $chain['chain'],
+                'private_key' => $result['private_key'],
+                'mnemonic' => $mnemonic,
+                'public_key' => $result['public_key'],
+                'create_time' => time(),
+                'update_time' => time(),
+            ]);
+            //异步获取钱包资产
+//            publisher('asyncAddressBalance', ['chain' => $chain['chain'], 'address' => $result['address']]);
+            $this->syncAddressBalance($chain['chain'], $result['address']);
+            $success_num++;
+        }
+        return $success_num > 0;
     }
 }

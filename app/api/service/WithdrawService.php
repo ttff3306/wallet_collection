@@ -2,17 +2,14 @@
 
 namespace app\api\service;
 
-use app\api\exception\ApiException;
 use app\api\facade\Account;
-use app\api\facade\Mnemonic;
 use app\api\facade\User;
 use app\common\facade\Redis;
 use app\common\facade\SystemConfig;
-use app\common\facade\Wallet;
 use app\common\model\ChainTokenModel;
 use app\common\model\WithdrawOrderModel;
-use app\common\service\common\BscService;
-use app\common\service\common\TronService;
+use app\common\service\chain\BscService;
+use app\common\service\chain\TronService;
 use fast\Rsa;
 use think\Exception;
 use think\facade\Db;

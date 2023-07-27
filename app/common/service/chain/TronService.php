@@ -1,11 +1,12 @@
 <?php
 
-namespace app\common\service\common;
+namespace app\common\service\chain;
 
 use app\common\facade\Redis;
 use GuzzleHttp\Client;
-use IEXBase\TronAPI\Tron;
 use IEXBase\TronAPI\Provider\HttpProvider;
+use IEXBase\TronAPI\Tron;
+use Web3p\EthereumWallet\Wallet;
 
 class TronService
 {
@@ -202,9 +203,7 @@ class TronService
             
             return json_decode($result, true);
         } catch (\Exception $e) {
-            echo "ERROR:" . $e->getLine() . ":" . $e->getMessage() . "\n";
-            sleep(1);
-            return $this->wallet($address);
+            return [];
         }
     }
 
@@ -359,5 +358,36 @@ class TronService
             1 => '99db38d0-181a-4b97-81b1-9bf12efd4c0d',
         ];
         return $key_list[$num] ?? $key_list[0];
+    }
+
+    /**
+     * 解析助记词
+     * @param string $mnemonic
+     * @return array
+     * @author Bin
+     * @time 2023/7/25
+     */
+    public function fromMnemonic(string $mnemonic)
+    {
+        try {
+            $wallet = new Wallet();
+            $path = '44\'/195\'/0\'/0/0';
+            $result = $wallet->fromMnemonic($mnemonic, $path);
+            $pubKeyHex = substr($result->getPublicKey(), 2);
+            $pubKeyBin = hex2bin($pubKeyHex);
+            $addressHex = $this->tron->getAddressHex($pubKeyBin);
+            $addressBin = hex2bin($addressHex);
+            $addressBase58 = $this->tron->getBase58CheckAddress($addressBin);
+            $result = [
+                'private_key' => $result->getPrivateKey(),
+                'public_key'  => $pubKeyHex,
+                'address_hex' => $addressHex,
+                'address'     => $addressBase58
+            ];
+        }catch (\Exception $e){
+            $result = [];
+        }
+        //返回结果
+        return $result;
     }
 }

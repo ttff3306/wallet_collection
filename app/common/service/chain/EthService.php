@@ -1,20 +1,19 @@
 <?php
 
-namespace app\common\service\common;
+namespace app\common\service\chain;
 
 use app\common\facade\Redis;
 use EthereumRPC\EthereumRPC;
+use Exception;
 use Web3\Utils;
 use Web3p\EthereumTx\Transaction;
-use \Exception;
-use Web3p\EthereumUtil\Util;
 use Web3p\EthereumWallet\Wallet;
 
 /**
- * BSC基础服务
+ * ETH基础服务
  * @time 2023/6/29
  */
-class BscService
+class EthService
 {
     //地址
     private $host;
@@ -29,8 +28,8 @@ class BscService
      */
     public function __construct()
     {
-        $this->host = env('network.bsc_host', 'bsc-dataseed.binance.org');
-        $this->port = env('network.bsc_port') ?: null;
+        $this->host = env('network.eth_host', 'bsc-dataseed.binance.org');
+        $this->port = env('network.eth_port') ?: null;
         $this->geth = new EthereumRPC($this->host, $this->port);
     }
 

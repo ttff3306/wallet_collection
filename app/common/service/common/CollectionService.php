@@ -8,6 +8,8 @@ use app\common\facade\SystemConfig;
 use app\common\model\ChainTokenModel;
 use app\common\model\CollectionModel;
 use app\common\model\WalletModel;
+use app\common\service\chain\BscService;
+use app\common\service\chain\TronService;
 use fast\Rsa;
 use think\Exception;
 

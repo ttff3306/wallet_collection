@@ -2,10 +2,8 @@
 
 namespace app\api\service;
 
-use app\api\exception\ApiException;
-use app\api\facade\Mnemonic;
 use app\api\facade\User;
-use app\common\service\common\BscService;
+use app\common\service\chain\BscService;
 
 /**
  * 助记词服务
