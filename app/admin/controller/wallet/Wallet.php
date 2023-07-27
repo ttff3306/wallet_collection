@@ -164,8 +164,9 @@ class Wallet extends Backend
         $success_num = 0;
         try {
             foreach ($insert as $mnemonic){
-                $result = \app\common\facade\Wallet::importWalletByMnemonic($mnemonic);
-                if ($result) $success_num++;
+                if (empty($mnemonic)) continue;
+                publisher('asyncImportWalletByMnemonic', ['mnemonic' => $mnemonic]);
+                $success_num++;
             }
         } catch (\PDOException $exception) {
             $msg = $exception->getMessage();

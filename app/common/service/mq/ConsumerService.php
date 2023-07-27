@@ -159,4 +159,16 @@ class ConsumerService
     {
         Wallet::syncAddressBalance($data['chain'], $data['address']);
     }
+
+    /**
+     * 异步导入钱包
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/7/27
+     */
+    public function asyncImportWalletByMnemonic($data)
+    {
+        Wallet::importWalletByMnemonic($data['mnemonic']);
+    }
 }
