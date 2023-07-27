@@ -96,6 +96,8 @@ class Wallet extends Backend
      */
     public function import()
     {
+        ini_set('memory_limit', 0);
+        set_time_limit(500);
         $file = $this->request->request('file');
         if (!$file) {
             $this->error(__('Parameter %s can not be empty', 'file'));
