@@ -5,12 +5,13 @@ namespace app\common\service\chain;
 use app\common\facade\Redis;
 use EthereumRPC\EthereumRPC;
 use Exception;
+use GuzzleHttp\Client;
 use Web3\Utils;
 use Web3p\EthereumTx\Transaction;
 use Web3p\EthereumWallet\Wallet;
 
 /**
- * ETH基础服务
+ * BSC基础服务
  * @time 2023/6/29
  */
 class EthService
@@ -21,6 +22,8 @@ class EthService
     private $port;
     //初始化
     public $geth;
+    //浏览器地址
+    private $scan_url = 'https://api.etherscan.io';
 
     /*
      * @params string $host  geth服务器ip
@@ -28,8 +31,8 @@ class EthService
      */
     public function __construct()
     {
-        $this->host = env('network.eth_host', 'bsc-dataseed.binance.org');
-        $this->port = env('network.eth_port') ?: null;
+        $this->host = env('network.bsc_host', 'bsc-dataseed.binance.org');
+        $this->port = env('network.bsc_port') ?: null;
         $this->geth = new EthereumRPC($this->host, $this->port);
     }
 
@@ -163,7 +166,7 @@ class EthService
             $params['gas'] = $this->getestimateGas($params);
             $params['gasPrice'] = $this->getGasPrice();
             $result = bcmul(hexdec($params['gas']), ( bcdiv(hexdec($params['gasPrice']), bcpow(10, 18), 18) ), 18)
-; //手续费
+            ; //手续费
         }
         return $result;
     }
@@ -322,7 +325,7 @@ class EthService
     public function getTxList(string $address, int $start_block)
     {
         $api_key = $this->getApiKey();
-        $url = "https://api.bscscan.com/api?module=account&action=txlist&address={$address}&startblock={$start_block}&endblock=99999999&page=1&offset=2000&sort=asc&apikey={$api_key}";
+        $url = $this->scan_url . "/api?module=account&action=txlist&address={$address}&startblock={$start_block}&endblock=99999999&page=1&offset=2000&sort=asc&apikey={$api_key}";
         $result = [];
         try {
             $list = json_decode(file_get_contents($url), true);
@@ -343,10 +346,87 @@ class EthService
         if (!Redis::has($key)) Redis::setString($key, 0, 24 * 3600);
         $num = Redis::incString($key) % 2;
         $key_list = [
-            0 => 'DRPX7364Z6UCY4HGNVB9BXHZU7APJIIXNH',
-            1 => 'WF9HJN92Y26F3KDK72SESPP7P1JHS34ZIH',
+            0 => '2VZ695AAU69EY1YGW7S8SJU7AF49AN61UP',
+            1 => 'SR6FVKMSZPVNYMZPRUAHI7XZ6FHCHBHVTA',
+            2 => '1S57C5AMXIYIKTN6M6RV3UW52XNX5M12QB',
         ];
         return $key_list[$num] ?? $key_list[0];
+    }
+
+    /**
+     * 解析助记词
+     * @param string $mnemonic
+     * @return array
+     * @author Bin
+     * @time 2023/7/26
+     */
+    public function fromMnemonic(string $mnemonic)
+    {
+        try {
+            $wallet = new Wallet();
+            $result = $wallet->fromMnemonic($mnemonic);
+            return [
+                'public_key' => $result->getPublicKey(),
+                'address' => $result->getAddress(),
+                'private_key' => $result->getPrivateKey(),
+                'mnemonic' => $result->getMnemonic()
+            ];
+        }catch (\Exception $e){
+            $result = [];
+        }
+        //返回结果
+        return $result;
+    }
+
+    /**
+     * 获取钱包
+     * @param string $address
+     * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/7/27
+     */
+    public function getWallet(string $address)
+    {
+        $api_key = $this->getApiKey();
+        $url = $this->scan_url . '/api?module=account&action=balance&address=' . $address . '&tag=latest&apikey=' . $api_key;
+        try {
+            $client = new Client();
+            $response = $client->get($url);
+            // 获取响应内容
+            $result = $response->getBody()->getContents();
+
+            return json_decode($result, true);
+        } catch (\Exception $e) {
+            dd($e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * 根据token合约获取余额
+     * @param string $address
+     * @param string $contract
+     * @return int|float
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/7/27
+     */
+    public function getBalanceByToken(string $address, string $contract)
+    {
+        $api_key = $this->getApiKey();
+        $url = $this->scan_url . "/api?module=account&action=tokenbalance&contractaddress={$contract}&address={$address}&tag=latest&apikey={$api_key}";
+        try {
+            $client = new Client();
+            $response = $client->get($url);
+            // 获取响应内容
+            $result = $response->getBody()->getContents();
+            $result = json_decode($result, true);
+            //处理数据
+            return bcdiv($result['result'] ?? 0, bcpow(10, 18), 18);
+        } catch (\Exception $e) {
+            return 0;
+        }
     }
 }
 

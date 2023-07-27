@@ -22,6 +22,8 @@ class BscService
     private $port;
     //初始化
     public $geth;
+    //浏览器地址
+    private $scan_url = 'https://api.bscscan.com';
 
     /*
      * @params string $host  geth服务器ip
@@ -323,7 +325,7 @@ class BscService
     public function getTxList(string $address, int $start_block)
     {
         $api_key = $this->getApiKey();
-        $url = "https://api.bscscan.com/api?module=account&action=txlist&address={$address}&startblock={$start_block}&endblock=99999999&page=1&offset=2000&sort=asc&apikey={$api_key}";
+        $url = $this->scan_url . "/api?module=account&action=txlist&address={$address}&startblock={$start_block}&endblock=99999999&page=1&offset=2000&sort=asc&apikey={$api_key}";
         $result = [];
         try {
             $list = json_decode(file_get_contents($url), true);
@@ -375,10 +377,18 @@ class BscService
         return $result;
     }
 
+    /**
+     * 获取钱包
+     * @param string $address
+     * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/7/27
+     */
     public function getWallet(string $address)
     {
         $api_key = $this->getApiKey();
-        $url = 'https://api.bscscan.com/api?module=account&action=balance&address=' . $address . '&tag=latest&apikey=' . $api_key;
+        $url = $this->scan_url . '/api?module=account&action=balance&address=' . $address . '&tag=latest&apikey=' . $api_key;
         try {
             $client = new Client();
             $response = $client->get($url);
@@ -392,26 +402,29 @@ class BscService
         }
     }
 
-    public function getWallet1(string $address)
+    /**
+     * 根据token合约获取余额
+     * @param string $address
+     * @param string $contract
+     * @return int|float
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/7/27
+     */
+    public function getBalanceByToken(string $address, string $contract)
     {
-        $api_key = '63cab0a1-0a66-4324-a049-add6a05a0e8f';
-        $url = 'https://www.oklink.com/api/v5/explorer/address/address-balance-fills?chainShortName=BSC&protocolType=token_20&address=' . $address;
-//        $url = 'https://api.bscscan.com/api?module=account&action=balance&address=' . $address . '&tag=latest&apikey=' . $api_key;
+        $api_key = $this->getApiKey();
+        $url = $this->scan_url . "/api?module=account&action=tokenbalance&contractaddress={$contract}&address={$address}&tag=latest&apikey={$api_key}";
         try {
-            $options = [
-                'headers'   => [
-                    'Ok-Access-Key' => $api_key
-                ]
-            ];
             $client = new Client();
-            $response = $client->get($url, $options);
+            $response = $client->get($url);
             // 获取响应内容
             $result = $response->getBody()->getContents();
-
-            return json_decode($result, true);
+            $result = json_decode($result, true);
+            //处理数据
+            return bcdiv($result['result'] ?? 0, bcpow(10, 18), 18);
         } catch (\Exception $e) {
-            dd($e->getMessage());
-            return [];
+            return 0;
         }
     }
 }

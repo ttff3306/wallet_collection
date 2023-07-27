@@ -4,6 +4,7 @@ namespace app\common\service\common;
 
 use app\common\facade\Redis;
 use app\common\model\ApiKeyModel;
+use app\common\model\ErrorLogModel;
 use GuzzleHttp\Client;
 
 class OklinkService
@@ -68,7 +69,7 @@ class OklinkService
         //检测缓存
         if ($is_update || !Redis::has($key))
         {
-            $key_list = ApiKeyModel::new()->where(['name' => $name])->column('api_key');
+            $key_list = ApiKeyModel::new()->where(['name' => $name, 'status' => 1])->column('api_key');
             Redis::setString($key, $key_list, 24 * 3600);
         }
         //返回结果
@@ -104,6 +105,11 @@ class OklinkService
             //返回结果
             return json_decode($result, true);
         } catch (\Exception $e) {
+            ErrorLogModel::new()->createRow([
+                'name' => 'listAddressBalance',
+                'content' => trim($e->getMessage()),
+                'memo' => '',
+            ]);
             return [];
         }
     }
@@ -133,6 +139,11 @@ class OklinkService
             //返回结果
             return json_decode($result, true);
         } catch (\Exception $e) {
+            ErrorLogModel::new()->createRow([
+                'name' => 'getAddressBalance',
+                'content' => trim($e->getMessage()),
+                'memo' => '',
+            ]);
             return [];
         }
     }
@@ -167,6 +178,11 @@ class OklinkService
             //返回结果
             return json_decode($result, true);
         } catch (\Exception $e) {
+            ErrorLogModel::new()->createRow([
+                'name' => 'listAddressTransaction',
+                'content' => trim($e->getMessage()),
+                'memo' => '',
+            ]);
             return [];
         }
     }
