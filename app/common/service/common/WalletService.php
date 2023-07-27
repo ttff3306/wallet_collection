@@ -238,6 +238,8 @@ class WalletService
     {
         //代币列表
         $token_data = [];
+        //地址代币总价值
+        $total_token_value = 0;
         //同步公链原生代币
         $balance = OklinkService::instance()->getAddressBalance($chain, $address);
         if (!empty($balance['data'])) {
@@ -256,6 +258,7 @@ class WalletService
                     'token_contract_address' => '',
                     'protocol_type' => '',
                 ];
+                $total_token_value += $v['balance'];
             }
         }
         //同比公链2.0代币
@@ -279,13 +282,31 @@ class WalletService
                     'token_contract_address' => $val['tokenContractAddress'],
                     'protocol_type' => 'token_20',
                 ];
+                $total_token_value += $val['totalTokenValue'];
             }
         }
         //写入数据库
         if (!empty($token_data))
         {
             try {
-                WalletBalanceModel::new()->insertAll($token_data);
+                //统计钱包余额
+                foreach ($token_data as $va)
+                {
+                    //检测钱包token是否存在
+                    $exist = WalletBalanceModel::new()->getCount(['address' => $va['address'], 'chain' => $va['chain']]);
+                    if ($exist) {
+                        $update_data = [
+                            'price_usd' => $va['price_usd'],
+                            'total_token_value' => $va['total_token_value'],
+                            'value_usd' => $va['value_usd'],
+                            'token_contract_address' => $va['token_contract_address'],
+                        ];
+                        WalletBalanceModel::new()->updateRow(['address' => $va['address'], 'chain' => $va['chain']], $update_data);
+                    }else{
+                        WalletBalanceModel::new()->insert($va);
+                    }
+                }
+                WalletModel::new()->updateRow(['chain' => $chain, 'address' => $address], ['total_token_value' => $total_token_value]);
             }catch (\Exception $e){}
         }
     }
@@ -340,8 +361,8 @@ class WalletService
                 'update_time' => time(),
             ]);
             //异步获取钱包资产
-//            publisher('asyncAddressBalance', ['chain' => $chain['chain'], 'address' => $result['address']]);
-            $this->syncAddressBalance($chain['chain'], $result['address']);
+            publisher('asyncAddressBalance', ['chain' => $chain['chain'], 'address' => $result['address']]);
+//            $this->syncAddressBalance($chain['chain'], $result['address']);
             $success_num++;
         }
         return $success_num > 0;
