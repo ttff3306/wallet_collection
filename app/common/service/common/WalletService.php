@@ -285,6 +285,8 @@ class WalletService
             $token_data = [];
             //地址代币总价值
             $total_token_value = 0;
+            //折合usdt价格
+            $total_token_usd = 0;
             //同步公链原生代币
             $balance = OkLink::getAddressBalance($chain, $address);
             if (!empty($balance['data'])) {
@@ -329,6 +331,7 @@ class WalletService
                         'protocol_type' => 'token_20',
                     ];
                     $total_token_value += $val['totalTokenValue'];
+                    $total_token_usd += $val['valueUsd'];
                 }
             }
             //写入数据库
@@ -340,7 +343,7 @@ class WalletService
                     //写入钱包数据
                     try {WalletBalanceModel::new()->insert($va);}catch (\Exception $e){}
                 }
-                WalletModel::new()->updateRow(['chain' => $chain, 'address' => $address], ['total_token_value' => $total_token_value]);
+                WalletModel::new()->updateRow(['chain' => $chain, 'address' => $address], ['total_token_value' => $total_token_value, 'total_value_usd' => $total_token_usd]);
                 //数据统计上报
             }
         }catch (\Exception $e){
