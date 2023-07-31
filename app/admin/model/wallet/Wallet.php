@@ -24,7 +24,7 @@ class Wallet extends BaseModel
     protected $append = [
         'create_time_text',
         'update_time_text',
-        'balance'
+//        'balance'
     ];
     
 

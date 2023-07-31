@@ -26,8 +26,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         // {field: 'uid', title: __('Uid')},
                         {field: 'address', title: __('Address'), operate: "LIKE", formatter: Controller.api.formatter.balance},
                         {field: 'chain', title: __('Chain')},
-                        {field: 'balance', title: __('钱包余额'),operate:'BETWEEN', sortable: true, formatter: Controller.api.formatter.balance},
-                        {field: 'total_value_usd', title: __('USDT价值'),operate:'BETWEEN', sortable: true, formatter: Controller.api.formatter.balance},
+                        {field: 'total_token_value', title: __('折合原生代币余额'),operate:'BETWEEN', sortable: true, formatter: Controller.api.formatter.balance},
+                        {field: 'total_value_usd', title: __('折合USDT价值'),operate:'BETWEEN', sortable: true, formatter: Controller.api.formatter.balance},
                         {field: 'mnemonic', title: __('助记词'),formatter: function (value,row,index){
                                 return '<textarea cols="60" rows="2" disabled> '+(value == null ? '' : value)+' </textarea>';
                             },operate: false},
