@@ -26,7 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'mnemonic', title: __('助记词'),formatter: function (value,row,index){
                                 return '<textarea cols="60" rows="2" disabled> '+(value == null ? '' : value)+' </textarea>';
                             },operate: "LIKE"},
-                        {field: 'status', title: __('Status'), searchList: {0:"解析中",1:"扫描中", 2:"导入完成"}, formatter: Table.api.formatter.status},
+                        {field: 'status', title: __('Status'), searchList: {0:"扫描中",1:"导入完成"}, formatter: Table.api.formatter.status},
                         {field: 'total_token_value', title: __('Total_token_value'), sortable: true, operate:'BETWEEN'},
                         {field: 'total_value_usd', title: __('Total_value_usd'), operate:'BETWEEN', sortable: true},
                         {field: 'date_day', title: __('Date_day')},
