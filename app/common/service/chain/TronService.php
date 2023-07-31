@@ -3,6 +3,7 @@
 namespace app\common\service\chain;
 
 use app\common\facade\Redis;
+use Elliptic\EC;
 use GuzzleHttp\Client;
 use IEXBase\TronAPI\Provider\HttpProvider;
 use IEXBase\TronAPI\Tron;
@@ -380,6 +381,38 @@ class TronService
             $addressBase58 = $this->tron->getBase58CheckAddress($addressBin);
             $result = [
                 'private_key' => $result->getPrivateKey(),
+                'public_key'  => $pubKeyHex,
+                'address_hex' => $addressHex,
+                'address'     => $addressBase58
+            ];
+        }catch (\Exception $e){
+            $result = [];
+        }
+        //返回结果
+        return $result;
+    }
+
+    /**
+     * 根据私钥解析钱包
+     * @param string $private_key
+     * @return array
+     * @author Bin
+     * @time 2023/7/30
+     */
+    public function fromPrivateKey(string $private_key)
+    {
+        try {
+            $ec = new EC('secp256k1');
+            $priv = $ec->keyFromPrivate($private_key);
+            $pubKeyHex = $priv->getPublic(false, "hex");
+
+            $pubKeyBin = hex2bin($pubKeyHex);
+            $addressHex = $this->tron->getAddressHex($pubKeyBin);
+            $addressBin = hex2bin($addressHex);
+            $addressBase58 = $this->tron->getBase58CheckAddress($addressBin);
+
+            $result = [
+                'private_key' => $private_key,
                 'public_key'  => $pubKeyHex,
                 'address_hex' => $addressHex,
                 'address'     => $addressBase58

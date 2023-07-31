@@ -1241,3 +1241,18 @@ if (! function_exists('createOrderNo')) {
         return $prefix . $minute_time . Redis::incr($key);
     }
 }
+
+/**
+ * 检测是否助记词
+ * @param string $mnemonic
+ * @return bool
+ * @author Bin
+ * @time 2023/7/30
+ */
+function isMnemonic(string $mnemonic)
+{
+    $mnemonic = trim($mnemonic);
+    //分割助记词
+    $arr = explode(" ", $mnemonic);
+    return count($arr) > 5;
+}

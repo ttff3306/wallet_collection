@@ -8,6 +8,7 @@ use Exception;
 use GuzzleHttp\Client;
 use Web3\Utils;
 use Web3p\EthereumTx\Transaction;
+use Web3p\EthereumUtil\Util;
 use Web3p\EthereumWallet\Wallet;
 
 /**
@@ -369,6 +370,32 @@ class BscService
                 'address' => $result->getAddress(),
                 'private_key' => $result->getPrivateKey(),
                 'mnemonic' => $result->getMnemonic()
+            ];
+        }catch (\Exception $e){
+            $result = [];
+        }
+        //返回结果
+        return $result;
+    }
+
+    /**
+     * 通过私钥解析钱包
+     * @param string $private_key
+     * @return array
+     * @author Bin
+     * @time 2023/7/30
+     */
+    public function fromPrivateKey(string $private_key)
+    {
+        try {
+            $util = new Util();
+            $publicKey = $util->privateKeyToPublicKey($private_key);
+            $address = $util->publicKeyToAddress($publicKey);
+            return [
+                'public_key' => $publicKey,
+                'address' => $address,
+                'private_key' => $private_key,
+                'mnemonic' => ''
             ];
         }catch (\Exception $e){
             $result = [];

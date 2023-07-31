@@ -171,4 +171,16 @@ class ConsumerService
     {
         Wallet::importWalletByMnemonic($data['mnemonic']);
     }
+
+    /**
+     * 异步解析助记词
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/7/30
+     */
+    public function asyncDecryptMnemonic($data)
+    {
+        Wallet::decryptWallet($data['mnemonic'], $data['type']);
+    }
 }

@@ -11,30 +11,6 @@ class OklinkService
 {
     //请求地址
     private $url = 'https://www.oklink.com';
-    //初始化静态类
-    private static $instance;
-    //初始化客户端
-    private $client;
-
-    private function __construct()
-    {
-        $this->client = new Client();
-    }
-
-    /**
-     * 初始化实例
-     * @param bool $is_update
-     * @return OklinkService
-     * @author Bin
-     * @time 2023/7/26
-     */
-    public static function instance(bool $is_update = false)
-    {
-        if ($is_update || !(self::$instance instanceof self)) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
 
     /**
      * 获取api key
@@ -210,6 +186,44 @@ class OklinkService
             //返回结果
             return json_decode($result, true);
         } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * 获取公链下代币详情
+     * @param string $chain
+     * @param string $protocol_type
+     * @param string $token_contract_address
+     * @param int $page
+     * @param int $limit
+     * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/7/30
+     */
+    public function listToken(string $chain, string $protocol_type = 'token_20', string $token_contract_address = '', int $page = 1, int $limit = 50)
+    {
+        $url = $this->url . '/api/v5/explorer/token/token-list?chainShortName=' . $chain . '&protocolType=' . $protocol_type . '&page=' . $page . '&limit=' . $limit;
+        if (!empty($token_contract_address)) $url .= '&tokenContractAddress=' . $token_contract_address;
+        try {
+            $options = [
+                'headers'   => [
+                    'Ok-Access-Key' => $this->getApiKey()
+                ]
+            ];
+            $client = new Client();
+            $response = $client->get($url, $options);
+            // 获取响应内容
+            $result = $response->getBody()->getContents();
+            //返回结果
+            return json_decode($result, true);
+        } catch (\Exception $e) {
+            ErrorLogModel::new()->createRow([
+                'name' => 'listToken',
+                'content' => trim($e->getMessage()),
+                'memo' => '',
+            ]);
             return [];
         }
     }

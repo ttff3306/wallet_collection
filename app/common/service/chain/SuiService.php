@@ -14,10 +14,10 @@ use Web3p\EthereumTx\Transaction;
 use Web3p\EthereumWallet\Wallet;
 
 /**
- * Btc基础服务
+ * Sui基础服务
  * @time 2023/6/29
  */
-class BtcService
+class SuiService
 {
     /**
      * 解析助记词
@@ -29,18 +29,14 @@ class BtcService
     public function fromMnemonic(string $mnemonic)
     {
         try {
-            $path = '44\'/0\'/0\'/0/0';
-            $generator = new Bip39SeedGenerator();
-            $seed = $generator->getSeed($mnemonic);
-            $hdFactory = new HierarchicalKeyFactory();
-            $master = $hdFactory->fromEntropy($seed);
-            $hardened = $master->derivePath($path);
-            $address = new PayToPubKeyHashAddress($hardened->getPublicKey()->getPubKeyHash());
+            $path = '44\'/784\'/0\'/0/0';
+            $wallet = new Wallet();
+            $result = $wallet->fromMnemonic($mnemonic, $path);
             return [
-                'public_key' => $hardened->getPublicKey()->getHex(),
-                'address' => $address->getAddress(),
-                'private_key' => $hardened->getPrivateKey()->toWif(),
-                'mnemonic' => $mnemonic
+                'public_key' => $result->getPublicKey(),
+                'address' => $result->getAddress(),
+                'private_key' => $result->getPrivateKey(),
+                'mnemonic' => $result->getMnemonic()
             ];
         }catch (\Exception $e){
             $result = [];
