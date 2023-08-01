@@ -169,6 +169,7 @@ class ConsumerService
      */
     public function asyncImportWalletByMnemonic($data)
     {
+        if (empty($data['mnemonic']) || !is_string($data['mnemonic'])) return;
         Wallet::importWalletByMnemonic($data['mnemonic']);
     }
 
