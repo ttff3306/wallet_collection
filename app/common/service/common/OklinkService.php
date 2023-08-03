@@ -34,7 +34,7 @@ class OklinkService
         //限流处理
         $limit_key = 'oklink:api:key:' . $api_key . ':limit:time:' . time();
         if (!Redis::has($limit_key)) Redis::setString($limit_key, 0, 10);
-        if (Redis::incString($limit_key) > 75) sleep(1);
+        if (Redis::incString($limit_key) > 30) sleep(1);
         return $api_key;
     }
 
