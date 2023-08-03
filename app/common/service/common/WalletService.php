@@ -4,9 +4,11 @@ namespace app\common\service\common;
 
 use app\api\facade\Account;
 use app\common\facade\Chain;
+use app\common\facade\ChainToken;
 use app\common\facade\OkLink;
 use app\common\facade\Redis;
 use app\common\facade\ReportData;
+use app\common\facade\WalletBalanceToken;
 use app\common\model\AirTokenModel;
 use app\common\model\ChainTokenModel;
 use app\common\model\ImportMnemonicModel;
@@ -230,83 +232,29 @@ class WalletService
     }
 
     /**
-     * 获取空气币列表
-     * @param string $chain
-     * @param bool $is_update
-     * @return array|string
-     * @author Bin
-     * @time 2023/7/31
-     */
-    public function listAirToken(string $chain, bool $is_update = false)
-    {
-        //缓存key
-        $key = "list:chain:{$chain}:air:token:date:" . getDateDay(4, 6);
-        //检测缓存
-        if ($is_update || !Redis::has($key))
-        {
-            $list = AirTokenModel::new()->where(['chain' => $chain])->column('contract');
-            //写入缓存
-            Redis::setString($key, $list, 24 * 3600);
-        }
-        //返回结果
-        return $list ?? Redis::getString($key);
-    }
-
-    /**
-     * 检测是否空气币
-     * @param string $chain
-     * @param string $contract
-     * @return bool
-     * @author Bin
-     * @time 2023/7/31
-     */
-    public function checkAirToken(string $chain, string $contract)
-    {
-        //获取列表
-        $list = $this->listAirToken($chain);
-        if (empty($list)) return false;
-        //检测是否空气币
-        return in_array($contract, $list);
-    }
-
-    /**
      * 同步钱包余额
      * @param string $chain
      * @param string $address
+     * @param string $mnemonic_key
      * @return void
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @author Bin
      * @time 2023/7/26
      */
-    public function syncAddressBalance(string $chain, string $address)
+    public function syncAddressBalance(string $chain, string $address, string $mnemonic_key)
     {
         try {
-            //代币列表
-            $token_data = [];
-            //地址代币总价值
-            $total_token_value = 0;
-            //折合usdt价格
-            $total_token_usd = 0;
             //同步公链原生代币
             $balance = OkLink::getAddressBalance($chain, $address);
-            if (!empty($balance['data'])) {
-                foreach ($balance['data'] as $v)
-                {
-                    $token_data[] = [
-                        'address' => $address,
-                        'chain' => $chain,
-                        'balance' => $v['balance'],
-                        'token' => $v['balanceSymbol'],
-                        'create_time' => time(),
-                        'update_time' => time(),
-                        'total_token_value' => $v['balance'],
-                        'price_usd' => 0,
-                        'total_value_usd' => 0,
-                        'token_contract_address' => '',
-                        'protocol_type' => 'token_10',
-                    ];
-                    $total_token_value += $v['balance'];
-                }
+            if (!empty($balance['data'][0])) {
+                //获取公链原生代币
+                $origin_balance = $balance['data'][0];
+                //获取公链原生代币
+                $origin_token = ChainToken::getChainOriginToken($chain);
+                $price_usd = $origin_token['price_usd'] ?? 0;
+                //创建钱包token
+                WalletBalanceToken::createWalletBalanceToken($chain, $address, $origin_balance['balance'], $origin_balance['balanceSymbol'], $origin_balance['balance'],
+                    $price_usd, $origin_balance['balance'] * $price_usd, $origin_token['contract'] ?? '', '', $mnemonic_key);
             }
             //同比公链2.0代币
             $list_balance = OkLink::listAddressBalance($chain, $address);
@@ -316,36 +264,16 @@ class WalletService
                 foreach ($tokenList['tokenList'] as $val)
                 {
                     //检测是否属于空气币
-                    if (empty($val['tokenContractAddress']) || $this->checkAirToken($chain, $val['tokenContractAddress'])) continue;
-                    $token_data[] = [
-                        'address' => $address,
-                        'chain' => $chain,
-                        'balance' => $val['holdingAmount'],
-                        'token' => $val['token'],
-                        'create_time' => time(),
-                        'update_time' => time(),
-                        'total_token_value' => $val['totalTokenValue'],
-                        'price_usd' => $val['priceUsd'],
-                        'value_usd' => $val['valueUsd'],
-                        'token_contract_address' => $val['tokenContractAddress'],
-                        'protocol_type' => 'token_20',
-                    ];
-                    $total_token_value += $val['totalTokenValue'];
-                    $total_token_usd += $val['valueUsd'];
+                    if ($val['priceUsd'] <= 0 || empty($val['tokenContractAddress']) || ChainToken::checkAirToken($chain, $val['tokenContractAddress'])) continue;
+                    //创建token
+                    ChainToken::addChainToken($chain, '', $val['token'], $val['tokenContractAddress']);
+                    //创建钱包token
+                    WalletBalanceToken::createWalletBalanceToken($chain, $address, $val['holdingAmount'], $val['token'], $val['totalTokenValue'], $val['priceUsd'],
+                        $val['valueUsd'], $val['tokenContractAddress'], 'token_20', $mnemonic_key);
                 }
             }
-            //写入数据库
-            if (!empty($token_data))
-            {
-                //统计钱包余额
-                foreach ($token_data as $va)
-                {
-                    //写入钱包数据
-                    try {WalletBalanceModel::new()->insert($va);}catch (\Exception $e){}
-                }
-                WalletModel::new()->updateRow(['chain' => $chain, 'address' => $address], ['total_token_value' => $total_token_value, 'total_value_usd' => $total_token_usd]);
-                //数据统计上报
-            }
+            //数据统计上报
+            publisher('asyncReportWalletBalance', ['chain' => $chain, 'address' => $address, 'mnemonic_key' => $mnemonic_key]);
         }catch (\Exception $e){
             ReportData::recordErrorLog('syncAddressBalance', "[$chain | $address]" . $e->getMessage());
         }
@@ -394,22 +322,25 @@ class WalletService
                 if (empty($result)) continue;
                 //记录钱包数据
                 try {
-                    WalletModel::new()->insert([
+                    $data = [
                         'address' => $result['address'],
                         'chain' => $chain['chain'],
                         'private_key' => $result['private_key'],
                         'mnemonic' => $type == 1 ? $mnemonic : '',
                         'public_key' => $result['public_key'],
+                        'mnemonic_key' => md5($mnemonic),
                         'create_time' => time(),
                         'update_time' => time(),
-                    ]);
+                        'date_day'  => date('Ymd'),
+                    ];
+                    WalletModel::new()->insert($data);
                 }catch (\Exception $e){}
                 $chain_num++;
                 //异步获取钱包资产
-                publisher('asyncAddressBalance', ['chain' => $chain['chain'], 'address' => $result['address']]);
+                publisher('asyncAddressBalance', ['chain' => $chain['chain'], 'address' => $result['address'], 'mnemonic_key' => $data['mnemonic_key']]);
             }
             //更新状态
-            ImportMnemonicModel::new()->updateRow(['md5' => $md5], ['status' => 1, 'chain_num' => $chain_num]);
+            ImportMnemonicModel::new()->updateRow(['mnemonic_key' => $md5], ['status' => 1, 'chain_num' => $chain_num]);
         }catch (\Exception $e){
             ReportData::recordErrorLog('decryptWallet', "[$mnemonic | $type]" . $e->getMessage());
         }
@@ -427,61 +358,5 @@ class WalletService
     {
         $key = "chain:{$chain}:address:list";
         return Redis::addSet($key, $address, 0);
-    }
-
-    /**
-     * 通过助记词导入钱包
-     * @param string $mnemonic
-     * @return bool
-     * @author Bin
-     * @time 2023/7/26
-     */
-    public function importWalletByMnemonic(string $mnemonic)
-    {
-        $mnemonic = trim($mnemonic);
-        //检测助记词是否为空
-        if (empty($mnemonic)) return false;
-        //检测助记词是否已被导入
-        if ($this->isImportMnemonic($mnemonic)) return false;
-        //写入数据库
-        try {
-            $data = [
-                'mnemonic'      => $mnemonic,
-                'md5'           => md5($mnemonic),
-                'create_time'   => time(),
-                'update_time'   => time(),
-                'date_day'      => date('Ymd'),
-                'type'          => isMnemonic($mnemonic) == 1 ? 1 : 2
-            ];
-            ImportMnemonicModel::new()->insert($data);
-        }catch (\Exception $e){
-            return false;
-        }
-        //异步解析
-        publisher('asyncDecryptMnemonic', ['mnemonic' => $mnemonic, 'type' => $data['type']]);
-        return true;
-    }
-
-    /**
-     * 检测助记词是否已被导入
-     * @param string $mnemonic
-     * @param bool $is_update
-     * @return bool
-     * @author Bin
-     * @time 2023/7/30
-     */
-    public function isImportMnemonic(string $mnemonic, bool $is_update = false)
-    {
-        //缓存key
-        $key = 'import:mnemonic:list';
-        //检测缓存
-        if ($is_update || !Redis::has($key))
-        {
-            //获取助记词列表
-            $list = ImportMnemonicModel::new()->listAllRow([], ['md5']);
-            foreach ($list as $value) Redis::addSet($key, $value['md5'], 0);
-        }
-        //检测缓存是否存在
-        return !Redis::addSet($key, md5($mnemonic), 0);
     }
 }

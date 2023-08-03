@@ -26,15 +26,33 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'address', title: __('Address')},
-                        {field: 'chain', title: __('Chain')},
+                        {field: 'chain', title: __('Chain'), searchList: $.getJSON('chain.chain/listChain'), formatter: Table.api.formatter.status},
                         {field: 'balance', title: __('Balance'), operate:'BETWEEN', sortable: true},
                         {field: 'token', title: __('Token')},
-                        {field: 'total_token_value', title: __('折合公链原生代币数量'), sortable: true},
-                        {field: 'value_usd', title: __('折合USD数量'), sortable: true},
+                        {field: 'total_token_value', title: __('折合公链原生代币数量'), operate:'BETWEEN', sortable: true},
+                        {field: 'value_usd', title: __('折合USD数量'), operate:'BETWEEN', sortable: true},
                         {field: 'token_contract_address', title: __('代币合约地址')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
-                        // {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
+                        // {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
+                            buttons: [
+                                {
+                                    name: 'addblack',
+                                    text: '加入黑名单',
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'wallet.token_balance/addblack',
+                                    confirm: '确认加入黑名单吗?',
+                                    success: function (data, ret) {
+                                        return true;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    }
+                                }
+                            ],
+                        }
                     ]
                 ]
             });
@@ -46,6 +64,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
         },
         edit: function () {
+            Controller.api.bindevent();
+        },
+        addblack: function () {
+            console.log(123456)
             Controller.api.bindevent();
         },
         api: {

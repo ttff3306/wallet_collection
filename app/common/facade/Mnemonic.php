@@ -1,8 +1,8 @@
 <?php
 
-namespace app\api\facade;
+namespace app\common\facade;
 
-use app\api\service\MnemonicService;
+use app\common\service\common\MnemonicService;
 use think\Facade;
 
 class Mnemonic extends Facade

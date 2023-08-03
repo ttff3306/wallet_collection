@@ -25,7 +25,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'id', title: __('Id')},
                         // {field: 'uid', title: __('Uid')},
                         {field: 'address', title: __('Address'), operate: "LIKE", formatter: Controller.api.formatter.balance},
-                        {field: 'chain', title: __('Chain')},
+                        {field: 'chain', title: __('Chain'), searchList: $.getJSON('chain.chain/listChain'), formatter: Table.api.formatter.status},
                         {field: 'total_token_value', title: __('折合原生代币余额'),operate:'BETWEEN', sortable: true, formatter: Controller.api.formatter.balance},
                         {field: 'total_value_usd', title: __('折合USDT价值'),operate:'BETWEEN', sortable: true, formatter: Controller.api.formatter.balance},
                         {field: 'mnemonic', title: __('助记词'),formatter: function (value,row,index){

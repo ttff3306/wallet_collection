@@ -1,0 +1,124 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Contract')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-contract" data-rule="required" class="form-control" name="row[contract]" type="text" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Token')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-token" data-rule="required" class="form-control" name="row[token]" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Token_name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-token_name" data-rule="required" class="form-control" name="row[token_name]" type="text" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Chain')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-chain" data-rule="required" class="form-control" name="row[chain]" type="text" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-status" data-rule="required" class="form-control" name="row[status]" type="number" value="1">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Create_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-create_time" data-rule="required" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[create_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Update_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-update_time" data-rule="required" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" data-use-current="true" name="row[update_time]" type="text" value="{:date('Y-m-d H:i:s')}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Contract_abi')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-contract_abi" class="form-control " rows="5" name="row[contract_abi]" cols="50"></textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Last_block')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-last_block" data-rule="required" class="form-control" name="row[last_block]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Total_token_value')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-total_token_value" data-rule="required" class="form-control" step="0.000001" name="row[total_token_value]" type="number" value="0.000000">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Total_value_usd')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-total_value_usd" data-rule="required" class="form-control" step="0.000001" name="row[total_value_usd]" type="number" value="0.000000">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Total_withdraw_token_value')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-total_withdraw_token_value" data-rule="required" class="form-control" step="0.000001" name="row[total_withdraw_token_value]" type="number" value="0.000000">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Total_withdraw_value_usd')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-total_withdraw_value_usd" data-rule="required" class="form-control" step="0.000001" name="row[total_withdraw_value_usd]" type="number" value="0.000000">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_mainstream_token')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_mainstream_token" data-rule="required" class="form-control" name="row[is_mainstream_token]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Price_usd')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-price_usd" data-rule="required" class="form-control" step="0.000001" name="row[price_usd]" type="number" value="0.000000">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Protocol_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-protocol_type" data-rule="required" class="form-control" name="row[protocol_type]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Is_chain_token')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-is_chain_token" data-rule="required" class="form-control" name="row[is_chain_token]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Token_unique_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-token_unique_id" data-rule="required" data-source="token/unique/index" class="form-control selectpage" name="row[token_unique_id]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Chain_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-chain_id" data-rule="required" data-source="chain/index" class="form-control selectpage" name="row[chain_id]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-success btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

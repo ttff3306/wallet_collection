@@ -3,6 +3,7 @@
 namespace app\admin\controller\wallet;
 
 use app\common\controller\Backend;
+use app\common\facade\Mnemonic;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Reader\Csv;
 use PhpOffice\PhpSpreadsheet\Reader\Xls;
@@ -43,7 +44,7 @@ class ImportMnemonic extends Backend
             if ($params) {
                 //获取助记词
                 $mnemonic = $params['mnemonic'];
-                $result = \app\common\facade\Wallet::importWalletByMnemonic($mnemonic);
+                $result = Mnemonic::importWalletByMnemonic($mnemonic);
                 if (!$result) {
                     $this->error('导入失败');
                 }else{

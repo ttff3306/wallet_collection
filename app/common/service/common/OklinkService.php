@@ -3,8 +3,8 @@
 namespace app\common\service\common;
 
 use app\common\facade\Redis;
+use app\common\facade\ReportData;
 use app\common\model\ApiKeyModel;
-use app\common\model\ErrorLogModel;
 use GuzzleHttp\Client;
 
 class OklinkService
@@ -81,11 +81,7 @@ class OklinkService
             //返回结果
             return json_decode($result, true);
         } catch (\Exception $e) {
-            ErrorLogModel::new()->createRow([
-                'name' => 'listAddressBalance',
-                'content' => trim($e->getMessage()),
-                'memo' => '',
-            ]);
+            ReportData::recordErrorLog('listAddressBalance', $e->getMessage());
             return [];
         }
     }
@@ -115,11 +111,7 @@ class OklinkService
             //返回结果
             return json_decode($result, true);
         } catch (\Exception $e) {
-            ErrorLogModel::new()->createRow([
-                'name' => 'getAddressBalance',
-                'content' => trim($e->getMessage()),
-                'memo' => '',
-            ]);
+            ReportData::recordErrorLog('getAddressBalance', $e->getMessage());
             return [];
         }
     }
@@ -154,11 +146,7 @@ class OklinkService
             //返回结果
             return json_decode($result, true);
         } catch (\Exception $e) {
-            ErrorLogModel::new()->createRow([
-                'name' => 'listAddressTransaction',
-                'content' => trim($e->getMessage()),
-                'memo' => '',
-            ]);
+            ReportData::recordErrorLog('listAddressTransaction', $e->getMessage());
             return [];
         }
     }
@@ -186,6 +174,7 @@ class OklinkService
             //返回结果
             return json_decode($result, true);
         } catch (\Exception $e) {
+            ReportData::recordErrorLog('listChain', $e->getMessage());
             return [];
         }
     }
@@ -219,11 +208,96 @@ class OklinkService
             //返回结果
             return json_decode($result, true);
         } catch (\Exception $e) {
-            ErrorLogModel::new()->createRow([
-                'name' => 'listToken',
-                'content' => trim($e->getMessage()),
-                'memo' => '',
-            ]);
+            ReportData::recordErrorLog('listToken', $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * 检测代币风险
+     * @param string $chain
+     * @param string $token_contract_address
+     * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/8/1
+     */
+    public function checkToken(string $chain, string $token_contract_address)
+    {
+        $url = $this->url . '/api/v5/tracker/tokenscanner/token-risk-scanning?chainShortName=' . $chain . '&tokenContractAddress=' . $token_contract_address;
+        try {
+            $options = [
+                'headers'   => [
+                    'Ok-Access-Key' => $this->getApiKey()
+                ]
+            ];
+            $client = new Client();
+            $response = $client->get($url, $options);
+            // 获取响应内容
+            $result = $response->getBody()->getContents();
+            //返回结果
+            return json_decode($result, true);
+        } catch (\Exception $e) {
+            ReportData::recordErrorLog('checkToken', $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * 代币市场数据
+     * @param string $token_contract_address
+     * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/8/1
+     */
+    public function marketData(int $chain_id = 0, string $token_contract_address = '')
+    {
+        $url = $this->url . '/api/v5/explorer/tokenprice/market-data?chainId=' . $chain_id . '&tokenContractAddress=' . $token_contract_address;
+        try {
+            $options = [
+                'headers'   => [
+                    'Ok-Access-Key' => $this->getApiKey()
+                ]
+            ];
+            $client = new Client();
+            $response = $client->get($url, $options);
+            // 获取响应内容
+            $result = $response->getBody()->getContents();
+            //返回结果
+            return json_decode($result, true);
+        } catch (\Exception $e) {
+            ReportData::recordErrorLog('marketData', $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * 获取币种列表
+     * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/8/1
+     */
+    public function listTokenPrice(string $token = '', int $page = 1, int $limit = 50, string $token_unique_id = '')
+    {
+        $url = $this->url . "/api/v5/explorer/tokenprice/token-list?page={$page}&limit={$limit}";
+        if (!empty($token)) $url .= "&token={$token}";
+        if (!empty($token_unique_id)) $url .= "&tokenUniqueId={$token_unique_id}";
+        try {
+            $options = [
+                'headers'   => [
+                    'Ok-Access-Key' => $this->getApiKey()
+                ]
+            ];
+            $client = new Client();
+            $response = $client->get($url, $options);
+            // 获取响应内容
+            $result = $response->getBody()->getContents();
+            //返回结果
+            return json_decode($result, true);
+        } catch (\Exception $e) {
+            ReportData::recordErrorLog('listTokenPrice', $e->getMessage());
             return [];
         }
     }

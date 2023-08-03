@@ -19,6 +19,6 @@ return [
         'app\common\command\AutoCollectionOutGas',
         'app\common\command\AutoCollectionOutToken',
         'app\common\command\AutoWithdraw',
-        'app\common\command\AutoCheckReleaseOrderProfit',
+        'app\common\command\AutoUpdateChainOriginToken',
     ],
 ];

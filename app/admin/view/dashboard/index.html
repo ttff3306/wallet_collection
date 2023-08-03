@@ -171,113 +171,57 @@
             <div class="tab-pane fade active in" id="one">
 
                 <div class="row">
-                    <div class="col-sm-3 col-xs-6">
+                    <div class="col-sm-2 col-xs-6">
                         <div class="sm-st clearfix">
-                            <span class="sm-st-icon st-red"><i class="fa fa-users"></i></span>
+                            <span class="sm-st-icon st-violet"><i class="fa fa-users"></i></span>
                             <div class="sm-st-info">
-                                <span>{$totaluser}</span>
-                                {:__('Total user')}
+                                <span>{$total_usdt}</span>
+                                资产总数（USDT）
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-3 col-xs-6">
+                    <div class="col-sm-2 col-xs-6">
                         <div class="sm-st clearfix">
-                            <span class="sm-st-icon st-violet"><i class="fa fa-magic"></i></span>
+                            <span class="sm-st-icon st-violet"><i class="fa fa-users"></i></span>
                             <div class="sm-st-info">
-                                <span>{$totaladdon}</span>
-                                {:__('Total addon')}
+                                <span>{$total_mnemonic}</span>
+                                总资源（数量）
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-3 col-xs-6">
+                    <div class="col-sm-2 col-xs-6">
                         <div class="sm-st clearfix">
-                            <span class="sm-st-icon st-blue"><i class="fa fa-leaf"></i></span>
+                            <span class="sm-st-icon st-violet"><i class="fa fa-users"></i></span>
                             <div class="sm-st-info">
-                                <span>{$totalcategory}</span>
-                                {:__('Total category')}
+                                <span>{$today_mnemonic}</span>
+                                今日新增资源（数量）
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-3 col-xs-6">
+                    <div class="col-sm-2 col-xs-6">
                         <div class="sm-st clearfix">
-                            <span class="sm-st-icon st-green"><i class="fa fa-user"></i></span>
+                            <span class="sm-st-icon st-violet"><i class="fa fa-users"></i></span>
                             <div class="sm-st-info">
-                                <span>{$totaladmin}</span>
-                                {:__('Total admin')}
+                                <span>{$total_withdraw_usdt}</span>
+                                总提取数量（USDT）
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-8">
-                        <div id="echart" class="btn-refresh" style="height:200px;width:100%;"></div>
+                    <div class="col-sm-2 col-xs-6">
+                        <div class="sm-st clearfix">
+                            <span class="sm-st-icon st-violet"><i class="fa fa-users"></i></span>
+                            <div class="sm-st-info">
+                                <span>{$today_withdraw_usdt}</span>
+                                今日提取数量（USDT）
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-lg-4">
-                        <div class="card sameheight-item stats">
-                            <div class="card-block">
-                                <div class="row row-sm stats-container">
-                                    <div class="col-xs-6 stat-col">
-                                        <div class="stat-icon"><i class="fa fa-rocket"></i></div>
-                                        <div class="stat">
-                                            <div class="value"> {$todayusersignup}</div>
-                                            <div class="name"> {:__('Today user signup')}</div>
-                                        </div>
-                                        <div class="progress">
-                                            <div class="progress-bar progress-bar-success" style="width: 30%"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-xs-6 stat-col">
-                                        <div class="stat-icon"><i class="fa fa-vcard"></i></div>
-                                        <div class="stat">
-                                            <div class="value"> {$todayuserlogin}</div>
-                                            <div class="name"> {:__('Today user login')}</div>
-                                        </div>
-                                        <div class="progress">
-                                            <div class="progress-bar progress-bar-success" style="width: 25%"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-xs-6  stat-col">
-                                        <div class="stat-icon"><i class="fa fa-calendar"></i></div>
-                                        <div class="stat">
-                                            <div class="value"> {$threednu}</div>
-                                            <div class="name"> {:__('Three dnu')}</div>
-                                        </div>
-                                        <div class="progress">
-                                            <div class="progress-bar progress-bar-success" style="width: 25%"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-xs-6 stat-col">
-                                        <div class="stat-icon"><i class="fa fa-calendar-plus-o"></i></div>
-                                        <div class="stat">
-                                            <div class="value"> {$sevendnu}</div>
-                                            <div class="name"> {:__('Seven dnu')}</div>
-                                        </div>
-                                        <div class="progress">
-                                            <div class="progress-bar progress-bar-success" style="width: 25%"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-xs-6  stat-col">
-                                        <div class="stat-icon"><i class="fa fa-user-circle"></i></div>
-                                        <div class="stat">
-                                            <div class="value"> {$sevendau}</div>
-                                            <div class="name"> {:__('Seven dau')}</div>
-                                        </div>
-                                        <div class="progress">
-                                            <div class="progress-bar progress-bar-success" style="width: 25%"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-xs-6  stat-col">
-                                        <div class="stat-icon"><i class="fa fa-user-circle-o"></i></div>
-                                        <div class="stat">
-                                            <div class="value"> {$thirtydau}</div>
-                                            <div class="name"> {:__('Thirty dau')}</div>
-                                        </div>
-                                        <div class="progress">
-                                            <div class="progress-bar progress-bar-success" style="width: 25%"></div>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div class="col-sm-2 col-xs-6">
+                        <div class="sm-st clearfix">
+                            <span class="sm-st-icon st-violet"><i class="fa fa-users"></i></span>
+                            <div class="sm-st-info">
+                                <span>{$total_chain}</span>
+                                公链数量（数量）
                             </div>
                         </div>
                     </div>
@@ -285,21 +229,22 @@
 
                 <div class="row" style="margin-top:15px;" id="statistics">
 
-                    <div class="col-lg-12">
-                    </div>
+                    <div class="col-lg-12"></div>
+                    {volist name='chain_list' id='chain_info'}
                     <div class="col-xs-6 col-md-3">
                         <div class="panel bg-blue-gradient no-border">
                             <div class="panel-body">
                                 <div class="panel-title">
-                                    <span class="label label-primary pull-right">{:__('Real time')}</span>
-                                    <h5>{:__('Category count')}</h5>
+                                    <span class="label label-primary pull-right"></span>
+                                    <h2>{$chain_info['chain']}</h2>
                                 </div>
                                 <div class="panel-content">
                                     <div class="row">
                                         <div class="col-md-12">
-                                            <h1 class="no-margins">{$totalcategory}</h1>
+                                            <h3 class="no-margins">{$chain_info['total_token_value']} {$chain_info['chain_token']}</h3>
+                                            <h3 class="no-margins">{$chain_info['total_value_usd']} USDT</h3>
                                             <div class="font-bold"><i class="fa fa-magic"></i>
-                                                <small>{:__('Category count tips')}</small>
+                                                <small>折合原生代币数量。折合USDT总数量</small>
                                             </div>
                                         </div>
                                     </div>
@@ -307,87 +252,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-xs-6 col-md-3">
-                        <div class="panel bg-aqua-gradient no-border">
-                            <div class="panel-body">
-                                <div class="ibox-title">
-                                    <span class="label label-primary pull-right">{:__('Real time')}</span>
-                                    <h5>{:__('Database count')}</h5>
-                                </div>
-                                <div class="ibox-content">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <h1 class="no-margins">{$dbtablenums}</h1>
-                                            <div class="font-bold"><i class="fa fa-database"></i>
-                                                <small>{:__('Database table nums')}</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <h1 class="no-margins">{$dbsize|format_bytes=###,'',0}</h1>
-                                            <div class="font-bold"><i class="fa fa-filter"></i>
-                                                <small>{:__('Database size')}</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xs-6 col-md-3">
-                        <div class="panel bg-purple-gradient no-border">
-                            <div class="panel-body">
-                                <div class="ibox-title">
-                                    <span class="label label-primary pull-right">{:__('Real time')}</span>
-                                    <h5>{:__('Attachment count')}</h5>
-                                </div>
-                                <div class="ibox-content">
-
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <h1 class="no-margins">{$attachmentnums}</h1>
-                                            <div class="font-bold"><i class="fa fa-files-o"></i>
-                                                <small>{:__('Attachment nums')}</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <h1 class="no-margins">{$attachmentsize|format_bytes=###,'',0}</h1>
-                                            <div class="font-bold"><i class="fa fa-filter"></i>
-                                                <small>{:__('Attachment size')}</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xs-6 col-md-3">
-                        <div class="panel bg-green-gradient no-border">
-                            <div class="panel-body">
-                                <div class="ibox-title">
-                                    <span class="label label-primary pull-right">{:__('Real time')}</span>
-                                    <h5>{:__('Picture count')}</h5>
-                                </div>
-                                <div class="ibox-content">
-
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <h1 class="no-margins">{$picturenums}</h1>
-                                            <div class="font-bold"><i class="fa fa-picture-o"></i>
-                                                <small>{:__('Picture nums')}</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <h1 class="no-margins">{$picturesize|format_bytes=###,'',0}</h1>
-                                            <div class="font-bold"><i class="fa fa-filter"></i>
-                                                <small>{:__('Picture size')}</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {/volist}
                 </div>
             </div>
             <div class="tab-pane fade" id="two">

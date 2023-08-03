@@ -2,15 +2,15 @@
 
 namespace app\common\command;
 
-use app\api\facade\Account;
+use app\common\facade\ChainToken;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
 
-class AutoCheckReleaseOrderProfit extends Command
+class AutoUpdateChainOriginToken extends Command
 {
     protected function configure() {
-        $this->setName('auto:check:release:order:profit')->setDescription('自动计算质押订单收益');
+        $this->setName('auto:update:chain:origin:token')->setDescription('自动更新公链原生代币');
     }
     protected function execute(Input $input, Output $output){
 
@@ -21,7 +21,7 @@ class AutoCheckReleaseOrderProfit extends Command
      */
     protected function runConsumer(Input $input, Output $output) {
         $output->writeln('['. date('Y-m-d H:i:s') . '] runConsumer...running!');
-        Account::autoCheckOrderRevenueReleaseProfit();
+        ChainToken::updateChainOriginTokenPrice();
         $output->writeln('['. date('Y-m-d H:i:s') . '] runConsumer...end!');
     }
 }
