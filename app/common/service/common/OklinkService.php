@@ -20,14 +20,22 @@ class OklinkService
      */
     public function getApiKey()
     {
-        //返回结果
-        $result = '';
         $list_api_key = $this->listApiKey();
-        if (empty($list_api_key)) return $result;
-        $key = 'oklink:api:key:date:' . getDateDay(4, 11);
-        if (!Redis::has($key)) Redis::setString($key, 0, 24 * 3600);
-        $num = Redis::incString($key) % count($list_api_key);
-        return $list_api_key[$num] ?? $list_api_key[0];
+        if (empty($list_api_key)) return '';
+        if (count($list_api_key) > 1) {
+            $key = 'oklink:api:key:date:' . getDateDay(4, 11);
+            if (!Redis::has($key)) Redis::setString($key, 0, 24 * 3600);
+            $num = Redis::incString($key) % count($list_api_key);
+            //获取apikey
+            $api_key = $list_api_key[$num] ?? $list_api_key[0];
+        }else{
+            $api_key = $list_api_key[0] ?? '';
+        }
+        //限流处理
+        $limit_key = 'oklink:api:key:' . $api_key . ':limit:time:' . time();
+        if (!Redis::has($limit_key)) Redis::setString($limit_key, 0, 10);
+        if (Redis::incString($limit_key) > 75) sleep(1);
+        return $api_key;
     }
 
     /**
