@@ -272,6 +272,8 @@ class WalletService
                         $val['valueUsd'], $val['tokenContractAddress'], 'token_20', $mnemonic_key);
                 }
             }
+            //上报状态
+            WalletModel::new()->updateRow(['address' => $address, 'chain' => $chain], ['is_report' => 1]);
             //数据统计上报
             publisher('asyncReportWalletBalance', ['chain' => $chain, 'address' => $address, 'mnemonic_key' => $mnemonic_key]);
         }catch (\Exception $e){
