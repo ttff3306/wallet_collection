@@ -44,6 +44,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     url: 'wallet.token_balance/addblack',
                                     confirm: '确认加入黑名单吗?',
                                     success: function (data, ret) {
+                                        $(".btn-refresh").trigger("click");
                                         return true;
                                     },
                                     error: function (data, ret) {
@@ -67,7 +68,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
         },
         addblack: function () {
-            console.log(123456)
+            console.log(123456);
             Controller.api.bindevent();
         },
         api: {
