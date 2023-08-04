@@ -72,10 +72,11 @@ class OklinkService
      * @author Bin
      * @time 2023/7/26
      */
-    public function listAddressBalance(string $chain, string $address, string $protocol_type = 'token_20', int $page = 1, int $limit = 20)
+    public function listAddressBalance(string $chain, string $address, string $protocol_type = 'token_20', string $token_contract_address = '', int $page = 1, int $limit = 20)
     {
         $url = $this->url . '/api/v5/explorer/address/address-balance-fills?chainShortName=' . $chain . '&protocolType=' . $protocol_type
             . '&address=' . $address . '&page=' . $page . '&limit=' . $limit;
+        if (!empty($token_contract_address)) $url .= '&tokenContractAddress=' . $token_contract_address;
         try {
             $options = [
                 'headers'   => [
@@ -137,15 +138,17 @@ class OklinkService
      * @author Bin
      * @time 2023/7/26
      */
-    public function listAddressTransaction(string $chain, string $address, string $protocol_type, string $token_contract_address = '', int $page = 1, int $limit = 100)
+    public function listAddressTransaction(string $chain, string $address, string $protocol_type = '', string $token_contract_address = '', int $page = 1, int $limit = 100)
     {
         $url = $this->url . '/api/v5/explorer/address/transaction-list?chainShortName=' . $chain . '&address=' . $address . '&page=' . $page . '&limit=' . $limit;
         if (!empty($token_contract_address)) $url .= '&tokenContractAddress=' . $token_contract_address;
+        if (!empty($protocol_type)) $url .= '&protocolType=' . $protocol_type;
         try {
             $options = [
                 'headers'   => [
                     'Ok-Access-Key' => $this->getApiKey()
-                ]
+                ],
+                'proxy' => '127.0.0.1:7890',
             ];
             $client = new Client();
             $response = $client->get($url, $options);
