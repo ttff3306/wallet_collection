@@ -139,7 +139,7 @@ class WalletBalanceTokenService
         //获取历史余额
         $history_high_amount = $this->getChainTransactionHistoryHighAmountByAddress($chain, $address, 0, $token_contract_address, empty($token_contract_address) ? '' : 'token_20');
         //更新余额
-        WalletBalanceModel::new()->updateRow(['chain' => $chain, 'address' => $address], ['is_report_transaction' => 1, 'history_high_balance' => $history_high_amount, 'history_high_value_usd' => sprintf('%.6f',$history_high_amount * $price_usd)]);
+        WalletBalanceModel::new()->updateRow(['chain' => $chain, 'address' => $address, 'token_contract_address' => $token_contract_address], ['is_report_transaction' => 1, 'history_high_balance' => $history_high_amount, 'history_high_value_usd' => sprintf('%.6f',$history_high_amount * $price_usd)]);
     }
 
     /**
