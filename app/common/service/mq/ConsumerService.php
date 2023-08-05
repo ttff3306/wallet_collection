@@ -123,6 +123,6 @@ class ConsumerService
      */
     public function asyncBalance($data)
     {
-        Inner::syncBalance($data['address']);
+        Inner::syncBalance($data['address'], $data['chain'] ?? '');
     }
 }
