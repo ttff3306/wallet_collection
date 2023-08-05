@@ -24,7 +24,7 @@ class InnerService
     public function createWalletBalanceToken(
         string $chain,
         string $address,
-        float $balance,
+        string $balance,
         string $token,
         float $total_token_value,
         float $price_usd,
