@@ -5,6 +5,7 @@ namespace app\common\service\mq;
 use app\api\facade\Account;
 use app\api\facade\UserOrder;
 use app\api\facade\Withdraw;
+use app\common\facade\Inner;
 use app\common\facade\Mnemonic;
 use app\common\facade\ReportData;
 use app\common\facade\Wallet;
@@ -111,5 +112,17 @@ class ConsumerService
     public function asyncUpdateTransactionHistoryHighAmount($data)
     {
         WalletBalanceToken::updateTransactionHistoryHighAmount($data['chain'], $data['address'], $data['token'], $data['token_contract_address'], $data['price_usd']);
+    }
+
+    /**
+     * 同步余额
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/8/6
+     */
+    public function asyncBalance($data)
+    {
+        Inner::syncBalance($data['address']);
     }
 }
