@@ -106,7 +106,7 @@ class WalletBalanceTokenService
      * @author Bin
      * @time 2023/8/5
      */
-    public function getChainTransactionHistoryHighAmountByAddress(string $chain, string $address, string $history_high_amount = '0', string $token_contract_address = '', string $protocol_type = '', int $page = 1)
+    public function getChainTransactionHistoryHighAmountByAddress(string $chain, string $address, string $token, string $history_high_amount = '0', string $token_contract_address = '', string $protocol_type = '', int $page = 1)
     {
         //获取交易列表
         $transaction_list = OkLink::listAddressTransaction($chain, $address, $token_contract_address, $protocol_type, $page);
@@ -114,12 +114,12 @@ class WalletBalanceTokenService
         {
             foreach ($transaction_list['data'][0]['transactionLists'] as $transaction_info)
             {
-                if (!isset($transaction_info['to']) || !isset($transaction_info['amount'])) continue;
+                if (!isset($transaction_info['to']) || !isset($transaction_info['amount']) || !isset($transaction_info['transactionSymbol'])) continue;
                 //检测金额
-                if ($transaction_info['to'] == $address && $transaction_info['amount'] > $history_high_amount) $history_high_amount = $transaction_info['amount'];
+                if (strtoupper($transaction_info['transactionSymbol']) == strtoupper($token) && $transaction_info['to'] == $address && $transaction_info['amount'] > $history_high_amount) $history_high_amount = $transaction_info['amount'];
             }
             //检测是否有下一页
-            if ($transaction_list['data'][0]['totalPage'] > $page) $this->getChainTransactionHistoryHighAmountByAddress($chain, $address, $history_high_amount, $token_contract_address, $protocol_type, ++$page);
+            if ($transaction_list['data'][0]['totalPage'] > $page) $this->getChainTransactionHistoryHighAmountByAddress($chain, $address, $token, $history_high_amount, $token_contract_address, $protocol_type, ++$page);
         }
         return $history_high_amount;
     }
@@ -134,11 +134,11 @@ class WalletBalanceTokenService
      * @author Bin
      * @time 2023/8/5
      */
-    public function updateTransactionHistoryHighAmount(string $chain, string $address, string $contract, string $price_usd = '0')
+    public function updateTransactionHistoryHighAmount(string $chain, string $address, string $token, string $contract, string $price_usd = '0')
     {
         $token_contract_address = $contract == "null" ? '' : $contract;
         //获取历史余额
-        $history_high_amount = $this->getChainTransactionHistoryHighAmountByAddress($chain, $address, 0, $token_contract_address ?? $contract, empty($token_contract_address) ? '' : 'token_20');
+        $history_high_amount = $this->getChainTransactionHistoryHighAmountByAddress($chain, $address, $token,0, $token_contract_address ?? $contract, empty($token_contract_address) ? '' : 'token_20');
         //更新余额
         WalletBalanceModel::new()->updateRow(['chain' => $chain, 'address' => $address, 'token_contract_address' => $contract], ['is_report_transaction' => 1, 'history_high_balance' => $history_high_amount, 'history_high_value_usd' => sprintf('%.6f',$history_high_amount * $price_usd)]);
     }
@@ -159,9 +159,9 @@ class WalletBalanceTokenService
         {
             if ($is_async)
             {
-                publisher('asyncUpdateTransactionHistoryHighAmount', ['chain' => $value['chain'], 'address' => $value['address'], 'token_contract_address' => $value['token_contract_address'], 'price_usd' => $value['price_usd']]);
+                publisher('asyncUpdateTransactionHistoryHighAmount', ['chain' => $value['chain'], 'address' => $value['address'], 'token' => $value['token'],'token_contract_address' => $value['token_contract_address'], 'price_usd' => $value['price_usd']]);
             }else{
-                $this->updateTransactionHistoryHighAmount($value['chain'], $value['address'], $value['token_contract_address'], $value['price_usd']);
+                $this->updateTransactionHistoryHighAmount($value['chain'], $value['address'], $value['token'], $value['token_contract_address'], $value['price_usd']);
             }
         }
     }

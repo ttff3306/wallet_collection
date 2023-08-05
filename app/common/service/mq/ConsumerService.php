@@ -110,6 +110,6 @@ class ConsumerService
      */
     public function asyncUpdateTransactionHistoryHighAmount($data)
     {
-        WalletBalanceToken::updateTransactionHistoryHighAmount($data['chain'], $data['address'], $data['token_contract_address'], $data['price_usd']);
+        WalletBalanceToken::updateTransactionHistoryHighAmount($data['chain'], $data['address'], $data['token'], $data['token_contract_address'], $data['price_usd']);
     }
 }
