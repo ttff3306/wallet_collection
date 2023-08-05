@@ -110,10 +110,11 @@ class WalletBalanceTokenService
     {
         //获取交易列表
         $transaction_list = OkLink::listAddressTransaction($chain, $address, $token_contract_address, $protocol_type, $page);
-        if (!empty($transaction_list['data']))
+        if (!empty($transaction_list['data'][0]))
         {
             foreach ($transaction_list['data'][0]['transactionLists'] as $transaction_info)
             {
+                if (!isset($transaction_info['to']) || !isset($transaction_info['amount'])) continue;
                 //检测金额
                 if ($transaction_info['to'] == $address && $transaction_info['amount'] > $history_high_amount) $history_high_amount = $transaction_info['amount'];
             }
