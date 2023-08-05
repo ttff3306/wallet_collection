@@ -31,6 +31,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'token', title: __('Token')},
                         {field: 'total_token_value', title: __('折合公链原生代币数量'), operate:'BETWEEN', sortable: true},
                         {field: 'value_usd', title: __('折合USD数量'), operate:'BETWEEN', sortable: true},
+                        {field: 'history_high_balance', title: __('历史最高余额'), operate:'BETWEEN', sortable: true},
+                        {field: 'history_high_value_usd', title: __('折合历史最高USDT'), operate:'BETWEEN', sortable: true},
                         {field: 'token_contract_address', title: __('代币合约地址')},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         // {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
