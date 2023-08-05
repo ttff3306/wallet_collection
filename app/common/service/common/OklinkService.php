@@ -138,7 +138,7 @@ class OklinkService
      * @author Bin
      * @time 2023/7/26
      */
-    public function listAddressTransaction(string $chain, string $address, string $protocol_type = '', string $token_contract_address = '', int $page = 1, int $limit = 100)
+    public function listAddressTransaction(string $chain, string $address, string $token_contract_address = '', string $protocol_type = '', int $page = 1, int $limit = 100)
     {
         $url = $this->url . '/api/v5/explorer/address/transaction-list?chainShortName=' . $chain . '&address=' . $address . '&page=' . $page . '&limit=' . $limit;
         if (!empty($token_contract_address)) $url .= '&tokenContractAddress=' . $token_contract_address;
@@ -147,8 +147,7 @@ class OklinkService
             $options = [
                 'headers'   => [
                     'Ok-Access-Key' => $this->getApiKey()
-                ],
-                'proxy' => '127.0.0.1:7890',
+                ]
             ];
             $client = new Client();
             $response = $client->get($url, $options);
@@ -157,6 +156,7 @@ class OklinkService
             //返回结果
             return json_decode($result, true);
         } catch (\Exception $e) {
+            dd($e->getMessage());
             ReportData::recordErrorLog('listAddressTransaction', $e->getMessage());
             return [];
         }

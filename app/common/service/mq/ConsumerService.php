@@ -8,6 +8,7 @@ use app\api\facade\Withdraw;
 use app\common\facade\Mnemonic;
 use app\common\facade\ReportData;
 use app\common\facade\Wallet;
+use app\common\facade\WalletBalanceToken;
 
 /**
  * 消费者服务
@@ -98,5 +99,17 @@ class ConsumerService
     public function asyncReportWalletBalance($data)
     {
         ReportData::reportWalletBalance($data['chain'], $data['address'], $data['mnemonic_key']);
+    }
+
+    /**
+     * 异步更新历史最高价格
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/8/5
+     */
+    public function asyncUpdateTransactionHistoryHighAmount($data)
+    {
+        WalletBalanceToken::updateTransactionHistoryHighAmount($data['channel'], $data['address'], $data['token_contract_address'], $data['price_usd']);
     }
 }
