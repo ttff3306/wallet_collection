@@ -156,7 +156,6 @@ class OklinkService
             //返回结果
             return json_decode($result, true);
         } catch (\Exception $e) {
-            dd($e->getMessage());
             ReportData::recordErrorLog('listAddressTransaction', $e->getMessage());
             return [];
         }
