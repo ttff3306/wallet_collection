@@ -143,6 +143,7 @@ class WalletBalanceTokenService
         WalletBalanceModel::new()->updateRow(['chain' => $chain, 'address' => $address, 'token_contract_address' => $contract], ['is_report_transaction' => 1, 'history_high_balance' => $history_high_amount, 'history_high_value_usd' => sprintf('%.6f',$history_high_amount * $price_usd)]);
     }
 
+
     /**
      * 检测历史最高余额
      * @param bool $is_async
