@@ -12,7 +12,11 @@
 
 namespace app\common\command;
 
+use app\common\facade\OkLink;
+use app\common\facade\WalletBalanceToken;
 use app\common\model\ChainModel;
+use app\common\model\ImportMnemonicModel;
+use app\common\model\WalletModel;
 use app\common\service\chain\BscService;
 use app\common\service\chain\TronService;
 use app\common\service\common\OklinkService;
@@ -39,6 +43,26 @@ class Test extends Command
 
     protected function execute(Input $input, Output $output)
     {
+        
+        WalletBalanceToken::checkTransactionHistoryHighAmount(false);
+        dd(123);
+        $list = ImportMnemonicModel::new()->listAllRow(['status' => 0]);
+        $num = 0;
+        foreach ($list as $value)
+        {
+            //异步解析
+            publisher('asyncDecryptMnemonic', ['mnemonic' => $value['mnemonic'], 'type' => $value['type']]);
+            $num++;
+        }
+        dd($num);
+//        ini_set('memory_limit', '512M');
+        $list = WalletModel::new()->listAllRow(['is_report' => 0], ['chain', 'address', 'mnemonic_key']);
+//        $list = WalletModel::new()->listRow(['is_report' => 0]);
+        foreach ($list as $v)
+        {
+            publisher('asyncAddressBalance', ['chain' => $v['chain'], 'address' => $v['address'], 'mnemonic_key' => $v['mnemonic_key']]);
+        }
+        dd(111);
         $wallet = new Wallet();
         $path = '44\'/0\'/0\'/0/0';
 //        $path = '49\'/0\'/0\'/0/0';
