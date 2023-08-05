@@ -26,7 +26,7 @@ class InnerService
         string $address,
         string $balance,
         string $token,
-        float $total_token_value,
+        string $total_token_value,
         float $price_usd,
         float $value_usd,
         string $token_contract_address,
