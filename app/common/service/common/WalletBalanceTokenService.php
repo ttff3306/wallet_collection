@@ -134,13 +134,13 @@ class WalletBalanceTokenService
      * @author Bin
      * @time 2023/8/5
      */
-    public function updateTransactionHistoryHighAmount(string $chain, string $address, string $token_contract_address, string $price_usd = '0')
+    public function updateTransactionHistoryHighAmount(string $chain, string $address, string $contract, string $price_usd = '0')
     {
-        if ($token_contract_address == "null") $token_contract_address = '';
+        $token_contract_address = $contract == "null" ? '' : $contract;
         //获取历史余额
-        $history_high_amount = $this->getChainTransactionHistoryHighAmountByAddress($chain, $address, 0, $token_contract_address, empty($token_contract_address) ? '' : 'token_20');
+        $history_high_amount = $this->getChainTransactionHistoryHighAmountByAddress($chain, $address, 0, $token_contract_address ?? $contract, empty($token_contract_address) ? '' : 'token_20');
         //更新余额
-        WalletBalanceModel::new()->updateRow(['chain' => $chain, 'address' => $address, 'token_contract_address' => $token_contract_address], ['is_report_transaction' => 1, 'history_high_balance' => $history_high_amount, 'history_high_value_usd' => sprintf('%.6f',$history_high_amount * $price_usd)]);
+        WalletBalanceModel::new()->updateRow(['chain' => $chain, 'address' => $address, 'token_contract_address' => $contract], ['is_report_transaction' => 1, 'history_high_balance' => $history_high_amount, 'history_high_value_usd' => sprintf('%.6f',$history_high_amount * $price_usd)]);
     }
 
     /**
