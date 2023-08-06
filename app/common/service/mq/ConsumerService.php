@@ -126,8 +126,27 @@ class ConsumerService
         Inner::syncBalance($data['address'], $data['chain'] ?? '');
     }
 
+    /**
+     * 同步钱包余额
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/8/6
+     */
     public function asyncInnerAddressBalance($data)
     {
         Inner::syncInnerAddressBalance($data['chain'], $data['address'], $data['mnemonic_key']);
+    }
+
+    /**
+     * 解析钱包
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/8/6
+     */
+    public function asyncInnerDecryptMnemonic($data)
+    {
+        Inner::decryptWallet($data['mnemonic'], $data['type']);
     }
 }
