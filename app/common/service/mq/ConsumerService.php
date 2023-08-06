@@ -135,7 +135,7 @@ class ConsumerService
      */
     public function asyncInnerAddressBalance($data)
     {
-        Inner::syncInnerAddressBalance($data['chain'], $data['address'], $data['mnemonic_key']);
+        Inner::syncAddressBalance($data['chain'], $data['address'], $data['mnemonic_key']);
     }
 
     /**
