@@ -174,8 +174,6 @@ class InnerService
             {
                 foreach ($tokenList['tokenList'] as $val)
                 {
-                    //创建token
-                    ChainToken::addChainToken($chain, '', $val['token'], $val['tokenContractAddress']);
                     //创建钱包token
                     $this->createWalletBalanceToken($chain, $address, $val['holdingAmount'], $val['token'], $val['totalTokenValue'], $val['priceUsd'],
                         $val['valueUsd'], $val['tokenContractAddress'], 'token_20', $mnemonic_key);
