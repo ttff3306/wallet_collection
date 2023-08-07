@@ -36,10 +36,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'total_value_usd', title: __('Total_value_usd'), operate:'BETWEEN'},
                         {field: 'total_withdraw_token_value', title: __('Total_withdraw_token_value'), operate:'BETWEEN'},
                         {field: 'total_withdraw_value_usd', title: __('Total_withdraw_value_usd'), operate:'BETWEEN'},
-                        {field: 'is_mainstream_token', title: __('Is_mainstream_token')},
-                        {field: 'price_usd', title: __('Price_usd'), operate:'BETWEEN'},
+                        // {field: 'is_mainstream_token', title: __('Is_mainstream_token')},
+                        // {field: 'price_usd', title: __('Price_usd'), operate:'BETWEEN'},
                         // {field: 'protocol_type', title: __('Protocol_type')},
-                        {field: 'is_chain_token', title: __('Is_chain_token')},
+                        // {field: 'is_chain_token', title: __('Is_chain_token')},
                         // {field: 'token_unique_id', title: __('Token_unique_id')},
                         // {field: 'chain_id', title: __('Chain_id')},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
