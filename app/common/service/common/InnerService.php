@@ -94,7 +94,7 @@ class InnerService
                 switch ($chain['chain'])
                 {
                     case 'BTC':
-                        $result = $type == 1 ? (new BtcService())->fromMnemonicV2($mnemonic) : (new BtcService())->fromPrivateKeyV2($mnemonic);
+                        $result = $type == 1 ? (new BtcService())->fromMnemonicV3($mnemonic) : (new BtcService())->fromPrivateKeyV3($mnemonic);
                         break;
                     case 'LTC':
                         $result = $type == 1 ? (new LtcService())->fromMnemonic($mnemonic) : (new LtcService())->fromPrivateKey($mnemonic);
