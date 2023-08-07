@@ -258,7 +258,7 @@ class WalletService
             }
             $list_balance = [];
             //同步公链2.0代币
-            if (!in_array($chain, ['BTC', 'LTC', 'BCH', 'ETC', ''])) $list_balance = OkLink::listAddressBalance($chain, $address);
+            if (!in_array($chain, ['BTC', 'LTC', 'BCH', 'ETC'])) $list_balance = OkLink::listAddressBalance($chain, $address);
             $tokenList = $list_balance['data'][0] ?? [];
             if (!empty($tokenList['tokenList']))
             {
