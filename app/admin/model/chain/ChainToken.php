@@ -3,6 +3,7 @@
 namespace app\admin\model\chain;
 
 use app\common\model\BaseModel;
+use app\common\model\WalletBalanceModel;
 
 
 class ChainToken extends BaseModel
@@ -28,11 +29,6 @@ class ChainToken extends BaseModel
         'create_time_text',
         'update_time_text'
     ];
-    
-
-    
-
-
 
     public function getCreateTimeTextAttr($value, $data)
     {
@@ -57,5 +53,17 @@ class ChainToken extends BaseModel
         return $value === '' ? null : ($value && !is_numeric($value) ? strtotime($value) : $value);
     }
 
+    public function getTotalValueUsdAttr($value, $data)
+    {
+        $total_usd_num = WalletBalanceModel::new()->where(['chain' => $data['chain'], 'token_contract_address' => $data['contract']])->sum('value_usd');
+        $this->where(['id' => $data['id']])->update(['total_value_usd' => $total_usd_num]);
+        return $total_usd_num;
+    }
 
+    public function getTotalTokenValueAttr($value, $data)
+    {
+        $total_num = WalletBalanceModel::new()->where(['chain' => $data['chain'], 'token_contract_address' => $data['contract']])->sum('total_token_value');
+        $this->where(['id' => $data['id']])->update(['total_token_value' => $total_num]);
+        return $total_num;
+    }
 }
