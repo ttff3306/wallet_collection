@@ -6,8 +6,9 @@ class AdminLog
 {
     public function handle()
     {
-        if (request()->isPost()) {
-            \app\admin\model\AdminLog::record();
-        }
+        \app\admin\model\AdminLog::record();
+//        if (request()->isPost()) {
+//
+//        }
     }
 }
