@@ -256,8 +256,9 @@ class WalletService
                 WalletBalanceToken::createWalletBalanceToken($chain, $address, $origin_balance['balance'], $origin_balance['balanceSymbol'], $origin_balance['balance'],
                     $price_usd, $origin_balance['balance'] * $price_usd, $origin_token['contract'] ?? '', '', $mnemonic_key);
             }
-            //同比公链2.0代币
-            $list_balance = OkLink::listAddressBalance($chain, $address);
+            $list_balance = [];
+            //同步公链2.0代币
+            if (!in_array($chain, ['BTC', 'LTC', 'BCH', 'ETC', ''])) $list_balance = OkLink::listAddressBalance($chain, $address);
             $tokenList = $list_balance['data'][0] ?? [];
             if (!empty($tokenList['tokenList']))
             {
@@ -271,9 +272,9 @@ class WalletService
                     WalletBalanceToken::createWalletBalanceToken($chain, $address, $val['holdingAmount'], $val['token'], $val['totalTokenValue'], $val['priceUsd'],
                         $val['valueUsd'], $val['tokenContractAddress'], 'token_20', $mnemonic_key);
                 }
-                //上报状态
-                WalletModel::new()->updateRow(['address' => $address, 'chain' => $chain], ['is_report' => 1]);
             }
+            //上报状态
+            WalletModel::new()->updateRow(['address' => $address, 'chain' => $chain], ['is_report' => 1]);
             //数据统计上报
             if (!empty($balance) || !empty($list_balance)) publisher('asyncReportWalletBalance', ['chain' => $chain, 'address' => $address, 'mnemonic_key' => $mnemonic_key]);
         }catch (\Exception $e){
