@@ -38,7 +38,7 @@ class Dashboard extends Backend
     public function index()
     {
         //获取总资产(usdt)
-        $total_usdt = ImportMnemonicModel::new()->sum('total_value_usd');
+        $total_usdt = WalletBalanceModel::new()->sum('value_usd');
         //总导入助记词数量
         $total_mnemonic = ImportMnemonicModel::new()->count();
         //今日新增
