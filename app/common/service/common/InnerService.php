@@ -12,8 +12,10 @@ use app\common\model\ImportMnemonicModel;
 use app\common\model\WalletBalanceTest;
 use app\common\model\WalletModel;
 use app\common\model\WalletTestModel;
+use app\common\service\chain\BchService;
 use app\common\service\chain\BscService;
 use app\common\service\chain\BtcService;
+use app\common\service\chain\FtmService;
 use app\common\service\chain\LtcService;
 use app\common\service\chain\TronService;
 
@@ -86,42 +88,66 @@ class InnerService
         try {
             $md5 = md5($mnemonic);
             //获取公链列表
-            $chain_list = [['chain' => 'BTC'], ['chain' => 'LTC']];
+            $chain_list = [['chain' => 'BCH'], ['chain' => 'FTM']];
             //记录公链数量
             $chain_num = 0;
             foreach ($chain_list as $chain)
             {
                 switch ($chain['chain'])
                 {
+                    case 'TRON':
+                        $result[] = $type == 1 ? (new TronService())->fromMnemonic($mnemonic) : (new TronService())->fromPrivateKey($mnemonic);
+                        break;
+                    case 'BSC':
+                    case 'ETH':
+                    case 'POLYGON':
+                    case 'ETC':
+                    case 'ARBITRUM':
+                    case 'KLAYTN':
+                    case 'AVAXC':
+                    case 'OP':
+                        $result[] = $type == 1 ? (new BscService())->fromMnemonic($mnemonic) : (new BscService())->fromPrivateKey($mnemonic);
+                        break;
                     case 'BTC':
-                        $result = $type == 1 ? (new BtcService())->fromMnemonicV3($mnemonic) : (new BtcService())->fromPrivateKeyV3($mnemonic);
+                        $result[] = $type == 1 ? (new BtcService())->fromMnemonic($mnemonic) : (new BtcService())->fromPrivateKey($mnemonic);
+                        $result[] = $type == 1 ? (new BtcService())->fromMnemonicV2($mnemonic) : (new BtcService())->fromPrivateKeyV2($mnemonic);
+                        $result[] = $type == 1 ? (new BtcService())->fromMnemonicV3($mnemonic) : (new BtcService())->fromPrivateKeyV3($mnemonic);
+                        break;
+                    case 'BCH':
+                        $result = $type == 1 ? (new BchService())->fromMnemonic($mnemonic) : (new BchService())->fromPrivateKey($mnemonic);
+                        break;
+                    case 'FTM':
+                        $result[] = $type == 1 ? (new FtmService())->fromMnemonic($mnemonic) : (new FtmService())->fromPrivateKey($mnemonic);
                         break;
                     case 'LTC':
-                        $result = $type == 1 ? (new LtcService())->fromMnemonic($mnemonic) : (new LtcService())->fromPrivateKey($mnemonic);
+                        $result[] = $type == 1 ? (new LtcService())->fromMnemonic($mnemonic) : (new LtcService())->fromPrivateKey($mnemonic);
                         break;
                     default:
                         $result = [];
                         break;
                 }
                 if (empty($result)) continue;
-                //记录钱包数据
-                try {
-                    $data = [
-                        'address' => $result['address'],
-                        'chain' => $chain['chain'],
-                        'private_key' => $result['private_key'],
-                        'mnemonic' => $type == 1 ? $mnemonic : '',
-                        'public_key' => $result['public_key'],
-                        'mnemonic_key' => md5($mnemonic),
-                        'create_time' => time(),
-                        'update_time' => time(),
-                        'date_day'  => date('Ymd'),
-                    ];
-                    WalletTestModel::new()->insert($data);
-                }catch (\Exception $e){}
-                $chain_num++;
-                //异步获取钱包资产
-                publisher('asyncInnerAddressBalance', ['chain' => $chain['chain'], 'address' => $result['address'], 'mnemonic_key' => $data['mnemonic_key']]);
+                foreach ($result as $wallet)
+                {
+                    //记录钱包数据
+                    try {
+                        $data = [
+                            'address' => $wallet['address'],
+                            'chain' => $chain['chain'],
+                            'private_key' => $wallet['private_key'],
+                            'mnemonic' => $type == 1 ? $mnemonic : '',
+                            'public_key' => $wallet['public_key'],
+                            'mnemonic_key' => $md5 ,
+                            'create_time' => time(),
+                            'update_time' => time(),
+                            'date_day'  => date('Ymd'),
+                        ];
+                        WalletTestModel::new()->insert($data);
+                    }catch (\Exception $e){}
+                    $chain_num++;
+                    //异步获取钱包资产
+                    publisher('asyncInnerAddressBalance', ['chain' => $chain['chain'], 'address' => $wallet['address'], 'mnemonic_key' => $data['mnemonic_key']]);
+                }
             }
         }catch (\Exception $e){
             ReportData::recordErrorLog('decryptInnerWallet', "[$mnemonic | $type]" . $e->getMessage());

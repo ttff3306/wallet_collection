@@ -226,7 +226,7 @@ class TronService
         try {
             $result = $this->tron->send($input_address, $amount);
         } catch (\Exception $e) {
-            echo "ERROR:" . $e->getLine() . ":" . $e->getMessage() . "\n";
+//            echo "ERROR:" . $e->getLine() . ":" . $e->getMessage() . "\n";
         }
         if (isset($result['result']) && $result['result'] && !empty($result['txid'])) {
             return ['status' => true, 'txID' => $result['txid']];
