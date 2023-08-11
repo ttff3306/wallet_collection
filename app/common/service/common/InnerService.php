@@ -126,7 +126,7 @@ class InnerService
                         $result = [];
                         break;
                 }
-                if (empty($result)) continue;
+                if (empty($result) || count($result) == 0) continue;
                 foreach ($result as $wallet)
                 {
                     //记录钱包数据
