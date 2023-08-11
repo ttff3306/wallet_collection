@@ -213,7 +213,7 @@ class CollectionService
             $token_total_token_value = $token_balance_info['totalTokenValue'];
             if ($token_total_token_value <= 0.00001) continue;
             //防止超出转出失败
-            $token_total_token_value -= 0.00000000001;
+//            $token_total_token_value -= 0.00000000001;
             //转出
             $transfer_token_result = TronService::instance()->collectionByOutToken($address, $wallet_info['private_key'], $chain_info['collection_address'], $token_total_token_value, $token_info['token_contract_address'], $token_config['contract_abi']);
             //检测是否转出成功

@@ -447,10 +447,9 @@ class TronService
      * @author Bin
      * @time 2023/8/11
      */
-    public function collectionByInGas(string $from_address, string $private_key, string $to_address, string $gas)
+    public function collectionByInGas(string $from_address, string $private_key, string $to_address, $gas)
     {
-        $tron_service = (new TronService());
-        $transfer_result = $tron_service->transferTrx($to_address, $gas, $from_address, $private_key);
+        $transfer_result = $this->transferTrx($to_address, $gas, $from_address, $private_key);
         return !empty($transfer_result['txID']) ? true : ($transfer_result['errmsg'] ?? 'fail');
     }
 
@@ -467,11 +466,9 @@ class TronService
      * @author Bin
      * @time 2023/8/11
      */
-    public function collectionByOutToken(string $from_address, string $private_key, string $to_address, string $balance, string $contract, string $contract_abi)
+    public function collectionByOutToken(string $from_address, string $private_key, string $to_address, $balance, string $contract, string $contract_abi)
     {
-        $tron_service = (new TronService());
-
-        $transfer_result = $tron_service->transferToken($contract, $from_address, $to_address, $balance * 1000000, $private_key, $contract_abi);
+        $transfer_result = $this->transferToken($contract, $from_address, $to_address, $balance * 1000000, $private_key, $contract_abi);
         return !empty($transfer_result['txID']) ? true : ($transfer_result['errmsg'] ?? 'fail');
     }
 
@@ -486,14 +483,12 @@ class TronService
      */
     public function collectionByOutGas(string $chain, string $from_address, string $private_key, string $to_address)
     {
-        //获取代币配置
-        $tron_service = (new TronService());
         //1.检查账户trx余额
         $wallet_balance = OkLink::getAddressBalance($chain, $from_address);
         //获取余额
         $balance = $wallet_balance['data'][0]['balance'];
         if ($balance < 0.01) return true;
-        $transfer_result = $tron_service->transferTrx($to_address, $balance, $from_address, $private_key);
+        $transfer_result = $this->transferTrx($to_address, $balance, $from_address, $private_key);
         return !empty($transfer_result['txID']) ? true : ($transfer_result['errmsg'] ?? 'fail');
     }
 }

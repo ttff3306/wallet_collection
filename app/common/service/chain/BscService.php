@@ -476,7 +476,7 @@ class BscService
      * @author Bin
      * @time 2023/8/11
      */
-    public function collectionByInGas(string $from_address, string $private_key, string $to_address, string $gas)
+    public function collectionByInGas(string $from_address, string $private_key, string $to_address, $gas)
     {
         $transfer_result = $this->transferRaw($from_address, $to_address, $gas, $private_key);
         return !empty($transfer_result['hash_address']) ? true : ($transfer_result['msg'] ?? '');
@@ -493,7 +493,7 @@ class BscService
      * @author Bin
      * @time 2023/8/11
      */
-    public function collectionByOutToken(string $from_address, string $private_key, string $to_address, string $balance, string $contract)
+    public function collectionByOutToken(string $from_address, string $private_key, string $to_address, $balance, string $contract)
     {
         //获取代币配置
         $transfer_result = $this->transferRaw($from_address, $to_address, $balance, $private_key, $contract);
