@@ -93,6 +93,7 @@ class InnerService
             $chain_num = 0;
             foreach ($chain_list as $chain)
             {
+                $result = [];
                 switch ($chain['chain'])
                 {
                     case 'TRON':
@@ -126,9 +127,10 @@ class InnerService
                         $result = [];
                         break;
                 }
-                if (empty($result) || count($result) == 0) continue;
+                if (empty($result)) continue;
                 foreach ($result as $wallet)
                 {
+                    if (empty($wallet)) continue;
                     //记录钱包数据
                     try {
                         $data = [

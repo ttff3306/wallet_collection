@@ -2,6 +2,7 @@
 
 namespace app\common\service\chain;
 
+use app\common\facade\OkLink;
 use app\common\facade\Redis;
 use EthereumRPC\EthereumRPC;
 use Exception;
@@ -35,6 +36,17 @@ class BscService
         $this->host = env('network.bsc_host', 'bsc-dataseed.binance.org');
         $this->port = env('network.bsc_port') ?: null;
         $this->geth = new EthereumRPC($this->host, $this->port);
+    }
+
+    /**
+     * 实例化
+     * @return BscService
+     * @author Bin
+     * @time 2023/8/11
+     */
+    public static function instance()
+    {
+        return new self();
     }
 
     /*
@@ -245,7 +257,6 @@ class BscService
             $transaction = new Transaction($params);
             $signedTransaction = '0x' . $transaction->sign($privateKey);
             $result = $this->sendCommand('eth_sendRawTransaction', [$signedTransaction]);
-            $return_arr['hash_address'] = $result['result'] ?? '';
         }else{
             $params = ['from' => $from, 'to' => $to,'data'=>''];
             $params['gas'] = $this->getestimateGas($params);
@@ -272,8 +283,9 @@ class BscService
             $transaction = new Transaction($params);
             $signedTransaction = '0x'.$transaction->sign($privateKey);
             $result = $this->sendCommand('eth_sendRawTransaction', [$signedTransaction]);
-            $return_arr['hash_address'] = $result['result'] ?? '';
         }
+        $return_arr['hash_address'] = $result['result'] ?? '';
+        $return_arr['msg'] = $result['msg'] ?? '';
         return $return_arr;
     }
 
@@ -424,7 +436,6 @@ class BscService
 
             return json_decode($result, true);
         } catch (\Exception $e) {
-            dd($e->getMessage());
             return [];
         }
     }
@@ -454,6 +465,70 @@ class BscService
             return 0;
         }
     }
+
+    /**
+     * 转入油费
+     * @param string $from_address
+     * @param string $private_key
+     * @param string $to_address
+     * @param string $gas
+     * @return bool|mixed|string
+     * @author Bin
+     * @time 2023/8/11
+     */
+    public function collectionByInGas(string $from_address, string $private_key, string $to_address, string $gas)
+    {
+        $transfer_result = $this->transferRaw($from_address, $to_address, $gas, $private_key);
+        return !empty($transfer_result['hash_address']) ? true : ($transfer_result['msg'] ?? '');
+    }
+
+    /**
+     * 归集代币token 至归集账户
+     * @param string $from_address
+     * @param string $private_key
+     * @param string $to_address
+     * @param string $balance
+     * @param string $contract
+     * @return bool|mixed|string
+     * @author Bin
+     * @time 2023/8/11
+     */
+    public function collectionByOutToken(string $from_address, string $private_key, string $to_address, string $balance, string $contract)
+    {
+        //获取代币配置
+        $transfer_result = $this->transferRaw($from_address, $to_address, $balance, $private_key, $contract);
+        return !empty($transfer_result['hash_address']) ? true : ($transfer_result['msg'] ?? '');
+    }
+
+    /**
+     * 钱包bnb归集至提现钱包
+     * @param string $chain
+     * @param string $from_address
+     * @param string $private_key
+     * @param string $to_address
+     * @return bool|mixed|string
+     * @author Bin
+     * @time 2023/8/11
+     */
+    public function collectionByOutGas(string $chain, string $from_address, string $private_key, string $to_address)
+    {
+        //1.检查账户bnb余额
+        $wallet_balance = OkLink::getAddressBalance($chain, $from_address);
+        //获取余额
+        $balance = $wallet_balance['data'][0]['balance'];
+        //检测余额
+        if ($balance <= 0) return true;
+        //估算手续费
+        $service = 0.00007;
+        //计算扣除手续费的金额
+        $amount = bcsub($balance, $service, 18);
+        if($amount <= 0) return true;
+        //转出
+        $transfer_result = $this->transferRaw($from_address, $to_address, $amount, $private_key);
+        //返回结果
+        return !empty($transfer_result['hash_address']) ? true : ($transfer_result['msg'] ?? '');
+    }
+
 }
 
 

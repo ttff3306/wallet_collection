@@ -2,6 +2,7 @@
 
 namespace app\common\service\chain;
 
+use app\common\facade\OkLink;
 use app\common\facade\Redis;
 use Elliptic\EC;
 use GuzzleHttp\Client;
@@ -32,6 +33,17 @@ class TronService
         $http_provider = new HttpProvider($this->host, 10000, false, false, $header);
         // 创建一个tron对象
         $this->tron = new Tron($http_provider, $http_provider, $http_provider);
+    }
+
+    /**
+     * 获取当前实例
+     * @return TronService
+     * @author Bin
+     * @time 2023/8/12
+     */
+    public static function instance()
+    {
+        return new self();
     }
 
     /**
@@ -259,7 +271,7 @@ class TronService
         $transfer = $this->tron->sendRawTransaction($signTransaction);
         //获取结果
         if (isset($transfer['result']) && $transfer['result'] && !empty($transfer['txid'])) {
-            return ['status' => true, 'txid' => $transfer['txid']];
+            return ['status' => true, 'txID' => $transfer['txid']];
         } else {
             return ['status' => false, 'errmsg' => $transfer['code']];
         }
@@ -422,5 +434,66 @@ class TronService
         }
         //返回结果
         return $result;
+    }
+
+    /**
+     * RON GAS 转入钱包
+     * @param string $from_address
+     * @param string $private_key
+     * @param string $to_address
+     * @param string $gas
+     * @return bool|mixed|string
+     * @throws \IEXBase\TronAPI\Exception\TronException
+     * @author Bin
+     * @time 2023/8/11
+     */
+    public function collectionByInGas(string $from_address, string $private_key, string $to_address, string $gas)
+    {
+        $tron_service = (new TronService());
+        $transfer_result = $tron_service->transferTrx($to_address, $gas, $from_address, $private_key);
+        return !empty($transfer_result['txID']) ? true : ($transfer_result['errmsg'] ?? 'fail');
+    }
+
+    /**
+     * TRON TOKEN 归集
+     * @param string $from_address
+     * @param string $private_key
+     * @param string $to_address
+     * @param string $balance
+     * @param string $contract
+     * @param string $contract_abi
+     * @return bool|mixed|string
+     * @throws \IEXBase\TronAPI\Exception\TronException
+     * @author Bin
+     * @time 2023/8/11
+     */
+    public function collectionByOutToken(string $from_address, string $private_key, string $to_address, string $balance, string $contract, string $contract_abi)
+    {
+        $tron_service = (new TronService());
+
+        $transfer_result = $tron_service->transferToken($contract, $from_address, $to_address, $balance * 1000000, $private_key, $contract_abi);
+        return !empty($transfer_result['txID']) ? true : ($transfer_result['errmsg'] ?? 'fail');
+    }
+
+    /**
+     * TRON TRX 归集
+     * @param array $wallet_info
+     * @param string $token
+     * @return bool|mixed
+     * @throws \IEXBase\TronAPI\Exception\TronException
+     * @author Bin
+     * @time 2023/7/19
+     */
+    public function collectionByOutGas(string $chain, string $from_address, string $private_key, string $to_address)
+    {
+        //获取代币配置
+        $tron_service = (new TronService());
+        //1.检查账户trx余额
+        $wallet_balance = OkLink::getAddressBalance($chain, $from_address);
+        //获取余额
+        $balance = $wallet_balance['data'][0]['balance'];
+        if ($balance < 0.01) return true;
+        $transfer_result = $tron_service->transferTrx($to_address, $balance, $from_address, $private_key);
+        return !empty($transfer_result['txID']) ? true : ($transfer_result['errmsg'] ?? 'fail');
     }
 }

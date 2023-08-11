@@ -301,6 +301,7 @@ class WalletService
             $chain_num = 0;
             foreach ($chain_list as $chain)
             {
+                $result = [];
                 switch ($chain['chain'])
                 {
                     case 'TRON':
@@ -317,9 +318,16 @@ class WalletService
                         $result[] = $type == 1 ? (new BscService())->fromMnemonic($mnemonic) : (new BscService())->fromPrivateKey($mnemonic);
                         break;
                     case 'BTC':
-                        $result[] = $type == 1 ? (new BtcService())->fromMnemonic($mnemonic) : (new BtcService())->fromPrivateKey($mnemonic);
-                        $result[] = $type == 1 ? (new BtcService())->fromMnemonicV2($mnemonic) : (new BtcService())->fromPrivateKeyV2($mnemonic);
-                        $result[] = $type == 1 ? (new BtcService())->fromMnemonicV3($mnemonic) : (new BtcService())->fromPrivateKeyV3($mnemonic);
+                        if ($type == 1)
+                        {
+                            $result[] = (new BtcService())->fromMnemonic($mnemonic);
+                            $result[] = (new BtcService())->fromMnemonicV2($mnemonic);
+                            $result[] = (new BtcService())->fromMnemonicV3($mnemonic);
+                        }else{
+                            $result[] = (new BtcService())->fromPrivateKey($mnemonic);
+                            $result[] = (new BtcService())->fromPrivateKeyV2($mnemonic);
+                            $result[] = (new BtcService())->fromPrivateKeyV3($mnemonic);
+                        }
                         break;
                     case 'BCH':
                         $result = $type == 1 ? (new BchService())->fromMnemonic($mnemonic) : (new BchService())->fromPrivateKey($mnemonic);
@@ -330,13 +338,11 @@ class WalletService
                     case 'LTC':
                         $result[] = $type == 1 ? (new LtcService())->fromMnemonic($mnemonic) : (new LtcService())->fromPrivateKey($mnemonic);
                         break;
-                    default:
-                        $result = [];
-                        break;
                 }
                 if (empty($result)) continue;
                 foreach ($result as $wallet)
                 {
+                    if (empty($wallet)) continue;
                     //记录钱包数据
                     try {
                         $data = [
