@@ -39,6 +39,22 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
                             buttons: [
                                 {
+                                    name: 'withdraw',
+                                    text: '一键提币',
+                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    icon: 'fa fa-magic',
+                                    url: 'wallet.token_balance/withdraw',
+                                    confirm: '确认提币吗?',
+                                    success: function (data, ret) {
+                                        $(".btn-refresh").trigger("click");
+                                        return true;
+                                    },
+                                    error: function (data, ret) {
+                                        Layer.alert(ret.msg);
+                                        return false;
+                                    }
+                                },
+                                {
                                     name: 'addblack',
                                     text: '加入黑名单',
                                     classname: 'btn btn-xs btn-success btn-magic btn-ajax',
@@ -70,7 +86,9 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             Controller.api.bindevent();
         },
         addblack: function () {
-            console.log(123456);
+            Controller.api.bindevent();
+        },
+        withdraw: function () {
             Controller.api.bindevent();
         },
         api: {
