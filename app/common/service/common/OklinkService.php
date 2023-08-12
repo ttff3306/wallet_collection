@@ -311,4 +311,39 @@ class OklinkService
             return [];
         }
     }
+
+    /**
+     * 查询代币持仓地址列表
+     * @param string $chain 公链
+     * @param string $token_contract_address 合约地址
+     * @param string|null $holder_address 持仓地址
+     * @param int $page
+     * @param int $limit
+     * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/8/12
+     */
+    public function listPosition(string $chain, string $token_contract_address, string $holder_address = null, int $page = 1, int $limit = 100)
+    {
+        $url = $this->url . '/api/v5/explorer/token/position-list?chainShortName=' . $chain . '&tokenContractAddress=' .
+            $token_contract_address . '&page=' . $page . '&limit=' . $limit;
+        if (!is_null($holder_address)) $url .= '&holderAddress=' . $holder_address;
+        try {
+            $options = [
+                'headers'   => [
+                    'Ok-Access-Key' => $this->getApiKey()
+                ]
+            ];
+            $client = new Client();
+            $response = $client->get($url, $options);
+            // 获取响应内容
+            $result = $response->getBody()->getContents();
+            //返回结果
+            return json_decode($result, true);
+        } catch (\Exception $e) {
+            ReportData::recordErrorLog('marketData', $e->getMessage());
+            return [];
+        }
+    }
 }
