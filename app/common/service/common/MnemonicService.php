@@ -67,4 +67,23 @@ class MnemonicService
         //检测缓存是否存在
         return !Redis::addSet($key, md5($mnemonic), 0);
     }
+
+    /**
+     * 检测助记词解析
+     * @param bool $is_actual_time
+     * @return void
+     * @author Bin
+     * @time 2023/8/12
+     */
+    public function checkDecryptMnemonic(bool $is_actual_time = false)
+    {
+        //查询条件
+        $where = [ ['status', '=', 0] ];
+        //检测是否实时
+        if (!$is_actual_time) $where[] = ['create_time', '<', time() - 5 * 86400];
+        $list = ImportMnemonicModel::new()->listRow($where, ['page' => 1 ,'page_count' => 5000]);
+        if (empty($list)) return;
+        //异步解析
+        foreach ($list as $value) publisher('asyncDecryptMnemonic', ['mnemonic' => $value['mnemonic'], 'type' => $value['type']]);
+    }
 }

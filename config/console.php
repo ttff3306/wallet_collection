@@ -20,5 +20,6 @@ return [
         'app\common\command\AutoCollectionOutToken',
         'app\common\command\AutoWithdraw',
         'app\common\command\AutoUpdateChainOriginToken',
+        'app\common\command\AutoCheckHistoryHighAmount',
     ],
 ];

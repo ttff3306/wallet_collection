@@ -151,7 +151,7 @@ class WalletBalanceTokenService
      * @author Bin
      * @time 2023/8/5
      */
-    public function checkTransactionHistoryHighAmount(bool $is_async = false)
+    public function checkTransactionHistoryHighAmount(bool $is_async = true)
     {
         //获取未上报数据
         $list = WalletBalanceModel::new()->listAllRow(['is_report_transaction' => 0]);
