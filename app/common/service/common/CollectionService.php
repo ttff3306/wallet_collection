@@ -287,7 +287,7 @@ class CollectionService
                             //防止超出转出失败
                             $token_total_token_value -= 0.00000000001;
                             //发起转账
-                            $transfer_result = BscService::instance()->transferRaw($address, $chain_info['collection_address'], $token_total_token_value, $wallet_info['private_key'], $token_info['token_contract_address']);
+                            $transfer_result = BscService::instance()->transferRaw($address, $chain_info['collection_address'], strval($token_total_token_value), $wallet_info['private_key'], $token_info['token_contract_address']);
                             //组装结果
                             $result = [
                                 'status' => !empty($transfer_result['hash_address']),

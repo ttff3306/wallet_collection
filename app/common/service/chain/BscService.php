@@ -217,7 +217,7 @@ class BscService
      * @author hebin
      * @time 2023/6/30
      */
-    public function transferRaw(string $from ,string $to, float $value, string $privateKey, string $contract = '')
+    public function transferRaw(string $from ,string $to, string $value, string $privateKey, string $contract = '')
     {
         if(!empty($contract)) {
             $method_hash = '0xa9059cbb';
