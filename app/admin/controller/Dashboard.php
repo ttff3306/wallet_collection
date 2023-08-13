@@ -47,7 +47,7 @@ class Dashboard extends Backend
         //总提现
         $total_withdraw_usdt = WalletBalanceModel::new()->sum('withdraw_value_usd');
         //今日提现
-        $today_withdraw_usdt = CollectionBalanceModel::new()->getValuesSum(['date_day' => date('Ymd')], 'actual_receipt_amount_usd');
+        $today_withdraw_usdt = CollectionBalanceModel::new()->getValuesSum(['date_day' => date('Ymd'), 'status' => 1], 'actual_receipt_amount_usd');
         //获取公链列表
         $chain_list = (new \app\admin\model\chain\Chain())->where(['status' => 1])->select();
 
