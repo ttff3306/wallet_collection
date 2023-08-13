@@ -271,8 +271,10 @@ class CollectionService
                 $token_balance_info = $token_balance['data'][0]['tokenList'][0] ?? [];
                 //检测
                 if (empty($token_balance_info)) {
-                    //上报错误数据
-                    ReportData::recordErrorLog('collectionToken', $chain . ' | ' . $token_info['token_contract_address'] . ' 余额查询失败', 'token归集');
+                    //更新钱包余额数据
+                    $this->updateCollectionBalanceResult($order_no, $chain, $address, $chain_info['collection_address'], $token_info['token'] ?? '',
+                        $token_info['token_contract_address'],$token_info['balance'] ?? 0, $token_info['value_usd'] ?? 0, 0,
+                        0, '10000', '未查询到余额数据');
                     continue;
                 }
                 //获取账户实际余额
@@ -401,7 +403,7 @@ class CollectionService
             $this->updateData($chain, $address, $order_no, $update);
             //更新钱包余额数据
             $this->updateCollectionBalanceResult($order_no, $chain, $address, $chain_info['collection_address'], $balance_token['token'] ?? '',
-                'null',$balance_token['balance'] ?? 0, $balance_token['value_usd'] ?? 0, $balance, $balance * $wallet_balance['priceUsd'],
+                'null',$balance_token['balance'] ?? 0, $balance_token['value_usd'] ?? 0, $balance, $balance * $balance_token['price_usd'],
                 $result['hash'] ?? '', $result['msg'] ?? '');
             //异步上报数据
             publisher('asyncReportWalletBalance', ['chain' => $chain, 'address' => $address, 'mnemonic_key' => $wallet_info['mnemonic_key']]);
