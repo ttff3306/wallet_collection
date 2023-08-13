@@ -170,22 +170,15 @@ class CollectionService
             $token_list = WalletBalanceModel::new()->listAllRow(['chain' => $chain, 'address' => $address, 'collection_type' => 1]);
             //更新状态
             if (empty($token_list)) return $this->updateData($chain, $address, $order_no, ['status' => 2, 'memo' => '暂无token']);
+            //3.获取公链配置钱包
+            $chain_info = Chain::getChain($chain);
             //2.计算油费，判断油费是否足够
             $total_gas = 0;
             foreach ($token_list as $value) {
                 //排除原生代币
                 if ($value['token_contract_address'] == "null" || empty($value['token_contract_address'])) continue;
-                switch ($chain)
-                {
-                    case 'BSC':
-                        //增加油费
-                        $total_gas += 0.0012;
-                        break;
-                    case 'TRON':
-                        //增加油费
-                        $total_gas += 40;
-                        break;
-                }
+                //增加油费
+                $total_gas += $chain_info['price_gas'];
             }
             //获取当前gas
             $balance = OkLink::getAddressBalance($chain, $address);
@@ -195,8 +188,6 @@ class CollectionService
                 //计算油费
                 if ($origin_balance['balance'] >= $total_gas) $total_gas = 0;
             }
-            //3.获取公链配置钱包
-            $chain_info = Chain::getChain($chain);
             //检测公链配置
             if (empty($chain_info['collection_address']) || empty($chain_info['gas_wallet_address']) ||
                 empty($chain_info['gas_wallet_private_key']) || empty($chain_info['is_auto_collection'])) return $this->updateData($chain, $address, $order_no, ['is_error' => 1, 'memo' => '公链归集配置无效']);
