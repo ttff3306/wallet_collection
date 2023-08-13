@@ -252,14 +252,14 @@ class TronService
      * @param string $contract 合约地址
      * @param string $owner_address 转出方BASE58钱包地址
      * @param string $to_address 转入方BASE58钱包地址
-     * @param int $amount 转入金额
+     * @param int|string $amount 转入金额
      * @param string $private 私钥
      * @param string $contract_abi 合约地址
      * @return array
      * @throws \IEXBase\TronAPI\Exception\TronException
      * @time 2023/6/28
      */
-    public function transferToken(string $contract, string $owner_address, string $to_address, int $amount, string $private, string $contract_abi)
+    public function transferToken(string $contract, string $owner_address, string $to_address, $amount, string $private, string $contract_abi)
     {
         try {
             $this->tron->setAddress($owner_address);

@@ -323,7 +323,7 @@ class CollectionService
             //更新状态
             $this->updateData($chain, $address, $order_no, ['status' => 2, 'memo' => "成功归集token_20 [{$success_num}]" ]);
             //异步归集gas
-            publisher('asyncCollectionByOutGas', ['chain' => $chain, 'address' => $address, 'order_no' => $order_no], 5);
+            publisher('asyncCollectionByOutGas', ['chain' => $chain, 'address' => $address, 'order_no' => $order_no], 20);
         }catch (Exception $e){
             ReportData::recordErrorLog('collectionByOutToken', $e->getMessage(), json_encode([$chain, $address, $order_no]));
         }
