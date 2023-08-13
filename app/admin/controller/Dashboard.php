@@ -46,8 +46,10 @@ class Dashboard extends Backend
         $today_mnemonic = ImportMnemonicModel::new()->where(['date_day' => date('Ymd')])->count();
         //总提现
         $total_withdraw_usdt = WalletBalanceModel::new()->sum('withdraw_value_usd');
+        $today_withdraw_usdt = sprintf('%.2f', $total_withdraw_usdt);
         //今日提现
         $today_withdraw_usdt = CollectionBalanceModel::new()->getValuesSum(['date_day' => date('Ymd'), 'status' => 1], 'actual_receipt_amount_usd');
+        $today_withdraw_usdt = sprintf('%.2f', $today_withdraw_usdt);
         //获取公链列表
         $chain_list = (new \app\admin\model\chain\Chain())->where(['status' => 1])->select();
 
