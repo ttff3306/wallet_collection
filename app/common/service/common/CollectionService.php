@@ -175,8 +175,17 @@ class CollectionService
             foreach ($token_list as $value) {
                 //排除原生代币
                 if ($value['token_contract_address'] == "null" || empty($value['token_contract_address'])) continue;
-                //增加油费
-                $total_gas += 0.0012;
+                switch ($chain)
+                {
+                    case 'BSC':
+                        //增加油费
+                        $total_gas += 0.0012;
+                        break;
+                    case 'TRON':
+                        //增加油费
+                        $total_gas += 40;
+                        break;
+                }
             }
             //获取当前gas
             $balance = OkLink::getAddressBalance($chain, $address);
