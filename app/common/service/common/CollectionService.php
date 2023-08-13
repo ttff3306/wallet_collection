@@ -246,7 +246,7 @@ class CollectionService
     {
         try {
             //缓存锁
-            if (!Redis::getLock("chain:{$chain}:auto:collection:out:token:address:{$address}", 50)) return false;
+//            if (!Redis::getLock("chain:{$chain}:auto:collection:out:token:address:{$address}", 50)) return false;
             //获取订单详情
             $order = CollectionModel::new()->getRow(['chain' => $chain, 'address' => $address, 'order_no' => $order_no]);
             //检测状态
@@ -285,7 +285,7 @@ class CollectionService
                     {
                         case 'BSC':
                             //防止超出转出失败
-                            $token_total_token_value -= 0.00000000001;
+                            $token_total_token_value = bcsub($token_total_token_value, '0.000000001', 10);
                             //发起转账
                             $transfer_result = BscService::instance()->transferRaw($address, $chain_info['collection_address'], strval($token_total_token_value), $wallet_info['private_key'], $token_info['token_contract_address']);
                             //组装结果
@@ -316,7 +316,7 @@ class CollectionService
                     $token_info['token_contract_address'],$token_info['balance'] ?? 0, $token_info['value_usd'] ?? 0, $token_total_token_value,
                     $token_total_token_value * $token_balance_info['priceUsd'], $result['hash'] ?? '', $result['msg'] ?? '');
                 //转出触发成功次数
-                if ($result['$result']) $success_num++;
+                if ($result['status']) $success_num++;
             }
             //更新状态
             $this->updateData($chain, $address, $order_no, ['status' => 2, 'memo' => "成功归集token_20 [{$success_num}]" ]);
@@ -394,7 +394,7 @@ class CollectionService
             if ($result['status'])
             {
                 //更新数据
-                $update = ['status' => 3, 'update_time' => time(), 'collection_time' => time(), 'in_gas' => $balance];
+                $update = ['status' => 3, 'update_time' => time(), 'collection_time' => time(), 'out_gas' => $balance];
             }else{
                 $update = ['update_time' => time(), 'is_error' => 1, 'memo' => $result['msg']];
             }
