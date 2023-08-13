@@ -649,6 +649,7 @@ class CollectionService
             if (!empty($hash))
             {
                 $update_data = [
+                    'balance' => 0,
                     'collection_type' => 2,
                     'total_token_value' => 0,
                     'value_usd' => 0,
