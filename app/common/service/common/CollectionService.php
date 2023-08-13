@@ -301,7 +301,7 @@ class CollectionService
                             //获取代币配置
                             $token_config = ChainTokenModel::new()->getRow(['chain' => $chain, 'contract' => $token_info['token_contract_address']]);
                             //发起转账
-                            $transfer_result = TronService::instance()->transferToken($token_info['token_contract_address'], $address, $chain_info['collection_address'], bcmul($token_total_token_value, bcpow(10, $chain_info['precision'])), $wallet_info['private_key'], $token_config['contract_abi']);
+                            $transfer_result = TronService::instance()->transferToken($token_info['token_contract_address'], $address, $chain_info['collection_address'], bcmul($token_total_token_value, bcpow(10, $token_config['precision'])), $wallet_info['private_key'], $token_config['contract_abi']);
                             //组装结果
                             $result = [
                                 'status' => $transfer_result['status'],
