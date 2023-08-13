@@ -34,17 +34,23 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'history_high_balance', title: __('历史最高余额'), operate:'BETWEEN', sortable: true},
                         {field: 'history_high_value_usd', title: __('折合历史最高USDT'), operate:'BETWEEN', sortable: true},
                         {field: 'token_contract_address', title: __('代币合约地址')},
+                        {field: 'collection_type', title: __('归集状态'), searchList: {'0':"待归集",'1':"归集中",'2':"归集成功",'3':"归集失败",'-1':"暂不支持归集"}, formatter: Table.api.formatter.status},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         // {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
                             buttons: [
                                 {
                                     name: 'withdraw',
-                                    text: '一键提币',
-                                    classname: 'btn btn-xs btn-success btn-magic btn-ajax',
+                                    text: '一键归集',
+                                    classname: 'btn btn-xs btn-success btn-danger btn-ajax',
                                     icon: 'fa fa-magic',
                                     url: 'wallet.token_balance/withdraw',
-                                    confirm: '确认提币吗?',
+                                    confirm: '确认一键归集吗?',
+                                    hidden:function (value,row) {
+                                        if (Number(value.collection_type) != 0){
+                                            return true;
+                                        }
+                                    },
                                     success: function (data, ret) {
                                         $(".btn-refresh").trigger("click");
                                         return true;

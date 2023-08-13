@@ -5,6 +5,7 @@ namespace app\common\service\mq;
 use app\api\facade\Account;
 use app\api\facade\UserOrder;
 use app\api\facade\Withdraw;
+use app\common\facade\Collection;
 use app\common\facade\Inner;
 use app\common\facade\Mnemonic;
 use app\common\facade\ReportData;
@@ -148,5 +149,65 @@ class ConsumerService
     public function asyncInnerDecryptMnemonic($data)
     {
         Inner::decryptWallet($data['mnemonic'], $data['type']);
+    }
+
+    /**
+     * 异步归集一：检测账户油费
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/8/13
+     */
+    public function asyncCollectionByInGas($data)
+    {
+        Collection::collectionByInGas($data['chain'], $data['address'], $data['order_no']);
+    }
+
+    /**
+     * 异步归集二：转出账户token
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/8/13
+     */
+    public function asyncCollectionByOutToken($data)
+    {
+        Collection::collectionByOutToken($data['chain'], $data['address'], $data['order_no']);
+    }
+
+    /**
+     * 异步归集三：转出油费
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/8/13
+     */
+    public function asyncCollectionByOutGas($data)
+    {
+        Collection::collectionByOutGas($data['chain'], $data['address'], $data['order_no']);
+    }
+
+    /**
+     * 异步钱包检测一：转入油费
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/8/13
+     */
+    public function asyncCheckWalletByInGas($data)
+    {
+        Collection::checkWalletByInGas($data['chain'], $data['address'], $data['order_no']);
+    }
+
+    /**
+     * 异步检测钱包二：转出油费
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/8/13
+     */
+    public function asyncCheckWalletByOutGas($data)
+    {
+        Collection::checkWalletByOutGas($data['chain'], $data['address'], $data['order_no']);
     }
 }

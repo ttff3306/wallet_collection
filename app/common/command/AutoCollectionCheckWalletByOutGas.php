@@ -7,10 +7,10 @@ use think\console\Command;
 use think\console\Input;
 use think\console\Output;
 
-class AutoCollectionOutToken extends Command
+class AutoCollectionCheckWalletByOutGas extends Command
 {
     protected function configure() {
-        $this->setName('auto:collection:out:token')->setDescription('自动归集token');
+        $this->setName('auto:collection:check:wallet:by:out:gas')->setDescription('自动归集检测钱包二');
     }
     protected function execute(Input $input, Output $output){
 
@@ -21,7 +21,7 @@ class AutoCollectionOutToken extends Command
      */
     protected function runConsumer(Input $input, Output $output) {
         $output->writeln('['. date('Y-m-d H:i:s') . '] runConsumer...running!');
-        Collection::autoCheckTransferToken();
+        Collection::autoCheckWalletByOutGas();
         $output->writeln('['. date('Y-m-d H:i:s') . '] runConsumer...end!');
     }
 }

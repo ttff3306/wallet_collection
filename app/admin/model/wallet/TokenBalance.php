@@ -2,6 +2,7 @@
 
 namespace app\admin\model\wallet;
 
+use app\common\facade\Chain;
 use app\common\model\BaseModel;
 
 
@@ -52,5 +53,14 @@ class TokenBalance extends BaseModel
         return $value === '' ? null : ($value && !is_numeric($value) ? strtotime($value) : $value);
     }
 
-
+    public function getCollectionTypeAttr($value, $data)
+    {
+        //检测是否可归集
+        if ($value == 0) {
+            //获取公链
+            $chain = Chain::getChain($data['chain']);
+            if (empty($chain['is_auto_collection'])) $value = -1;
+        }
+        return $value;
+    }
 }

@@ -1,5 +1,14 @@
 <div class="panel panel-default panel-intro">
-    {:build_heading()}
+    <div class="panel-heading">
+        {:build_heading(null, false)}
+        <ul class="nav nav-tabs" data-field="collection_type">
+            <li class="active"><a href="#all" data-value="" data-toggle="tab">全部状态</a></li>
+            <li><a href="#status_0" data-value="0" data-toggle="tab">待归集</a></li>
+            <li><a href="#status_1" data-value="1" data-toggle="tab">归集中</a></li>
+            <li><a href="#status_2" data-value="-1" data-toggle="tab">归集成功</a></li>
+            <li><a href="#status_3" data-value="-1" data-toggle="tab">归集失败</a></li>
+        </ul>
+    </div>
 
     <div class="panel-body">
         <div id="myTabContent" class="tab-content">

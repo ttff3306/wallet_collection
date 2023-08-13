@@ -238,12 +238,12 @@ class TronService
         try {
             $result = $this->tron->send($input_address, $amount);
         } catch (\Exception $e) {
-            echo "ERROR:" . $e->getLine() . ":" . $e->getMessage() . "\n";
+            $result = ['code' => $e->getMessage()];
         }
         if (isset($result['result']) && $result['result'] && !empty($result['txid'])) {
             return ['status' => true, 'txID' => $result['txid']];
         } else {
-            return ['code' => false, 'errmsg' => $result['code'] ?? ''];
+            return ['status' => false, 'msg' => $result['code'] ?? ''];
         }
     }
 
@@ -261,19 +261,23 @@ class TronService
      */
     public function transferToken(string $contract, string $owner_address, string $to_address, int $amount, string $private, string $contract_abi)
     {
-        $this->tron->setAddress($owner_address);
-        $this->tron->setPrivateKey($private);
-        $transaction_builder = $this->tron->getTransactionBuilder();
-        $abi = json_decode($contract_abi, true);
-        $params = [$this->tron->toHex($to_address), $amount];
-        $SmartContract = $transaction_builder->triggerSmartContract($abi, $this->tron->toHex($contract), 'transfer', $params, 40000000, $this->tron->toHex($owner_address));
-        $signTransaction = $this->tron->signTransaction($SmartContract);
-        $transfer = $this->tron->sendRawTransaction($signTransaction);
+        try {
+            $this->tron->setAddress($owner_address);
+            $this->tron->setPrivateKey($private);
+            $transaction_builder = $this->tron->getTransactionBuilder();
+            $abi = json_decode($contract_abi, true);
+            $params = [$this->tron->toHex($to_address), $amount];
+            $SmartContract = $transaction_builder->triggerSmartContract($abi, $this->tron->toHex($contract), 'transfer', $params, 40000000, $this->tron->toHex($owner_address));
+            $signTransaction = $this->tron->signTransaction($SmartContract);
+            $transfer = $this->tron->sendRawTransaction($signTransaction);
+        }catch (\Exception $e){
+            $transfer = ['code' => $e->getMessage()];
+        }
         //获取结果
         if (isset($transfer['result']) && $transfer['result'] && !empty($transfer['txid'])) {
             return ['status' => true, 'txID' => $transfer['txid']];
         } else {
-            return ['status' => false, 'errmsg' => $transfer['code']];
+            return ['status' => false, 'msg' => $transfer['code']];
         }
     }
 
@@ -434,61 +438,5 @@ class TronService
         }
         //返回结果
         return $result;
-    }
-
-    /**
-     * RON GAS 转入钱包
-     * @param string $from_address
-     * @param string $private_key
-     * @param string $to_address
-     * @param string $gas
-     * @return bool|mixed|string
-     * @throws \IEXBase\TronAPI\Exception\TronException
-     * @author Bin
-     * @time 2023/8/11
-     */
-    public function collectionByInGas(string $from_address, string $private_key, string $to_address, $gas)
-    {
-        $transfer_result = $this->transferTrx($to_address, $gas, $from_address, $private_key);
-        return !empty($transfer_result['txID']) ? true : ($transfer_result['errmsg'] ?? 'fail');
-    }
-
-    /**
-     * TRON TOKEN 归集
-     * @param string $from_address
-     * @param string $private_key
-     * @param string $to_address
-     * @param string $balance
-     * @param string $contract
-     * @param string $contract_abi
-     * @return bool|mixed|string
-     * @throws \IEXBase\TronAPI\Exception\TronException
-     * @author Bin
-     * @time 2023/8/11
-     */
-    public function collectionByOutToken(string $from_address, string $private_key, string $to_address, $balance, string $contract, string $contract_abi)
-    {
-        $transfer_result = $this->transferToken($contract, $from_address, $to_address, $balance * 1000000, $private_key, $contract_abi);
-        return !empty($transfer_result['txID']) ? true : ($transfer_result['errmsg'] ?? 'fail');
-    }
-
-    /**
-     * TRON TRX 归集
-     * @param array $wallet_info
-     * @param string $token
-     * @return bool|mixed
-     * @throws \IEXBase\TronAPI\Exception\TronException
-     * @author Bin
-     * @time 2023/7/19
-     */
-    public function collectionByOutGas(string $chain, string $from_address, string $private_key, string $to_address)
-    {
-        //1.检查账户trx余额
-        $wallet_balance = OkLink::getAddressBalance($chain, $from_address);
-        //获取余额
-        $balance = $wallet_balance['data'][0]['balance'];
-        if ($balance < 0.01) return true;
-        $transfer_result = $this->transferTrx($to_address, $balance, $from_address, $private_key);
-        return !empty($transfer_result['txID']) ? true : ($transfer_result['errmsg'] ?? 'fail');
     }
 }
