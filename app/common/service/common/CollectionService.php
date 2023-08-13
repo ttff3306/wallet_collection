@@ -223,6 +223,8 @@ class CollectionService
                 default:
                     break;
             }
+            //更新状态
+            $this->updateData($chain, $address, $order_no, ['status' => 1]);
             //处理token转入
             publisher('asyncCollectionByOutToken', ['chain' => $chain, 'address' => $address, 'order_no' => $order_no], $delay_time);
         }catch (Exception $e){
@@ -387,16 +389,16 @@ class CollectionService
                     default:
                         return ;
                 }
-                //增加月
-                if ($result['status'])
-                {
-                    //更新数据
-                    $update = ['status' => 3, 'update_time' => time(), 'collection_time' => time(), 'in_gas' => $balance];
-                }else{
-                    $update = ['update_time' => time(), 'is_error' => 1, 'memo' => $result['msg']];
-                }
-                $this->updateData($chain, $address, $order_no, $update);
             }
+            //更新状态
+            if ($result['status'])
+            {
+                //更新数据
+                $update = ['status' => 3, 'update_time' => time(), 'collection_time' => time(), 'in_gas' => $balance];
+            }else{
+                $update = ['update_time' => time(), 'is_error' => 1, 'memo' => $result['msg']];
+            }
+            $this->updateData($chain, $address, $order_no, $update);
             //更新钱包余额数据
             $this->updateCollectionBalanceResult($order_no, $chain, $address, $chain_info['collection_address'], $balance_token['token'] ?? '',
                 'null',$balance_token['balance'] ?? 0, $balance_token['value_usd'] ?? 0, $balance, $balance * $wallet_balance['priceUsd'],
