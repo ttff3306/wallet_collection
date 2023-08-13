@@ -368,25 +368,29 @@ class CollectionService
                     case 'BSC':
                         //估算手续费
                         $service = '0.00007';
-                        //计算扣除手续费的金额
-                        $balance = bcsub(strval($balance), $service, 18);
-                        //转出
-                        $transfer_result = BscService::instance()->transferRaw($address, $chain_info['collection_address'], $balance, $wallet_info['private_key']);
-                        //组装结果
-                        $result = [
-                            'status' => !empty($transfer_result['hash_address']),
-                            'msg'    => $transfer_result['msg'] ?? '',
-                            'hash'  => $transfer_result['hash_address'] ?? ''
-                        ];
+                        if ($balance > $service) {
+                            //计算扣除手续费的金额
+                            $balance = bcsub(strval($balance), $service, 18);
+                            //转出
+                            $transfer_result = BscService::instance()->transferRaw($address, $chain_info['collection_address'], $balance, $wallet_info['private_key']);
+                            //组装结果
+                            $result = [
+                                'status' => !empty($transfer_result['hash_address']),
+                                'msg'    => $transfer_result['msg'] ?? '',
+                                'hash'  => $transfer_result['hash_address'] ?? ''
+                            ];
+                        }
                         break;
                     case 'TRON':
-                        $transfer_result = TronService::instance()->transferTrx($chain_info['collection_address'], $balance, $address, $wallet_info['private_key']);
-                        //组装结果
-                        $result = [
-                            'status' => $transfer_result['status'],
-                            'msg'    => $transfer_result['msg'] ?? '',
-                            'hash'  => $transfer_result['txID'] ?? ''
-                        ];
+                        if ($balance >= 1) {
+                            $transfer_result = TronService::instance()->transferTrx($chain_info['collection_address'], $balance, $address, $wallet_info['private_key']);
+                            //组装结果
+                            $result = [
+                                'status' => $transfer_result['status'],
+                                'msg'    => $transfer_result['msg'] ?? '',
+                                'hash'  => $transfer_result['txID'] ?? ''
+                            ];
+                        }
                         break;
                     default:
                         return ;
