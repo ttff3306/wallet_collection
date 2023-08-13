@@ -355,7 +355,7 @@ class CollectionService
             //1.检查账户余额
             $wallet_balance = OkLink::getAddressBalance($chain, $address);
             //获取余额
-            $balance = $wallet_balance['data'][0]['balance'];
+            $balance = $wallet_balance['data'][0]['balance'] ?? 0;
             //初始化结果
             $result = ['status' => true, 'msg' => '', 'hash' => '1'];
             //获取token
