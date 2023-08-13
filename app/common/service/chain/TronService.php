@@ -262,7 +262,6 @@ class TronService
     public function transferToken(string $contract, string $owner_address, string $to_address, int $amount, string $private, string $contract_abi)
     {
         try {
-            $amount *= 1000000;
             $this->tron->setAddress($owner_address);
             $this->tron->setPrivateKey($private);
             $transaction_builder = $this->tron->getTransactionBuilder();
