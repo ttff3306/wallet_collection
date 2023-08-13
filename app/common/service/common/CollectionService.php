@@ -224,7 +224,7 @@ class CollectionService
                     break;
             }
             //更新状态
-            $this->updateData($chain, $address, $order_no, ['status' => 1]);
+            $this->updateData($chain, $address, $order_no, ['status' => 1, 'in_gas' => $total_gas]);
             //处理token转入
             publisher('asyncCollectionByOutToken', ['chain' => $chain, 'address' => $address, 'order_no' => $order_no], $delay_time);
         }catch (Exception $e){
@@ -246,7 +246,7 @@ class CollectionService
     {
         try {
             //缓存锁
-//            if (!Redis::getLock("chain:{$chain}:auto:collection:out:token:address:{$address}", 50)) return false;
+            if (!Redis::getLock("chain:{$chain}:auto:collection:out:token:address:{$address}", 50)) return false;
             //获取订单详情
             $order = CollectionModel::new()->getRow(['chain' => $chain, 'address' => $address, 'order_no' => $order_no]);
             //检测状态
