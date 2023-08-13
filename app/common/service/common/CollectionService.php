@@ -287,7 +287,7 @@ class CollectionService
                     {
                         case 'BSC':
                             //防止超出转出失败
-                            $token_total_token_value = bcsub($token_total_token_value, '0.000000001', 10);
+                            $token_total_token_value = bcsub($token_total_token_value, '0.000001', 6);
                             //发起转账
                             $transfer_result = BscService::instance()->transferRaw($address, $chain_info['collection_address'], strval($token_total_token_value), $wallet_info['private_key'], $token_info['token_contract_address']);
                             //组装结果
@@ -300,6 +300,8 @@ class CollectionService
                         case 'TRON':
                             //获取代币配置
                             $token_config = ChainTokenModel::new()->getRow(['chain' => $chain, 'contract' => $token_info['token_contract_address']]);
+                            //处理代币
+                            if ($token_config['precision'] >= 10) $token_total_token_value = bcsub($token_total_token_value, 1);
                             //发起转账
                             $transfer_result = TronService::instance()->transferToken($token_info['token_contract_address'], $address, $chain_info['collection_address'], bcmul($token_total_token_value, bcpow(10, $token_config['precision'])), $wallet_info['private_key'], $token_config['contract_abi']);
                             //组装结果
