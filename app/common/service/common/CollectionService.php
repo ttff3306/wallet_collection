@@ -459,7 +459,7 @@ class CollectionService
                     {
                         $transfer_amount = 1;
                         //油费转入
-                        $transfer_result = TronService::instance()->transferTrx($address, $transfer_amount, $chain_info['collection_address'], $chain_info['gas_wallet_private_key']);
+                        $transfer_result = TronService::instance()->transferTrx($address, $transfer_amount, $chain_info['gas_wallet_address'], $chain_info['gas_wallet_private_key']);
                         //检测是否转入成功
                         if (!$transfer_result['status']) return $this->updateData($chain, $address, $order_no, ['is_error' => 1, 'memo' => $transfer_result['msg']]);
                         $delay_time = 20;
