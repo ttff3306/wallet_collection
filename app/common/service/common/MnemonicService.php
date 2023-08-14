@@ -80,7 +80,7 @@ class MnemonicService
         //查询条件
         $where = [ ['status', '=', 0] ];
         //检测是否实时
-        if (!$is_actual_time) $where[] = ['create_time', '<', time() - 5 * 86400];
+        if (!$is_actual_time) $where[] = ['create_time', '<', time() - 5 * 3600];
         $list = ImportMnemonicModel::new()->listRow($where, ['page' => 1 ,'page_count' => 5000]);
         if (empty($list)) return;
         //异步解析
