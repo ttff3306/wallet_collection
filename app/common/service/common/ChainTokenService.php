@@ -164,7 +164,7 @@ class ChainTokenService
         {
             $list = AirTokenModel::new()->where(['chain' => $chain])->column('contract');
             //写入缓存
-            foreach ($list as $v) Redis::addSet($key, strtolower($v), 0);
+            foreach ($list as $v) Redis::addSet($key, strtolower($v), 24 * 3600);
         }
         //返回结果
         return Redis::getSet($key);
@@ -181,9 +181,9 @@ class ChainTokenService
     public function checkAirToken(string $chain, string $contract, bool $is_update = false)
     {
         //检测是否更新
-        if ($is_update) $this->listAirToken($chain, true);
-        $contract = strtolower($contract);
         $key = "list:chain:{$chain}:air:token:date:" . getDateDay(4, 6);
+        if ($is_update ||!Redis::has($key)) $this->listAirToken($chain, true);
+        $contract = strtolower($contract);
         return Redis::hasSetMember($key, $contract);
     }
 
