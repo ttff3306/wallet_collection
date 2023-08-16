@@ -315,6 +315,7 @@ class WalletService
                     case 'KLAYTN':
                     case 'AVAXC':
                     case 'OP':
+                    case 'OKTC':
                         $result[] = $type == 1 ? (new BscService())->fromMnemonic($mnemonic) : (new BscService())->fromPrivateKey($mnemonic);
                         break;
                     case 'BTC':
