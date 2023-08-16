@@ -67,7 +67,7 @@ class WalletBalanceTokenService
             $result = false;
         }
         //更新历史价格
-        if ($result) publisher('asyncUpdateTransactionHistoryHighAmount', ['chain' => $chain, 'address' => $address, 'token_contract_address' => $token_contract_address, 'price_usd' => $price_usd]);
+        if ($result) publisher('asyncUpdateTransactionHistoryHighAmount', ['chain' => $chain, 'address' => $address, 'token' => $token, 'token_contract_address' => $token_contract_address, 'price_usd' => $price_usd]);
         //返回结果
         return $result;
     }
