@@ -152,9 +152,9 @@ class EthService
             $params['from'] = $address;
             $params['to'] = $contract;
             $params['data'] = $data;
-            $result = $this->sendCommandV2('eth_call',[$params, "latest"]);
+            $result = $this->sendCommand('eth_call',[$params, "latest"]);
         }else{
-            $result = $this->sendCommandV2('eth_getBalance',[$address, "latest"]);
+            $result = $this->sendCommand('eth_getBalance',[$address, "latest"]);
         }
 
         if(isset($result['result'])) {
