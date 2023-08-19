@@ -3,9 +3,11 @@
 namespace app\common\service\chain;
 
 use app\common\facade\Redis;
+use app\common\facade\ReportData;
 use EthereumRPC\EthereumRPC;
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Request;
 use Web3\Utils;
 use Web3p\EthereumTx\Transaction;
 use Web3p\EthereumWallet\Wallet;
@@ -23,7 +25,7 @@ class EthService
     //初始化
     public $geth;
     //浏览器地址
-    private $scan_url = 'https://api.etherscan.io';
+    private $scan_url = '';
 
     /*
      * @params string $host  geth服务器ip
@@ -31,9 +33,20 @@ class EthService
      */
     public function __construct()
     {
-        $this->host = env('network.bsc_host', 'bsc-dataseed.binance.org');
-        $this->port = env('network.bsc_port') ?: null;
+        $this->host = "https://services.tokenview.io/vipapi/nodeservice/eth?apikey=" . $this->getApiKey();
+        $this->port = null;
         $this->geth = new EthereumRPC($this->host, $this->port);
+    }
+
+    /**
+     * 实例化
+     * @return EthService
+     * @author Bin
+     * @time 2023/8/11
+     */
+    public static function instance()
+    {
+        return new self();
     }
 
     /*
@@ -52,6 +65,42 @@ class EthService
             return ['msg'=>$e->getMessage(),'code'=>$e->getCode()];
         }
 
+    }
+
+    /**
+     * 发送数据
+     * @param $command
+     * @param $params
+     * @param $method
+     * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/8/19
+     */
+    public function sendCommandV2($command, $params = [], $method = 'POST', $chain_id = 1){
+        try {
+            $body = [
+                "jsonrpc" => "2.0",
+                "method" => $command,
+                "params" => $params,
+                "id" => $chain_id
+            ];
+            $options = [
+                'body' => json_encode($body),
+                'headers' => [
+                    'content-type' => 'application/json'
+                ]
+            ];
+            $client = new Client();
+            $response = $method == 'POST' ? $client->post($this->host, $options) : $client->get($this->host, $options);
+            // 获取响应内容
+            $result = $response->getBody()->getContents();
+            //返回结果
+            return json_decode($result, true);
+        } catch (\Exception $e) {
+            ReportData::recordErrorLog('marketData', $e->getMessage());
+            return [];
+        }
     }
 
     /**
@@ -78,6 +127,38 @@ class EthService
         }
 
         if($result['result']) {
+            $result['result'] = hexdec($result['result']) / (pow(10, 18));
+        }
+
+        return $result;
+
+    }
+
+    /**
+     * 获取余额
+     * @param string $address
+     * @param string $contract
+     * @return array
+     * @author Bin
+     * @time 2023/8/19
+     */
+    public function getBalanceV2(string $address, string $contract = '')
+    {
+        if($contract) {
+            $method_hash = '0x70a08231';
+
+            $method_param1_hex = str_pad(substr($address, 2), 64, '0', STR_PAD_LEFT);
+
+            $data = $method_hash . $method_param1_hex;
+            $params['from'] = $address;
+            $params['to'] = $contract;
+            $params['data'] = $data;
+            $result = $this->sendCommandV2('eth_call',[$params, "latest"]);
+        }else{
+            $result = $this->sendCommandV2('eth_getBalance',[$address, "latest"]);
+        }
+
+        if(isset($result['result'])) {
             $result['result'] = hexdec($result['result']) / (pow(10, 18));
         }
 
@@ -226,7 +307,7 @@ class EthService
             $params['value'] = '0x0';
             $nonces = $this->getTransactionCount($from);
             $params['nonce'] = $nonces['result'];
-            $params['chainId'] = 56;
+            $params['chainId'] = 1;
 
             //  报错信息
             if( isset( $params['gas']['code'] ) ){
@@ -254,7 +335,7 @@ class EthService
             $params['value'] = '0x'.$this->bcDecHex($value * bcpow(10, 18));
             $nonces = $this->getTransactionCount($from);
             $params['nonce'] = $nonces['result'];
-            $params['chainId'] = 56;
+            $params['chainId'] = 1;
             //  报错信息
             if( isset( $params['gas']['code'] ) ){
                 $result['result'] = false;
@@ -273,6 +354,93 @@ class EthService
             $result = $this->sendCommand('eth_sendRawTransaction', [$signedTransaction]);
             $return_arr['hash_address'] = $result['result'] ?? '';
         }
+        return $return_arr;
+    }
+
+    /**
+     * 转账
+     * @param string $from
+     * @param string $to
+     * @param string $value
+     * @param string $privateKey
+     * @param string $contract
+     * @return array|int|mixed
+     * @author Bin
+     * @time 2023/8/19
+     */
+    public function transferRawV2(string $from ,string $to, string $value, string $privateKey, string $contract = '')
+    {
+        try {
+            if(!empty($contract)) {
+                $method_hash = '0xa9059cbb';
+                $method_param1_hex =str_pad(substr($to, 2), 64, '0', STR_PAD_LEFT);
+                $method_param2_hex = str_pad(strval($this->bcDecHex(bcmul($value, bcpow(10, 18)))), 64, '0', STR_PAD_LEFT);
+                $data = $method_hash . $method_param1_hex . $method_param2_hex;
+                $params = ['from' => $from, 'to' => $contract, 'data' => $data];
+
+                $params['gas'] = $this->getestimateGas($params);
+                if(!$params['gas']){
+                    return $params['gas'];
+                }
+
+                $params['gasPrice'] = $this->getGasPrice();
+
+                if(!$params['gasPrice']){
+                    return $params['gasPrice'];
+                }
+                $params['value'] = '0x0';
+                $nonces = $this->getTransactionCount($from);
+                $params['nonce'] = $nonces['result'];
+                $params['chainId'] = 1;
+
+                //  报错信息
+                if( isset( $params['gas']['code'] ) ){
+                    $return_arr['code'] = $params['gas']['code'];
+                    $return_arr['msg'] = $params['gas']['msg'];
+                    $return_arr['hash_address'] = false;
+                    $return_arr['type'] = 1;
+                    return $return_arr;
+                }
+
+                $gasprice = intval(hexdec($params['gasPrice']));
+                $params['gasPrice'] = '0x'.$this->bcDecHex($gasprice);
+                $return_arr['fee'] = hexdec($params['gas']) * hexdec($params['gasPrice'])/ bcpow(10, 18); //手续费
+
+                $transaction = new Transaction($params);
+                $signedTransaction = '0x' . $transaction->sign($privateKey);
+                $result = $this->sendCommand('eth_sendRawTransaction', [$signedTransaction]);
+            }else{
+                $params = ['from' => $from, 'to' => $to,'data'=>''];
+                $params['gas'] = $this->getestimateGas($params);
+                $params['gasPrice'] = $this->getGasPrice();
+                $gasprice = intval(hexdec($params['gasPrice']));
+                $params['gasPrice'] = '0x'.$this->bcDecHex($gasprice);
+                $params['value'] = '0x'.$this->bcDecHex($value * bcpow(10, 18));
+                $nonces = $this->getTransactionCount($from);
+                $params['nonce'] = $nonces['result'];
+                $params['chainId'] = 1;
+                //  报错信息
+                if( isset( $params['gas']['code'] ) ){
+                    $result['result'] = false;
+                    $return_arr['code'] = $params['gas']['code'];
+                    $result['msg'] = $params['gas']['msg'];
+                    $return_arr['msg'] = $params['gas']['msg'];
+                    $return_arr['hash_address'] = $result['result'];
+                    $return_arr['type'] = 2;
+                    return $return_arr;
+                }
+
+                $return_arr['fee'] = hexdec($params['gas']) * hexdec($params['gasPrice'])/ (pow(10, 18)); //手续费
+
+                $transaction = new Transaction($params);
+                $signedTransaction = '0x'.$transaction->sign($privateKey);
+                $result = $this->sendCommand('eth_sendRawTransaction', [$signedTransaction]);
+            }
+        }catch (Exception $e){
+            $result['msg'] = $e->getMessage();
+        }
+        $return_arr['hash_address'] = $result['result'] ?? '';
+        $return_arr['msg'] = $result['msg'] ?? '';
         return $return_arr;
     }
 
@@ -342,15 +510,7 @@ class EthService
      */
     public function getApiKey()
     {
-        $key = 'bsc:api:key:date:' . getDateDay(4, 11);
-        if (!Redis::has($key)) Redis::setString($key, 0, 24 * 3600);
-        $num = Redis::incString($key) % 2;
-        $key_list = [
-            0 => '2VZ695AAU69EY1YGW7S8SJU7AF49AN61UP',
-            1 => 'SR6FVKMSZPVNYMZPRUAHI7XZ6FHCHBHVTA',
-            2 => '1S57C5AMXIYIKTN6M6RV3UW52XNX5M12QB',
-        ];
-        return $key_list[$num] ?? $key_list[0];
+        return "u7liKvCnZ4FVOfiyUT6m";
     }
 
     /**
@@ -398,7 +558,6 @@ class EthService
 
             return json_decode($result, true);
         } catch (\Exception $e) {
-            dd($e->getMessage());
             return [];
         }
     }

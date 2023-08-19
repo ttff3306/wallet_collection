@@ -12,6 +12,7 @@ use app\common\model\CollectionModel;
 use app\common\model\WalletBalanceModel;
 use app\common\model\WalletModel;
 use app\common\service\chain\BscService;
+use app\common\service\chain\EthService;
 use app\common\service\chain\TronService;
 use \Exception;
 
@@ -199,6 +200,16 @@ class CollectionService
             $delay_time = 5;
             switch ($chain)
             {
+                case 'ETH':
+                    if ($total_gas > 0) {
+                        //油费转入
+                        $transfer_result = EthService::instance()->transferRawV2($chain_info['gas_wallet_address'], $address, $total_gas, $chain_info['gas_wallet_private_key']);
+                        //检测是否转入成功
+                        if (empty($transfer_result['hash_address'])) return $this->updateData($chain, $address, $order_no, ['is_error' => 1, 'memo' => $transfer_result['msg'] ?? '']);
+                        //延时时长
+                        $delay_time = 60;
+                    }
+                    break;
                 case 'BSC':
                     if ($total_gas > 0) {
                         //油费转入
@@ -281,15 +292,27 @@ class CollectionService
                 $token_total_token_value = $token_balance_info['holdingAmount'];
                 //初始化结果
                 $result = ['status' => true, 'msg' => '', 'hash' => '1'];
-                if ($token_total_token_value > 0)
+                if ($token_total_token_value > 0 && $token_balance_info['valueUsd'] >= 1)
                 {
                     switch ($chain)
                     {
+                        case 'ETH':
+                            //防止超出转出失败
+                            $token_total_token_value = bcsub($token_total_token_value, '0.000001', 6);
+                            //发起转账
+                            $transfer_result = EthService::instance()->transferRawV2($address, $chain_info['collection_address'], $token_total_token_value, $wallet_info['private_key'], $token_info['token_contract_address']);
+                            //组装结果
+                            $result = [
+                                'status' => !empty($transfer_result['hash_address']),
+                                'msg'    => $transfer_result['msg'] ?? '',
+                                'hash'  => $transfer_result['hash_address'] ?? ''
+                            ];
+                            break;
                         case 'BSC':
                             //防止超出转出失败
                             $token_total_token_value = bcsub($token_total_token_value, '0.000001', 6);
                             //发起转账
-                            $transfer_result = BscService::instance()->transferRaw($address, $chain_info['collection_address'], strval($token_total_token_value), $wallet_info['private_key'], $token_info['token_contract_address']);
+                            $transfer_result = BscService::instance()->transferRaw($address, $chain_info['collection_address'], $token_total_token_value, $wallet_info['private_key'], $token_info['token_contract_address']);
                             //组装结果
                             $result = [
                                 'status' => !empty($transfer_result['hash_address']),
@@ -367,6 +390,22 @@ class CollectionService
             {
                 switch ($chain)
                 {
+                    case 'ETH':
+                        //估算手续费
+                        $service = '0.0008';
+                        if ($balance > $service) {
+                            //计算扣除手续费的金额
+                            $balance = bcsub(strval($balance), $service, 18);
+                            //转出
+                            $transfer_result = EthService::instance()->transferRawV2($address, $chain_info['collection_address'], $balance, $wallet_info['private_key']);
+                            //组装结果
+                            $result = [
+                                'status' => !empty($transfer_result['hash_address']),
+                                'msg'    => $transfer_result['msg'] ?? '',
+                                'hash'  => $transfer_result['hash_address'] ?? ''
+                            ];
+                        }
+                        break;
                     case 'BSC':
                         //估算手续费
                         $service = '0.00007';
