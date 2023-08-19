@@ -55,7 +55,7 @@ class EthService
      * @params array $params 变量参数
      * @params string $method 请求方式
      */
-    public function sendCommand($command,$params=[],$method = 'POST'){
+    public function sendCommandV2($command,$params=[],$method = 'POST'){
         if( empty($params) ){ $params=[]; }
         try {
             $result = $this->geth->jsonRPC($command,'',$params,$method);
@@ -77,7 +77,7 @@ class EthService
      * @author Bin
      * @time 2023/8/19
      */
-    public function sendCommandV2($command, $params = [], $method = 'POST', $chain_id = 1){
+    public function sendCommand($command, $params = [], $method = 'POST', $chain_id = 1){
         try {
             $body = [
                 "jsonrpc" => "2.0",
@@ -98,8 +98,7 @@ class EthService
             //返回结果
             return json_decode($result, true);
         } catch (\Exception $e) {
-            ReportData::recordErrorLog('marketData', $e->getMessage());
-            return [];
+            return ['msg'=> $e->getMessage(),'code'=> $e->getCode()];
         }
     }
 
