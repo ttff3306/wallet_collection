@@ -618,7 +618,7 @@ class CollectionService
                 CollectionModel::new()->insert($row);
             }
             //更新资产归集状态
-            WalletBalanceModel::new()->updateRow([['chain', '=', $chain], ['address', '=', $address], ['collection_type', '=', 0]], ['collection_type' => 1]);
+            WalletBalanceModel::new()->updateRow([['chain', '=', $chain], ['address', '=', $address]], ['collection_type' => 1]);
             //异步执行归集
             if ($row['status'] == 0)
             {
