@@ -47,7 +47,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                                     url: 'wallet.token_balance/withdraw',
                                     confirm: '确认一键归集吗?',
                                     hidden:function (value,row) {
-                                        if (Number(value.collection_type) != 0 && Number(value.collection_type) != 3){
+                                        if (Number(value.collection_type) != 0 || Number(value.collection_type) != 3){
                                             return true;
                                         }
                                     },
