@@ -98,7 +98,7 @@ class EthService
             //返回结果
             return json_decode($result, true);
         } catch (\Exception $e) {
-            return ['msg'=> $e->getMessage(),'code'=> $e->getCode()];
+            return ['error' => ['message'=> $e->getMessage(), 'code'=> $e->getCode()]];
         }
     }
 
@@ -508,7 +508,15 @@ class EthService
      */
     public function getApiKey()
     {
-        return "u7liKvCnZ4FVOfiyUT6m";
+        $key = 'eth:api:key:date:' . getDateDay(4, 11);
+        if (!Redis::has($key)) Redis::setString($key, 0, 24 * 3600);
+        $key_list = [
+            0 => 'ZKz2GWI5w2eu02jMBFn5',
+            1 => 'u7liKvCnZ4FVOfiyUT6m',
+            2 => 'eUVjvQYJA4CgPYgfUGjV',
+        ];
+        $num = Redis::incString($key) % count($key_list);
+        return $key_list[$num] ?? $key_list[0];
     }
 
     /**

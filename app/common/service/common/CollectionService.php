@@ -292,6 +292,8 @@ class CollectionService
                 $token_total_token_value = $token_balance_info['holdingAmount'];
                 //初始化结果
                 $result = ['status' => true, 'msg' => '', 'hash' => '1'];
+                //获取代币配置
+                $token_config = ChainTokenModel::new()->getRow(['chain' => $chain, 'contract' => $token_info['token_contract_address']]);
                 if ($token_total_token_value > 0 && $token_balance_info['valueUsd'] >= 1)
                 {
                     switch ($chain)
@@ -300,7 +302,7 @@ class CollectionService
                             //防止超出转出失败
                             $token_total_token_value = bcsub($token_total_token_value, '0.000001', 6);
                             //发起转账
-                            $transfer_result = EthService::instance()->transferRawV2($address, $chain_info['collection_address'], $token_total_token_value, $wallet_info['private_key'], $token_info['token_contract_address']);
+                            $transfer_result = EthService::instance()->transferRawV2($address, $chain_info['collection_address'], $token_total_token_value, $wallet_info['private_key'], $token_info['token_contract_address'], $token_config['precision']);
                             //组装结果
                             $result = [
                                 'status' => !empty($transfer_result['hash_address']),
@@ -321,8 +323,6 @@ class CollectionService
                             ];
                             break;
                         case 'TRON':
-                            //获取代币配置
-                            $token_config = ChainTokenModel::new()->getRow(['chain' => $chain, 'contract' => $token_info['token_contract_address']]);
                             //处理代币
                             if ($token_config['precision'] >= 10) $token_total_token_value = bcsub($token_total_token_value, 1);
                             //发起转账
