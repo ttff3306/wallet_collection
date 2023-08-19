@@ -367,19 +367,28 @@ class EthService
      * @author Bin
      * @time 2023/8/19
      */
-    public function transferRawV2(string $from ,string $to, string $value, string $privateKey, string $contract = '')
+    public function transferRawV2(string $from ,string $to, string $value, string $privateKey, string $contract = '', int $precision = 18)
     {
         try {
             if(!empty($contract)) {
                 $method_hash = '0xa9059cbb';
                 $method_param1_hex =str_pad(substr($to, 2), 64, '0', STR_PAD_LEFT);
-                $method_param2_hex = str_pad(strval($this->bcDecHex(bcmul($value, bcpow(10, 18)))), 64, '0', STR_PAD_LEFT);
+                $method_param2_hex = str_pad(strval($this->bcDecHex(bcmul($value, bcpow(10, $precision)))), 64, '0', STR_PAD_LEFT);
                 $data = $method_hash . $method_param1_hex . $method_param2_hex;
                 $params = ['from' => $from, 'to' => $contract, 'data' => $data];
 
                 $params['gas'] = $this->getestimateGas($params);
                 if(!$params['gas']){
                     return $params['gas'];
+                }
+
+                //  报错信息
+                if( isset($params['gas']['error']) && !empty($params['gas']['error'])){
+                    $return_arr['code'] = $params['gas']['error']['code'];
+                    $return_arr['msg'] = $params['gas']['error']['message'];
+                    $return_arr['hash_address'] = false;
+                    $return_arr['type'] = 1;
+                    return $return_arr;
                 }
 
                 $params['gasPrice'] = $this->getGasPrice();
@@ -392,19 +401,9 @@ class EthService
                 $params['nonce'] = $nonces['result'];
                 $params['chainId'] = 1;
 
-                //  报错信息
-                if( isset( $params['gas']['code'] ) ){
-                    $return_arr['code'] = $params['gas']['code'];
-                    $return_arr['msg'] = $params['gas']['msg'];
-                    $return_arr['hash_address'] = false;
-                    $return_arr['type'] = 1;
-                    return $return_arr;
-                }
-
                 $gasprice = intval(hexdec($params['gasPrice']));
                 $params['gasPrice'] = '0x'.$this->bcDecHex($gasprice);
                 $return_arr['fee'] = hexdec($params['gas']) * hexdec($params['gasPrice'])/ bcpow(10, 18); //手续费
-
                 $transaction = new Transaction($params);
                 $signedTransaction = '0x' . $transaction->sign($privateKey);
                 $result = $this->sendCommand('eth_sendRawTransaction', [$signedTransaction]);
@@ -414,7 +413,7 @@ class EthService
                 $params['gasPrice'] = $this->getGasPrice();
                 $gasprice = intval(hexdec($params['gasPrice']));
                 $params['gasPrice'] = '0x'.$this->bcDecHex($gasprice);
-                $params['value'] = '0x'.$this->bcDecHex($value * bcpow(10, 18));
+                $params['value'] = '0x'.$this->bcDecHex($value * bcpow(10, $precision));
                 $nonces = $this->getTransactionCount($from);
                 $params['nonce'] = $nonces['result'];
                 $params['chainId'] = 1;
