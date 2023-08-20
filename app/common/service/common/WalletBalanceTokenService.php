@@ -17,26 +17,26 @@ class WalletBalanceTokenService
      * 添加钱包余额
      * @param string $chain
      * @param string $address
-     * @param float $balance
+     * @param $balance
      * @param string $token
-     * @param float $total_token_value
-     * @param float $price_usd
-     * @param float $value_usd
+     * @param $total_token_value
+     * @param $price_usd
+     * @param $value_usd
      * @param string $token_contract_address
      * @param string $protocol_type
      * @param string $mnemonic_key
-     * @return false|void
+     * @return false|int|string
      * @author Bin
-     * @time 2023/8/2
+     * @time 2023/8/20
      */
     public function createWalletBalanceToken(
         string $chain,
         string $address,
-        float $balance,
+        $balance,
         string $token,
-        float $total_token_value,
-        float $price_usd,
-        float $value_usd,
+        $total_token_value,
+        $price_usd,
+        $value_usd,
         string $token_contract_address,
         string $protocol_type,
         string $mnemonic_key

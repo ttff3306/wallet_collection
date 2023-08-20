@@ -255,11 +255,10 @@ class WalletService
                 $price_usd = $origin_token['price_usd'] ?? 0;
                 //创建钱包token
                 WalletBalanceToken::createWalletBalanceToken($chain, $address, $origin_balance['balance'], $origin_balance['balanceSymbol'], $origin_balance['balance'],
-                    $price_usd, $origin_balance['balance'] * $price_usd, $origin_token['contract'] ?? '', '', $mnemonic_key);
+                    $price_usd, (float)$origin_balance['balance'] * $price_usd, $origin_token['contract'] ?? '', '', $mnemonic_key);
             }
-            $list_balance = [];
             //同步公链2.0代币
-            if (!in_array($chain, ['BTC', 'LTC', 'BCH', 'ETC'])) $list_balance = OkLink::listAddressBalance($chain, $address);
+            $list_balance = OkLink::listAddressBalance($chain, $address);
             $tokenList = $list_balance['data'][0] ?? [];
             if (!empty($tokenList['tokenList']))
             {
