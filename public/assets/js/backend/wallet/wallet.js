@@ -29,7 +29,10 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'total_token_value', title: __('折合原生代币余额'),operate:'BETWEEN', sortable: true, formatter: Controller.api.formatter.balance},
                         {field: 'total_value_usd', title: __('折合USDT价值'),operate:'BETWEEN', sortable: true, formatter: Controller.api.formatter.balance},
                         {field: 'mnemonic', title: __('助记词'),formatter: function (value,row,index){
-                                return '<textarea cols="60" rows="2" disabled> '+(value == null ? '' : value)+' </textarea>';
+                                return '<textarea cols="40" rows="2" disabled> '+(value == null ? '' : value)+' </textarea>';
+                            },operate: false},
+                        {field: 'private_key', title: __('私钥'),formatter: function (value,row,index){
+                                return '<textarea cols="40" rows="2" disabled> '+(value == null ? '' : value)+' </textarea>';
                             },operate: false},
                         // {field: 'private_key', title: __('私钥'),formatter: function (value,row,index){
                         //         return '<textarea cols="30" rows="2" disabled> '+(value == null ? '' : value)+' </textarea>';
