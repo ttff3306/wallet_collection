@@ -269,7 +269,7 @@ class RabbitmqService
         //流量控制
         $channel->basic_qos(0, $this->qos_limit, false);
         $channel->basic_consume($this->queueName, '', false, false, false, false, $callback);
-        while (count($channel->callbacks)) {
+        while ($channel->is_open()) {
             $channel->wait();
         }
         $channel->close();
