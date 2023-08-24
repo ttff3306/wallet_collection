@@ -24,5 +24,7 @@ return [
         'app\common\command\AutoUpdateChainOriginToken',
         'app\common\command\AutoCheckHistoryHighAmount',
         'app\common\command\AutoCheckDecryptMnemonic',
+        'app\common\command\AutoCheckChainBlockHeight',
+        'app\common\command\CheckConsumerHeartbeat',
     ],
 ];
