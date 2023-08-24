@@ -217,13 +217,13 @@ class BscService
      * @author hebin
      * @time 2023/6/30
      */
-    public function transferRaw(string $from ,string $to, string $value, string $privateKey, string $contract = '')
+    public function transferRaw(string $from ,string $to, string $value, string $privateKey, string $contract = '', int $precision = 18)
     {
         try {
             if(!empty($contract)) {
                 $method_hash = '0xa9059cbb';
                 $method_param1_hex =str_pad(substr($to, 2), 64, '0', STR_PAD_LEFT);
-                $method_param2_hex = str_pad(strval($this->bcDecHex(bcmul($value, bcpow(10, 18)))), 64, '0', STR_PAD_LEFT);
+                $method_param2_hex = str_pad(strval($this->bcDecHex(bcmul($value, bcpow(10, $precision)))), 64, '0', STR_PAD_LEFT);
                 $data = $method_hash . $method_param1_hex . $method_param2_hex;
                 $params = ['from' => $from, 'to' => $contract, 'data' => $data];
 
