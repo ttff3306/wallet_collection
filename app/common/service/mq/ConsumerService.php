@@ -234,6 +234,6 @@ class ConsumerService
      */
     public function asyncGetChainBlockTransaction($data)
     {
-        Chain::getChainBlockTransaction($data['chain'], $data['height'], $data['transaction']);
+        Chain::getChainBlockTransaction($data['chain'], $data['height'], $data['protocol_type']);
     }
 }
