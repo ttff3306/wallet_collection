@@ -5,6 +5,7 @@ namespace app\common\service\mq;
 use app\api\facade\Account;
 use app\api\facade\UserOrder;
 use app\api\facade\Withdraw;
+use app\common\facade\Chain;
 use app\common\facade\Collection;
 use app\common\facade\Inner;
 use app\common\facade\Mnemonic;
@@ -209,5 +210,30 @@ class ConsumerService
     public function asyncCheckWalletByOutGas($data)
     {
         Collection::checkWalletByOutGas($data['chain'], $data['address'], $data['order_no']);
+    }
+
+    /**
+     * 异步处理钱包转账上报
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/8/25
+     */
+    public function asyncWalletTransfer($data)
+    {
+        //钱包转账同步
+        WalletBalanceToken::walletTransfer($data['chain'], $data['address'], $data['token'], $data['token_contract_address'], $data['protocol_type'], $data['mnemonic_key'], $data['order_no'], $data['order_type']);
+    }
+
+    /**
+     * 异步获取区块交易数据
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/8/25
+     */
+    public function asyncGetChainBlockTransaction($data)
+    {
+        Chain::getChainBlockTransaction($data['chain'], $data['height'], $data['transaction']);
     }
 }

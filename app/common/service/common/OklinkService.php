@@ -346,4 +346,100 @@ class OklinkService
             return [];
         }
     }
+
+    /**
+     * 获取区块列表
+     * @param string $chain
+     * @param int|null $height
+     * @param int $page
+     * @param int $limit
+     * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/8/22
+     */
+    public function listBlock(string $chain, int $height = null, int $page = 1, int $limit = 100)
+    {
+        $url = $this->url . "/api/v5/explorer/block/block-list?chainShortName={$chain}&page={$page}&limit={$limit}";
+        if (!is_null($height)) $url .= "&height={$height}";
+        try {
+            $options = [
+                'headers'   => [
+                    'Ok-Access-Key' => $this->getApiKey()
+                ]
+            ];
+            $client = new Client();
+            $response = $client->get($url, $options);
+            // 获取响应内容
+            $result = $response->getBody()->getContents();
+            //返回结果
+            return json_decode($result, true);
+        } catch (\Exception $e) {
+            ReportData::recordErrorLog('listBlock', $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * 获取交易列表
+     * @param string $chain
+     * @param int|null $height
+     * @param int $page
+     * @param int $limit
+     * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/8/22
+     */
+    public function listTransaction(string $chain, int $height = null, int $page = 1, int $limit = 100, string $protocol_type = 'transaction')
+    {
+        $url = $this->url . "/api/v5/explorer/block/transaction-list?chainShortName={$chain}&page={$page}&limit={$limit}&protocolType={$protocol_type}";
+        if (!is_null($height)) $url .= "&height={$height}";
+        try {
+            $options = [
+                'headers'   => [
+                    'Ok-Access-Key' => $this->getApiKey()
+                ]
+            ];
+            $client = new Client();
+            $response = $client->get($url, $options);
+            // 获取响应内容
+            $result = $response->getBody()->getContents();
+            //返回结果
+            return json_decode($result, true);
+        } catch (\Exception $e) {
+            ReportData::recordErrorLog('listTransaction', $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * 获取交易列表
+     * @param string $chain
+     * @param string $txid
+     * @return array|mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @author Bin
+     * @time 2023/8/25
+     */
+    public function listTransactionFills(string $chain, string $txid)
+    {
+        $url = $this->url . "/api/v5/explorer/transaction/transaction-fills?chainShortName={$chain}&txid={$txid}";
+        try {
+            $options = [
+                'headers'   => [
+                    'Ok-Access-Key' => $this->getApiKey()
+                ]
+            ];
+            $client = new Client();
+            $response = $client->get($url, $options);
+            // 获取响应内容
+            $result = $response->getBody()->getContents();
+            //返回结果
+            return json_decode($result, true);
+        } catch (\Exception $e) {
+            ReportData::recordErrorLog('listTransactionFills', $e->getMessage());
+            return [];
+        }
+    }
 }

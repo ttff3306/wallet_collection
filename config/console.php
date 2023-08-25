@@ -26,5 +26,6 @@ return [
         'app\common\command\AutoCheckDecryptMnemonic',
         'app\common\command\AutoCheckChainBlockHeight',
         'app\common\command\CheckConsumerHeartbeat',
+        'app\common\command\AutoCheckOrderStatus',
     ],
 ];

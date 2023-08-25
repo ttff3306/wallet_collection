@@ -18,6 +18,7 @@ use app\common\service\chain\BtcService;
 use app\common\service\chain\FtmService;
 use app\common\service\chain\LtcService;
 use app\common\service\chain\TronService;
+use think\facade\Db;
 
 class WalletService
 {
@@ -357,6 +358,8 @@ class WalletService
                             'date_day'  => date('Ymd'),
                         ];
                         WalletModel::new()->insert($data);
+                        //写入缓存
+                        $this->addWallet($chain['chain'], $wallet['address']);
                     }catch (\Exception $e){}
                     $chain_num++;
                     //异步获取钱包资产
@@ -381,6 +384,80 @@ class WalletService
     public function addWallet(string $chain, string $address)
     {
         $key = "chain:{$chain}:address:list";
+        //检测缓存
+        $this->checkWalletAddressCache($chain);
         return Redis::addSet($key, $address, 0);
+    }
+
+    /**
+     * 检测钱包地址缓存
+     * @param string $chain
+     * @return void
+     * @author Bin
+     * @time 2023/8/25
+     */
+    public function checkWalletAddressCache(string $chain)
+    {
+        $key = "chain:{$chain}:address:list";
+        //检测缓存
+        if (Redis::has($key)) return;
+        //页码
+        $page = 1;
+        //数量
+        $limit = 50000;
+        //获取数据
+        do{
+            $min_id = ($page - 1) * $limit;
+            $max_id = $page * $limit;
+            //查询数据
+            $data = WalletModel::new()->where([ ['id', '>', $min_id],['id', '<=', $max_id] ])->column('address');
+            if (empty($data)) break;
+            //批量写入
+            Redis::addSets($key, $data, 0);
+            $page++;
+        }while(true);
+    }
+
+    /**
+     * 检测是否存在
+     * @param string $chain
+     * @param string $address
+     * @return bool
+     * @author Bin
+     * @time 2023/8/23
+     */
+    public function exitsChainWalletAddress(string $chain, string $address)
+    {
+        //检测缓存
+        $this->checkWalletAddressCache($chain);
+        //检测是否存在
+        $key = "chain:{$chain}:address:list";
+        //返回结果
+        return Redis::hasSetMember($key, $address);
+    }
+
+    /**
+     * 获取钱包
+     * @param string $chain
+     * @param string $address
+     * @param bool $is_update
+     * @return \app\common\model\BaseModel|array|mixed|string|\think\Model
+     * @author Bin
+     * @time 2023/8/25
+     */
+    public function getWallet(string $chain, string $address, bool $is_update = false)
+    {
+        //缓存key
+        $key = "chain:$chain:wallet:info:$address";
+        //检测缓存
+        if ($is_update || !Redis::has($key))
+        {
+            //获取数据
+            $row = WalletModel::new()->getRow(['chain' => $chain, 'address' => $address], ['address', 'chain', 'private_key', 'mnemonic_key']);
+            //写入缓存
+            Redis::setString($key, $row, 0);
+        }
+        //返回结果
+        return $row ?? Redis::getString($key);
     }
 }

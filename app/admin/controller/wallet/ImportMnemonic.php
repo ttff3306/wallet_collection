@@ -136,9 +136,9 @@ class ImportMnemonic extends Backend
         try {
             foreach ($insert as $mnemonic){
                 if (empty($mnemonic) || !is_string($mnemonic)) continue;
-                $result = Mnemonic::importWalletByMnemonic($mnemonic);
-//                publisher('asyncImportWalletByMnemonic', ['mnemonic' => $mnemonic]);
-                if ($result) $success_num++;
+//                $result = Mnemonic::importWalletByMnemonic($mnemonic);
+                publisher('asyncImportWalletByMnemonic', ['mnemonic' => $mnemonic]);
+                $success_num++;
             }
         } catch (\PDOException $exception) {
             $msg = $exception->getMessage();
