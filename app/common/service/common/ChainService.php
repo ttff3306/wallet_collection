@@ -68,10 +68,12 @@ class ChainService
         $num = 0;
         do{
             //检测缓存
-            if ($num >= 10) break;
-            $key = 'check:chain:block:height:num:' . floor(date('s') / 6);
+            $key = 'check:chain:block:height:num:' . floor(date('s') / 20);
             //间隔10秒执行
-            if (!Redis::getLock($key)) continue;
+            if (!Redis::getLock($key)) {
+                sleep(2);
+                continue;
+            }
             foreach ($list as $value)
             {
                 //获取最新区块
@@ -88,7 +90,7 @@ class ChainService
                 ChainModel::new()->where(['chain' => $value['chain']])->update(['height' => $block_data['height']]);
             }
             $num++;
-        }while(true);
+        }while($num < 2);
     }
 
     /**
@@ -108,22 +110,25 @@ class ChainService
         do{
             $key = 'check:chain:block:transaction:num:' . floor(date('s') / 10);
             //间隔10秒执行
-            if (!Redis::getLock($key)) continue;
+            if (!Redis::getLock($key)) {
+                sleep(2);
+                continue;
+            }
             $list = ChainModel::new()->where([['is_scan_block', '=', 1]])
                 ->whereExp('scan_height', '< height')
                 ->field('id,chain,scan_height,height')->select();
             foreach ($list as $value)
             {
-                for ($i = 1; $i <= $value['height']; $i++)
+                for ($i = $value['scan_height'] + 1; $i <= $value['height']; $i++)
                 {
                     //检测数据
-                    $this->createChainBlockHeightData($value['chain'], $value['height']);
-                    //异步处理扫快
-                    publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $value['height'], 'protocol_type' => 'transaction'], 5);
-                    publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $value['height'], 'protocol_type' => 'token_20'], 5);
+                    $this->createChainBlockHeightData($value['chain'], $i);
+//                    //异步处理扫快
+                    publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $i, 'protocol_type' => 'transaction'], 5);
+                    publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $i, 'protocol_type' => 'token_20'], 5);
                 }
                 //更新当前扫描高度
-                ChainModel::new()->updateRow([ ['chain', '=', $value['chain'], 'protocol_type' => 'transaction']], ['scan_height' => $value['height']]);
+                ChainModel::new()->updateRow([ ['chain', '=', $value['chain']]], ['scan_height' => $value['height']]);
             }
             $num++;
         }while($num < 5);
@@ -205,17 +210,21 @@ class ChainService
         //获取公链配置
         $chain_config = ChainModel::new()->getRow(['chain' => $chain]);
         $page = 1;
+        $txn_count = 0;
+        $block_hash = '';
         do{
             //获取交易列表
             $list = OkLink::listTransaction($chain, $height, $page, 100, $protocol_type);
             //检测列表
-            $data = $list[0] ?? [];
+            $data = $list['data'][0] ?? [];
             if (empty($data)) break;
             //交易列表
-            $transaction_list = $data['blockList'];
+            $transaction_list = $data['blockList'] ?? [];
+            $txn_count += count($transaction_list);
             //扫描交易数据
             foreach ($transaction_list as $value)
             {
+                if (empty($block_hash)) $block_hash = $value['blockHash'];
                 //token_20状态下检测是否空气币
                 if ($protocol_type == 'token_20' && ChainToken::checkAirToken($chain, $value['tokenContractAddress'])) continue;
                 //初始化状态 0未匹配 1收款 2提现
@@ -270,6 +279,6 @@ class ChainService
             $page++;
         }while(true);
         //更新扫描状态
-        $this->updateChainBlockHeightData($chain, $height, null, ['status' => 2]);
+        $this->updateChainBlockHeightData($chain, $height, null, ['status' => 2, 'txn_count' => $txn_count, 'hash' => $block_hash]);
     }
 }
