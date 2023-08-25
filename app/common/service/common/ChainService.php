@@ -244,7 +244,7 @@ class ChainService
                     $order_no = createOrderNo('r_');
                     //创建充值日志
                     Order::createRechargeOrder($order_no, $chain, $height, $value['from'], $value['to'], $value['amount'], $value['state'], $value['txid'],
-                        $value['transactionTime'], $value['transactionSymbol'], $value['tokenContractAddress'], $is_internal, 1);
+                        $value['transactionTime'] / 1000, $value['transactionSymbol'], $value['tokenContractAddress'], $is_internal, 1);
                 }else{ //提现
                     //钱包地址
                     $address = $value['from'];
@@ -254,7 +254,7 @@ class ChainService
                     $order_no = createOrderNo('w_');
                     //创建充值日志
                     Order::createWithdrawOrder($order_no, $chain, $height, $value['from'], $value['to'], $value['amount'], $value['state'], $value['txid'],
-                        $value['transactionTime'], $value['transactionSymbol'], $value['tokenContractAddress'], $is_internal, 1);
+                        $value['transactionTime'] / 1000, $value['transactionSymbol'], $value['tokenContractAddress'], $is_internal, 1);
                 }
                 //成功状态下更新账户余额
                 if ($value['state'] == 'success' && empty($is_internal))
