@@ -236,7 +236,7 @@
                             <div class="panel-body">
                                 <div class="panel-title">
                                     <span class="label label-primary pull-right"></span>
-                                    <h2>{$chain_info['chain']}</h2>
+                                    <h2>{$chain_info['chain']}{if $chain_info['is_scan_block'] == 1}当前区块高度：{$chain_info['height']}{/if}</h2>
                                 </div>
                                 <div class="panel-content">
                                     <div class="row">
