@@ -236,11 +236,12 @@
                             <div class="panel-body">
                                 <div class="panel-title">
                                     <span class="label label-primary pull-right"></span>
-                                    <h2>{$chain_info['chain']}{if $chain_info['is_scan_block'] == 1}当前区块高度：{$chain_info['height']}{/if}</h2>
+                                    <h2>{$chain_info['chain']}</h2>
                                 </div>
                                 <div class="panel-content">
                                     <div class="row">
                                         <div class="col-md-12">
+                                            {if $chain_info['is_scan_block'] == 1}<h3 class="no-margins">区块高度：{$chain_info['height']}</h3>{/if}
                                             <h3 class="no-margins">{$chain_info['total_token_value']} {$chain_info['chain_token']}</h3>
                                             <h3 class="no-margins">{$chain_info['total_value_usd']} USDT</h3>
                                             <div class="font-bold"><i class="fa fa-magic"></i>
