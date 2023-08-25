@@ -35,6 +35,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'to_address', title: __('收款地址')},
                         // {field: 'uid', title: __('Uid')},
                         {field: 'trade_num', title: __('提币数量'), operate:'BETWEEN'},
+                        {field: 'status', title: __('交易状态'), searchList: {'success':"交易成功",'fail':"交易失败",'pending':'等待确认'}, formatter: Table.api.formatter.status},
                         {field: 'trade_time', title: __('Withdraw_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'token_name', title: __('提币名称')},
                         {field: 'chain', title: __('所属公链'), searchList: $.getJSON('chain.chain/listChain'), formatter: Table.api.formatter.status},

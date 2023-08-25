@@ -34,7 +34,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'from_address', title: __('From_address')},
                         {field: 'to_address', title: __('To_address')},
                         {field: 'trade_num', title: __('Trade_num'), operate:'BETWEEN'},
-                        // {field: 'status', title: __('Status'), searchList: {0:"交易中",1:"交易成功",2:'交易失败'}, formatter: Table.api.formatter.status},
+                        {field: 'status', title: __('交易状态'), searchList: {'success':"交易成功",'fail':"交易失败",'pending':'等待确认'}, formatter: Table.api.formatter.status},
                         {field: 'trade_time', title: __('Trade_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'chain', title: __('Chain')},
                         {field: 'token_name', title: __('Token_name')},
