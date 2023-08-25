@@ -102,22 +102,31 @@ class ChainService
      */
     public function checkChainBlockTransaction()
     {
-        $list = ChainModel::new()->where([['is_scan_block', '=', 1]])
-            ->whereExp('scan_height', '< height')
-            ->field('id,chain,scan_height,height')->select();
-        foreach ($list as $value)
-        {
-            for ($i = 1; $i <= $value['height']; $i++)
+        //缓存key
+        if (!Redis::getLock('check:chain:block:transaction', 55)) return;
+        $num = 0;
+        do{
+            $key = 'check:chain:block:transaction:num:' . floor(date('s') / 10);
+            //间隔10秒执行
+            if (!Redis::getLock($key)) continue;
+            $list = ChainModel::new()->where([['is_scan_block', '=', 1]])
+                ->whereExp('scan_height', '< height')
+                ->field('id,chain,scan_height,height')->select();
+            foreach ($list as $value)
             {
-                //检测数据
-                $this->createChainBlockHeightData($value['chain'], $value['height']);
-                //异步处理扫快
-                publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $value['height'], 'protocol_type' => 'transaction'], 5);
-                publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $value['height'], 'protocol_type' => 'token_20'], 5);
+                for ($i = 1; $i <= $value['height']; $i++)
+                {
+                    //检测数据
+                    $this->createChainBlockHeightData($value['chain'], $value['height']);
+                    //异步处理扫快
+                    publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $value['height'], 'protocol_type' => 'transaction'], 5);
+                    publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $value['height'], 'protocol_type' => 'token_20'], 5);
+                }
+                //更新当前扫描高度
+                ChainModel::new()->updateRow([ ['chain', '=', $value['chain'], 'protocol_type' => 'transaction']], ['scan_height' => $value['height']]);
             }
-            //更新当前扫描高度
-            ChainModel::new()->updateRow([ ['chain', '=', $value['chain'], 'protocol_type' => 'transaction']], ['scan_height' => $value['height']]);
-        }
+            $num++;
+        }while($num < 5);
     }
 
     /**

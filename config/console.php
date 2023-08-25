@@ -27,5 +27,6 @@ return [
         'app\common\command\AutoCheckChainBlockHeight',
         'app\common\command\CheckConsumerHeartbeat',
         'app\common\command\AutoCheckOrderStatus',
+        'app\common\command\AutoCheckChainBlockTransaction',
     ],
 ];
