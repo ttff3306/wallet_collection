@@ -261,7 +261,7 @@ class WalletBalanceTokenService
             }
         }else{
             //同步公链2.0代币
-            $list_balance = OkLink::listAddressBalance($chain, $address, $token_contract_address);
+            $list_balance = OkLink::listAddressBalance($chain, $address, 'token_20', $token_contract_address);
             $balance_data = $list_balance['data'][0]['tokenList'][0] ?? [];
             if (!empty($balance_data))
             {
