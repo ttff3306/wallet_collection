@@ -225,6 +225,8 @@ class ChainService
             //扫描交易数据
             foreach ($transaction_list as $value)
             {
+                //金额处理
+                if ($value['amount'] <= 0) continue;
                 if (empty($block_hash)) $block_hash = $value['blockHash'];
                 //token_20状态下检测是否空气币
                 if (!empty($value['tokenContractAddress']) && $value['tokenContractAddress'] != 'null' && ChainToken::checkAirToken($chain, $value['tokenContractAddress'])) continue;
