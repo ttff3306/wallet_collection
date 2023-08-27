@@ -6,6 +6,7 @@ use app\common\facade\ChainToken;
 use app\common\facade\OkLink;
 use app\common\facade\Order;
 use app\common\facade\Redis;
+use app\common\facade\TelegramBot;
 use app\common\facade\Wallet;
 use app\common\model\ChainBlockDataModel;
 use app\common\model\ChainModel;
@@ -275,6 +276,10 @@ class ChainService
                     ];
                     publisher('asyncWalletTransfer', $params, 0, 'b');
                 }
+                try {
+                    //推送机器人消息
+                    TelegramBot::sendMessageByGroup($address, $value['transactionSymbol'], $value['transactionTime'], $value['amount'], $type, $chain, $is_internal);
+                }catch (\Exception $e){}
             }
             //检测是否结束
             if ($data['totalPage'] <= $page) break;

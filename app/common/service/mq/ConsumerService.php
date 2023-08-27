@@ -2,14 +2,13 @@
 
 namespace app\common\service\mq;
 
-use app\api\facade\Account;
 use app\api\facade\UserOrder;
-use app\api\facade\Withdraw;
 use app\common\facade\Chain;
 use app\common\facade\Collection;
 use app\common\facade\Inner;
 use app\common\facade\Mnemonic;
 use app\common\facade\ReportData;
+use app\common\facade\TelegramBot;
 use app\common\facade\Wallet;
 use app\common\facade\WalletBalanceToken;
 
@@ -235,5 +234,17 @@ class ConsumerService
     public function asyncGetChainBlockTransaction($data)
     {
         Chain::getChainBlockTransaction($data['chain'], $data['height'], $data['protocol_type']);
+    }
+
+    /**
+     * 发送tg机器人消息
+     * @param $data
+     * @return void
+     * @author Bin
+     * @time 2023/8/28
+     */
+    public function asyncSendTgBotMessage($data)
+    {
+        TelegramBot::sendMessage($data['message'], $data['chat_id'] ?? null);
     }
 }
