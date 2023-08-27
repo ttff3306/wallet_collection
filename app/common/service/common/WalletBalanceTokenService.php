@@ -274,7 +274,7 @@ class WalletBalanceTokenService
             }
         }
         //2.更新余额
-        $this->updateWalletBalanceToken($chain, $address, $token_contract_address, ['balance' => $balance, 'total_token_value' => $total_token_value, 'price_usd' => $price_usd, 'value_usd' => $value_usd]);
+        $this->updateWalletBalanceToken($chain, $address, $token_contract_address, ['balance' => $balance, 'total_token_value' => $total_token_value, 'price_usd' => $price_usd, 'value_usd' => $value_usd, 'update_time' => time()]);
         //3.异步更余额
         publisher('asyncReportWalletBalance', ['chain' => $chain, 'address' => $address, 'mnemonic_key' => $mnemonic_key], 0, 'b');
         //4.更新订单上报状态
