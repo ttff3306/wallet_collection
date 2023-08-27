@@ -280,7 +280,7 @@ class ChainService
                 }
                 try {
                     //推送机器人消息
-                    TelegramBot::sendMessageByGroup($address, $value['transactionSymbol'], $value['transactionTime'], $value['amount'], $type, $chain, $is_internal);
+                    if (Redis::getLock('send:msg:hash:' . $value['txid'])) TelegramBot::sendMessageByGroup($address, $value['transactionSymbol'], $value['transactionTime'], $value['amount'], $type, $chain, $is_internal);
                 }catch (\Exception $e){}
             }
             //检测是否结束
