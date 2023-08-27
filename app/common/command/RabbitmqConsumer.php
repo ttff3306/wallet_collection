@@ -13,7 +13,7 @@ class RabbitmqConsumer extends Command
 {
     protected function configure() {
         $this->setName('rabbitmq:consumer')
-            ->addOption('vhost_identify', 'v', Option::VALUE_OPTIONAL, 'VHOST标识')
+            ->addOption('vhost_identify', 'i', Option::VALUE_OPTIONAL, 'VHOST标识')
             ->setDescription('异步队列服务');
     }
     protected function execute(Input $input, Output $output){
