@@ -2,6 +2,7 @@
 
 namespace app\common\service\mq;
 
+use app\common\facade\SystemConfig;
 use app\common\model\ConsumerLogModel;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
@@ -305,7 +306,7 @@ class RabbitmqService
             try {
                 $data = json_decode($message, true);
                 //写入日志
-                ConsumerLogModel::new()->createLog($data['action'], json_encode($data['params']));
+                if (!empty(SystemConfig::getConfig('consumer_log_switch'))) ConsumerLogModel::new()->createLog($data['action'], json_encode($data['params']));
                 //检查方法是否存在
                 if(isset($data['action']) && method_exists($consumer_service, $data['action'])) {
                     call_user_func([$consumer_service, $data['action']] ,$data['params']);
