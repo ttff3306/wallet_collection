@@ -28,7 +28,7 @@ class TelegramBotService
      */
     public function sendMessageByGroup(string $address, string $token, string $trade_time, $amount, int $order_type, string $chain, int $is_internal)
     {
-        $order_type_name = $order_type === 1 ? "充值订单" : "提现提现";
+        $order_type_name = $order_type === 1 ? "充值订单" : "提现订单";
         $time = date('Y-m-d H:i:s', $trade_time);
         $internal = $is_internal == 1 ? '是' : '否';
         $msg = "订单类型：$order_type_name\n钱包地址：$address\n充值数量：$amount\ntoken名称：$token\n充值时间：$time\n所属网络：$chain\n是否内部：$internal";
