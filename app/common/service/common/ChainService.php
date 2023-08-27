@@ -124,8 +124,8 @@ class ChainService
                     //检测数据
                     $this->createChainBlockHeightData($value['chain'], $i);
                     //异步处理扫快
-                    publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $i, 'protocol_type' => 'transaction'], 30, 'b');
-                    publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $i, 'protocol_type' => 'token_20'], 30, 'b');
+                    publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $i, 'protocol_type' => 'transaction'], 0, 'b');
+                    publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $i, 'protocol_type' => 'token_20'], 0, 'b');
                 }
                 //更新当前扫描高度
                 ChainModel::new()->updateRow([ ['chain', '=', $value['chain']]], ['scan_height' => $value['height']]);
