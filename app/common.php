@@ -11,13 +11,13 @@
  */
 
 // 公共助手函数
-use app\common\facade\Rabbitmq;
 use fast\Random;
 use think\Model;
 use think\facade\Lang;
 use think\facade\Event;
 use think\facade\Config;
 use \app\common\facade\Redis;
+use app\common\service\mq\RabbitmqService;
 
 if (! function_exists('tp5ControllerToTp6Controller')) {
     /**
@@ -1167,8 +1167,24 @@ function createShareCode(int $length = 8)
  * @author Bin
  * @time 2023/7/3
  */
-function publisher(string $action, array $params, int $delayTime = 0) {
-    Rabbitmq::publisher(['action' => $action, 'params' => $params], $delayTime);
+function publisher(string $action, array $params, int $delayTime = 0, string $vhost_identify = null) {
+    (new RabbitmqService(getRabbitmqVhost($vhost_identify)))->publisher(['action' => $action, 'params' => $params], $delayTime);
+}
+
+/**
+ * 获取vhost
+ * @param string|null $vhost_identify
+ * @return mixed
+ * @author Bin
+ * @time 2023/8/27
+ */
+function getRabbitmqVhost(string $vhost_identify = null)
+{
+    //获取默认vhost
+    $vhost = env('RABBIT.RABBIT_VHOST', '/');
+    if (!is_null($vhost_identify)) $vhost = env('RABBIT.RABBIT_VHOST_' . strtoupper($vhost_identify), $vhost);
+    //返回结果
+    return $vhost;
 }
 
 /**

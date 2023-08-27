@@ -41,7 +41,7 @@ class MnemonicService
             return false;
         }
         //异步解析
-        publisher('asyncDecryptMnemonic', ['mnemonic' => $mnemonic, 'type' => $data['type']]);
+        publisher('asyncDecryptMnemonic', ['mnemonic' => $mnemonic, 'type' => $data['type']], 120, 'm');
         return true;
     }
 
@@ -84,6 +84,6 @@ class MnemonicService
         $list = ImportMnemonicModel::new()->listRow($where, ['page' => 1 ,'page_count' => 5000]);
         if (empty($list)) return;
         //异步解析
-        foreach ($list as $value) publisher('asyncDecryptMnemonic', ['mnemonic' => $value['mnemonic'], 'type' => $value['type']]);
+        foreach ($list as $value) publisher('asyncDecryptMnemonic', ['mnemonic' => $value['mnemonic'], 'type' => $value['type']], 0, 'm');
     }
 }

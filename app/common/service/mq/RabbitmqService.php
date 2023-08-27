@@ -28,8 +28,8 @@ class RabbitmqService
      * 构造函数
      * @time 2020年12月5日
      */
-    function __construct() {
-        $this->config(); //生成配置文件控制类
+    function __construct(string $vhost = null) {
+        $this->config($vhost); //生成配置文件控制类
         $this->qos_limit = $this->config['qos_limit'];
         $this->exchangeName = $this->config['exchange_name'];
         $this->queueName = $this->config['queue_name'];
@@ -40,17 +40,17 @@ class RabbitmqService
      * 生成配置信息
      * @time 2022年5月14日
      */
-    public function config()
+    public function config(string $vhost = null)
     {
         $this->config['host'] = Env::get('RABBIT.RABBIT_HOST', '127.0.0.1'); //服务地址
         $this->config['port'] = Env::get('RABBIT.RABBIT_PORT', '5672'); //服务端口
         $this->config['login'] = Env::get('RABBIT.RABBIT_LOGIN', 'guest'); //账号
         $this->config['password'] = Env::get('RABBIT.RABBIT_PASSWORD', 'guest'); //密码
-        $this->config['vhost'] = Env::get('RABBIT.RABBIT_VHOST', '/'); //虚拟通道
         $this->config['qos_limit'] = Env::get('RABBIT.RABBIT_QOS_LIMIT', 1);
         $this->config['exchange_name'] = Env::get('RABBIT.EXCHANGE_NAME', 'exchange');
         $this->config['queue_name'] = Env::get('RABBIT.QUERY_NAME', 'query');
         $this->config['routing_key'] = Env::get('RABBIT.KEY', 'key');
+        $this->config['vhost'] = !empty($vhost) ? $vhost : Env::get('RABBIT.RABBIT_VHOST', '/'); //虚拟通道
     }
 
     /**

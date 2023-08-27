@@ -24,15 +24,16 @@ class CheckConsumerHeartbeat extends Command
         $this
             ->setName('check:consumer:heartbeat')
             ->addOption('processes', 'p', Option::VALUE_OPTIONAL, '进程数量', 8)
+            ->addOption('vhost_identify', 'v', Option::VALUE_OPTIONAL, 'VHOST标识')
             ->setDescription('消费者心跳检测');
     }
 
     protected function execute(Input $input, Output $output)
     {
         $processes = $input->getOption('processes');
-        for ($i = 0; $i < $processes; $i++)
-        {
-            publisher('checkHeartbeat', ['processes' => $i]);
-        }
+        //vhost标识
+        $vhost_identify = $input->getOption('vhost_identify');
+        //发送数据
+        for ($i = 0; $i < $processes; $i++) publisher('checkHeartbeat', ['processes' => $i], 0, $vhost_identify);
     }
 }

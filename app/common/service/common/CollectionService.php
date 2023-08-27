@@ -451,7 +451,7 @@ class CollectionService
                 'null',$balance_token['balance'] ?? 0, $balance_token['value_usd'] ?? 0, $balance, $balance * $balance_token['price_usd'],
                 $result['hash'] ?? '', $result['msg'] ?? '');
             //异步上报数据
-            publisher('asyncReportWalletBalance', ['chain' => $chain, 'address' => $address, 'mnemonic_key' => $wallet_info['mnemonic_key']]);
+            publisher('asyncReportWalletBalance', ['chain' => $chain, 'address' => $address, 'mnemonic_key' => $wallet_info['mnemonic_key']], 'b');
         }catch (Exception $e){
             ReportData::recordErrorLog('collectionByOutGas', $e->getMessage(), json_encode([$chain, $address, $order_no]));
         }

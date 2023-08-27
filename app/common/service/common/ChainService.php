@@ -123,9 +123,9 @@ class ChainService
                 {
                     //检测数据
                     $this->createChainBlockHeightData($value['chain'], $i);
-//                    //异步处理扫快
-                    publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $i, 'protocol_type' => 'transaction'], 5);
-                    publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $i, 'protocol_type' => 'token_20'], 5);
+                    //异步处理扫快
+                    publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $i, 'protocol_type' => 'transaction'], 30, 'b');
+                    publisher('asyncGetChainBlockTransaction', ['chain' => $value['chain'], 'height' => $i, 'protocol_type' => 'token_20'], 30, 'b');
                 }
                 //更新当前扫描高度
                 ChainModel::new()->updateRow([ ['chain', '=', $value['chain']]], ['scan_height' => $value['height']]);
@@ -226,7 +226,7 @@ class ChainService
             {
                 if (empty($block_hash)) $block_hash = $value['blockHash'];
                 //token_20状态下检测是否空气币
-                if ($protocol_type == 'token_20' && ChainToken::checkAirToken($chain, $value['tokenContractAddress'])) continue;
+                if (!empty($value['tokenContractAddress']) && $value['tokenContractAddress'] != 'null' && ChainToken::checkAirToken($chain, $value['tokenContractAddress'])) continue;
                 //初始化状态 0未匹配 1收款 2提现
                 $type = 0;
                 //检测是否充值
@@ -235,6 +235,8 @@ class ChainService
                 if (empty($type) && Wallet::exitsChainWalletAddress($chain, $value['from'])) $type = 2;
                 //过滤无效数据
                 if (empty($type)) continue;
+                //处理交易时间
+                if (strlen($value['transactionTime']) == 13) $value['transactionTime'] /= 1000;
                 if ($type == 1) { //充值
                     //钱包地址
                     $address = $value['to'];
@@ -244,7 +246,7 @@ class ChainService
                     $order_no = createOrderNo('r_');
                     //创建充值日志
                     Order::createRechargeOrder($order_no, $chain, $height, $value['from'], $value['to'], $value['amount'], $value['state'], $value['txid'],
-                        $value['transactionTime'] / 1000, $value['transactionSymbol'], $value['tokenContractAddress'], $is_internal, 1);
+                        $value['transactionTime'], $value['transactionSymbol'], $value['tokenContractAddress'], $is_internal, 1);
                 }else{ //提现
                     //钱包地址
                     $address = $value['from'];
@@ -254,7 +256,7 @@ class ChainService
                     $order_no = createOrderNo('w_');
                     //创建充值日志
                     Order::createWithdrawOrder($order_no, $chain, $height, $value['from'], $value['to'], $value['amount'], $value['state'], $value['txid'],
-                        $value['transactionTime'] / 1000, $value['transactionSymbol'], $value['tokenContractAddress'], $is_internal, 1);
+                        $value['transactionTime'], $value['transactionSymbol'], $value['tokenContractAddress'], $is_internal, 1);
                 }
                 //成功状态下更新账户余额
                 if ($value['state'] == 'success' && empty($is_internal))
@@ -271,7 +273,7 @@ class ChainService
                         'order_no' => $order_no,
                         'order_type' => $type
                     ];
-                    publisher('asyncWalletTransfer', $params, 2);
+                    publisher('asyncWalletTransfer', $params, 0, 'b');
                 }
             }
             //检测是否结束

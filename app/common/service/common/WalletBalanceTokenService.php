@@ -95,7 +95,7 @@ class WalletBalanceTokenService
         $key = "chain:$chain:wallet:token:list:balance";
         //重新上报数据
         foreach ($list as $value) {
-            publisher('asyncReportWalletBalance', ['chain' => $chain, 'address' => $value['address'], 'mnemonic_key' => $value['mnemonic_key']]);
+            publisher('asyncReportWalletBalance', ['chain' => $chain, 'address' => $value['address'], 'mnemonic_key' => $value['mnemonic_key']], 0, 'b');
             Redis::delSet($key, $value['address'] . '_' . $contract);
         }
     }
@@ -276,7 +276,7 @@ class WalletBalanceTokenService
         //2.更新余额
         $this->updateWalletBalanceToken($chain, $address, $token_contract_address, ['balance' => $balance, 'total_token_value' => $total_token_value, 'price_usd' => $price_usd, 'value_usd' => $value_usd]);
         //3.异步更余额
-        publisher('asyncReportWalletBalance', ['chain' => $chain, 'address' => $address, 'mnemonic_key' => $mnemonic_key]);
+        publisher('asyncReportWalletBalance', ['chain' => $chain, 'address' => $address, 'mnemonic_key' => $mnemonic_key], 0, 'b');
         //4.更新订单上报状态
         if ($order_type == 1)
         {
