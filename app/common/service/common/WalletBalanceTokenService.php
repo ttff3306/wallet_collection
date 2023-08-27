@@ -189,7 +189,7 @@ class WalletBalanceTokenService
         if (!Redis::has($key))
         {
             //数据库获取
-            $result = WalletBalanceModel::new()->getCount(['chain' => $address, 'address' => $address, 'token_contract_address' => $token_contract_address]);
+            $result = WalletBalanceModel::new()->getCount(['chain' => $chain, 'address' => $address, 'token_contract_address' => $token_contract_address]);
             if (empty($result))
             {
                 //创建数据
