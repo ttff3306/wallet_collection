@@ -206,7 +206,7 @@ class ChainService
         $key = "chain:$chain:get:chain:block:transaction:height:$height:protocol_type:" . $protocol_type;
         if (!Redis::getLock($key, 50)) return;
         //更新扫描状态
-        if (!$this->updateChainBlockHeightData($chain, $height, 0, ['status' => 1])) return;
+//        if (!$this->updateChainBlockHeightData($chain, $height, 0, ['status' => 1])) return;
         //获取公链配置
         $chain_config = ChainModel::new()->getRow(['chain' => $chain]);
         $page = 1;
@@ -281,6 +281,6 @@ class ChainService
             $page++;
         }while(true);
         //更新扫描状态
-        $this->updateChainBlockHeightData($chain, $height, null, ['status' => 2, 'txn_count' => $txn_count, 'hash' => $block_hash]);
+        $this->updateChainBlockHeightData($chain, $height, null, ['status' => 2, 'hash' => $block_hash], ['txn_count' => $txn_count]);
     }
 }
