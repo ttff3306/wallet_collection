@@ -68,13 +68,6 @@ class ChainService
         $list = ChainModel::new()->listAllRow(['is_scan_block' => 1], ['id', 'chain', 'height']);
         $num = 0;
         do{
-            //检测缓存
-            $key = 'check:chain:block:height:num:' . floor(date('s') / 20);
-            //间隔10秒执行
-            if (!Redis::getLock($key)) {
-                sleep(2);
-                continue;
-            }
             foreach ($list as $value)
             {
                 //获取最新区块
@@ -91,7 +84,8 @@ class ChainService
                 ChainModel::new()->where(['chain' => $value['chain']])->update(['height' => $block_data['height']]);
             }
             $num++;
-        }while($num < 2);
+            sleep(6);
+        }while($num < 8);
     }
 
     /**
@@ -109,12 +103,6 @@ class ChainService
         if (!Redis::getLock('check:chain:block:transaction', 55)) return;
         $num = 0;
         do{
-            $key = 'check:chain:block:transaction:num:' . floor(date('s') / 10);
-            //间隔10秒执行
-            if (!Redis::getLock($key)) {
-                sleep(2);
-                continue;
-            }
             $list = ChainModel::new()->where([['is_scan_block', '=', 1]])
                 ->whereExp('scan_height', '< height')
                 ->field('id,chain,scan_height,height')->select();
@@ -131,8 +119,9 @@ class ChainService
                 //更新当前扫描高度
                 ChainModel::new()->updateRow([ ['chain', '=', $value['chain']]], ['scan_height' => $value['height']]);
             }
+            sleep(6);
             $num++;
-        }while($num < 5);
+        }while($num < 8);
     }
 
     /**
