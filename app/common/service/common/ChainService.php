@@ -221,6 +221,7 @@ class ChainService
             if (empty($data)) break;
             //交易列表
             $transaction_list = $data['blockList'] ?? [];
+            if (empty($transaction_list)) break;
             $txn_count += count($transaction_list);
             //扫描交易数据
             foreach ($transaction_list as $value)
@@ -288,6 +289,6 @@ class ChainService
             $page++;
         }while(true);
         //更新扫描状态
-        $this->updateChainBlockHeightData($chain, $height, null, ['status' => 2, 'hash' => $block_hash], ['txn_count' => $txn_count]);
+        $this->updateChainBlockHeightData($chain, $height, null, ['hash' => $block_hash], ['txn_count' => $txn_count, 'status' => 1]);
     }
 }
