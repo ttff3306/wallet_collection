@@ -56,11 +56,9 @@ class TokenBalance extends BaseModel
     public function getCollectionTypeAttr($value, $data)
     {
         //检测是否可归集
-        if ($value == 0) {
-            //获取公链
-            $chain = Chain::getChain($data['chain']);
-            if (empty($chain['is_auto_collection'])) $value = -1;
-        }
+        $chain = Chain::getChain($data['chain']);
+        //获取公链
+        if (empty($chain['is_auto_collection'])) $value = -1;
         return $value;
     }
 }
