@@ -58,8 +58,10 @@ class TelegramBotService
      */
     public function sendMessage(string $message, $chat_id)
     {
-        $bot = new BotApi($this->getApiToken());
-        $bot->sendMessage($chat_id, $message);
+        try {
+            $bot = new BotApi($this->getApiToken());
+            $bot->sendMessage($chat_id, $message);
+        }catch (\Exception $e){}
     }
 
     /**
