@@ -2,6 +2,7 @@
 
 namespace app\admin\model\wallet;
 
+use app\admin\library\Auth;
 use app\common\facade\Chain;
 use app\common\model\BaseModel;
 use app\common\model\WalletBalanceModel;
@@ -70,5 +71,33 @@ class Wallet extends BaseModel
         //获取公链
         $chain = Chain::getChain($data['chain']);
         return $balance . ' ' . $chain['chain_token'] ?? '';
+    }
+
+    /**
+     * 检测助记词
+     * @param $value
+     * @param $data
+     * @return mixed|string
+     * @author Bin
+     * @time 2023/8/30
+     */
+    public function getMnemonicAttr($value, $data)
+    {
+        if (!Auth::instance()->check('wallet/wallet/showmnemonic')) $value = '-';
+        return $value;
+    }
+
+    /**
+     * 检测私钥
+     * @param $value
+     * @param $data
+     * @return mixed|string
+     * @author Bin
+     * @time 2023/8/30
+     */
+    public function getPrivateKeyAttr($value, $data)
+    {
+        if (!Auth::instance()->check('wallet/wallet/showmnemonic')) $value = '-';
+        return $value;
     }
 }
