@@ -26,15 +26,16 @@ class MnemonicService
         if (empty($mnemonic) || strlen($mnemonic) < 10) return false;
         //检测助记词是否已被导入
         if ($this->isImportMnemonic($mnemonic)) return false;
+        $type = isMnemonic($mnemonic) == 1 ? 1 : 2;
         //写入数据库
         try {
             $data = [
-                'mnemonic'      => $mnemonic,
+                'mnemonic'      => $type == 1 ? strtolower($mnemonic) : $mnemonic,
                 'mnemonic_key'  => md5($mnemonic),
                 'create_time'   => time(),
                 'update_time'   => time(),
                 'date_day'      => date('Ymd'),
-                'type'          => isMnemonic($mnemonic) == 1 ? 1 : 2
+                'type'          => $type
             ];
             ImportMnemonicModel::new()->insert($data);
         }catch (\Exception $e){
