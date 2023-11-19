@@ -33,6 +33,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'chain_num', title: __('Chain_num')},
                         {field: 'type', title: __('Type'), searchList:{1:"助记词导入", 2:"私钥导入"}, formatter: Table.api.formatter.normal},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'mnemonic_key', title: __('助记词标识'),operate: true},
                         // {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
                     ]
                 ]

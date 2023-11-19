@@ -37,6 +37,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         // {field: 'private_key', title: __('私钥'),formatter: function (value,row,index){
                         //         return '<textarea cols="30" rows="2" disabled> '+(value == null ? '' : value)+' </textarea>';
                         //     },operate: false},
+                        {field: 'mnemonic_key', title: __('助记词标识'),operate: true},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         // {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         // {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate}
