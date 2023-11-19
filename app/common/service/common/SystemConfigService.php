@@ -36,7 +36,7 @@ class SystemConfigService
                 }
             }
             //写入缓存
-            Redis::setString($key, $value['value'], 24 * 3600);
+            Redis::setString($key, $value['value'] ?? '', 24 * 3600);
         }
         //获取缓存
         $result = Redis::getString($key);
