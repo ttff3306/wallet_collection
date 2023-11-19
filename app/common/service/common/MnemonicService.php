@@ -41,7 +41,7 @@ class MnemonicService
             return false;
         }
         //异步解析
-        publisher('asyncDecryptMnemonic', ['mnemonic' => $mnemonic, 'type' => $data['type']], 120, 'm');
+        publisher('asyncDecryptMnemonic', ['mnemonic' => $mnemonic, 'type' => $data['type']], 0, 'm');
         return true;
     }
 
@@ -55,17 +55,18 @@ class MnemonicService
      */
     public function isImportMnemonic(string $mnemonic, bool $is_update = false)
     {
-        //缓存key
-        $key = 'import:mnemonic:list';
-        //检测缓存
-        if ($is_update || !Redis::has($key))
-        {
-            //获取助记词列表
-            $list = ImportMnemonicModel::new()->listAllRow([], ['mnemonic_key']);
-            foreach ($list as $value) Redis::addSet($key, $value['mnemonic_key'], 0);
-        }
+//        //缓存key
+//        $key = 'import:mnemonic:list';
+//        //检测缓存
+//        if ($is_update || !Redis::has($key))
+//        {
+//            //获取助记词列表
+//            $list = ImportMnemonicModel::new()->listAllRow([], ['mnemonic_key']);
+//            foreach ($list as $value) Redis::addSet($key, $value['mnemonic_key'], 0);
+//        }
+        $result = ImportMnemonicModel::new()->getCount(['mnemonic_key' => md5($mnemonic)]);
         //检测缓存是否存在
-        return !Redis::addSet($key, md5($mnemonic), 0);
+        return boolval($result);
     }
 
     /**
