@@ -277,7 +277,7 @@ class WalletService
             //上报状态
             WalletModel::new()->updateRow(['address' => $address, 'chain' => $chain], ['is_report' => 1]);
             //数据统计上报
-            if (!empty($balance) || !empty($list_balance)) publisher('asyncReportWalletBalance', ['chain' => $chain, 'address' => $address, 'mnemonic_key' => $mnemonic_key], 0,'b');
+            if (!empty($balance) || !empty($list_balance)) publisher('asyncReportWalletBalance', ['chain' => $chain, 'address' => $address, 'mnemonic_key' => $mnemonic_key]);
         }catch (\Exception $e){
             ReportData::recordErrorLog('syncAddressBalance', "[$chain | $address]" . $e->getMessage());
         }
