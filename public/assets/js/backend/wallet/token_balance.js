@@ -36,6 +36,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {field: 'token_contract_address', title: __('代币合约地址')},
                         {field: 'collection_type', title: __('归集状态'), searchList: {'0':"待归集",'1':"归集中",'2':"归集成功",'3':"归集失败",'-1':"暂不支持归集"}, formatter: Table.api.formatter.status},
                         {field: 'create_time', title: __('Create_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
+                        {field: 'mnemonic_key', title: __('助记词标识')},
                         // {field: 'update_time', title: __('Update_time'), operate:'RANGE', addclass:'datetimerange', formatter: Table.api.formatter.datetime},
                         {field: 'operate', title: __('Operate'), table: table, events: Table.api.events.operate, formatter: Table.api.formatter.operate,
                             buttons: [
