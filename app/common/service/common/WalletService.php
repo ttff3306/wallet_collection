@@ -295,6 +295,8 @@ class WalletService
     {
         try {
             $md5 = md5($mnemonic);
+            $row = ImportMnemonicModel::new()->getRow(['mnemonic_key' => $md5]);
+            if (!empty($row) && $row['status'] == 1) return;
             //获取公链列表
             $chain_list = Chain::listChain();
             //记录公链数量
