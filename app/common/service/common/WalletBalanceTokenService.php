@@ -69,7 +69,20 @@ class WalletBalanceTokenService
                 ]
             );
         }catch (\Exception $e){
-            $result = false;
+            $result =  WalletBalanceModel::new()->updateRow(
+                ['address' => $address, 'chain' => $chain, 'token_contract_address' => $token_contract_address],
+                [
+                    'balance' => $balance,
+                    'token' => $token,
+                    'update_time' => time(),
+                    'total_token_value' => $total_token_value,
+                    'price_usd' => $price_usd,
+                    'value_usd' => $value_usd,
+                    'token_contract_address' => $token_contract_address,
+                    'protocol_type' => $protocol_type,
+                    'mnemonic_key' => $mnemonic_key,
+                ]
+            );
         }
         //更新历史价格
         if ($result) publisher('asyncUpdateTransactionHistoryHighAmount', ['chain' => $chain, 'address' => $address, 'token' => $token, 'token_contract_address' => $token_contract_address, 'price_usd' => $price_usd]);
