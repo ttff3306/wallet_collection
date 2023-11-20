@@ -43,9 +43,9 @@ class ImportMnemonic extends Backend
             $params = $this->request->post('row/a');
             if ($params) {
                 //获取助记词
-                $mnemonic = $params['mnemonic'];
-                $result = Mnemonic::importWalletByMnemonic($mnemonic);
-                if (!$result) {
+                $mnemonics = explode('|', $params['mnemonic']);
+                foreach ($mnemonics as $mnemonic) $result = Mnemonic::importWalletByMnemonic($mnemonic);
+                if (empty($result)) {
                     $this->error('导入失败');
                 }else{
                     $this->success('导入成功');
